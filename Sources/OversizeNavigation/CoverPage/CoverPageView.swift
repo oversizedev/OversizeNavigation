@@ -50,7 +50,10 @@ public struct CoverPageView<
                                 .ignoresSafeArea()
                                 .cornerRadius(
                                     contentCornerRadius,
-                                    corners: [.topLeft, .topRight]
+                                    corners: [
+                                        .topLeft,
+                                        .topRight,
+                                    ]
                                 )
                         }
                         .padding(.top, contentTopPadding)
@@ -60,7 +63,11 @@ public struct CoverPageView<
         .opacity(isEmpty ? 0 : 1)
         .if(isEmpty) { _ in
             emptyContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .frame(
+                    maxWidth: .infinity,
+                    maxHeight: .infinity,
+                    alignment: .center
+                )
         }
         .contentMargins(.top, coverHeight, for: .scrollIndicators)
         .navigationTitle(title)
