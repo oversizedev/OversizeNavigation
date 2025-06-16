@@ -4,28 +4,32 @@ on:
   push:
     branches:
       - '**'
+    tags:
+      - "*.*.*"
   workflow_dispatch:
-  
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-    
-  build-swiftpm:
-    name: Build SwiftPM
-    uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm.yml@main
-    strategy:
-      matrix:
-        destination:
-          - platform=iOS Simulator,name=iPhone 16,OS=18.4
-          - platform=watchOS Simulator,name=Apple Watch SE (40mm) (2nd generation),OS=11.4
-          - platform=tvOS Simulator,name=Apple TV 4K (3rd generation) (at 1080p),OS=18.4
-          - platform=macOS,arch=arm64
+  
+  build:
+    name: Build OversizeAppStoreServices
+    uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm-all-platforms.yml@main
     with:
       package: OversizeNavigation
-      destination: ${{ matrix.destination }}
     secrets: inherit
 
   bump:
     name: Bump version
-    needs: build-swiftpm
+    needs: build
     if: github.ref == 'refs/heads/main'
     uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
+    secrets: inherit
+
+  release:
+    name: Create Release
+    if: github.ref != 'refs/heads/main' && startsWith(github.ref, 'refs/tags/')
+    uses: oversizedev/GithubWorkflows/.github/workflows/release.yml@main
     secrets: inherit
