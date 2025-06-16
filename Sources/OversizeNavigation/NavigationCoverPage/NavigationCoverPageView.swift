@@ -49,7 +49,7 @@ public struct NavigationCoverPageView<
         .contentCornerRadius(contentCornerRadius)
         .toolbar {
             if isShowBackButton {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button(action: onTapBackButton) {
                         backImage.icon()
                     }

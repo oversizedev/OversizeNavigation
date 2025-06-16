@@ -46,9 +46,11 @@ public struct PageView<
         }
         .navigationTitle(title)
         .background(background.ignoresSafeArea())
-        .if(style == .default) {
-            $0.toolbarBackground(Color.surfacePrimary, for: .navigationBar)
-        }
+        #if os(iOS)
+            .if(style == .default) {
+                $0.toolbarBackground(Color.surfacePrimary, for: .navigationBar)
+            }
+        #endif
     }
 
     private func handleScrollOffset(_ offset: CGPoint) {

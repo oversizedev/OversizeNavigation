@@ -40,7 +40,7 @@ public struct NavigationPageView<
         .emptyContent(isEmptyContent)
         .toolbar {
             if isShowBackButton {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button(action: onTapBackButton) {
                         backImage.icon()
                     }
