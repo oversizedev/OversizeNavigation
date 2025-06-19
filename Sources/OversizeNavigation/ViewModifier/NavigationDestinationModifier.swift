@@ -21,7 +21,7 @@ private struct NavigationDestinationValueModifier<T: Hashable & Equatable>: View
 }
 
 public extension View {
-    func navigationTo<T: Hashable & Equatable>(_ item: Binding<T?>) -> some View {
+    func navigationMove<T: Hashable & Equatable>(_ item: Binding<T?>) -> some View {
         modifier(NavigationDestinationValueModifier<T>(item: item))
     }
 }

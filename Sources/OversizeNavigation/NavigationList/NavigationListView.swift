@@ -7,7 +7,7 @@ import NavigatorUI
 import OversizeUI
 import SwiftUI
 
-public struct NavigationPageView<
+public struct NavigationListView<
     Content: View,
     Background: View,
     EmptyContent: View
@@ -21,7 +21,6 @@ public struct NavigationPageView<
     private var emptyContent: EmptyContent?
 
     private let title: String
-    private let onScroll: ScrollAction?
     var logo: Image? = nil
     var isEmptyContent: Bool = false
     var backConfirmation: BackConfirmationContent?
@@ -30,9 +29,8 @@ public struct NavigationPageView<
     @State private var isPresentBackConfirmation: Bool = false
 
     public var body: some View {
-        PageView(
+        ListView(
             title,
-            onScroll: onScroll,
             content: { content },
             background: { background },
             emptyContent: { emptyContent }
@@ -162,13 +160,11 @@ public struct NavigationPageView<
 
     public init(
         _ title: String = "",
-        onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder background: () -> Background = { Color.backgroundPrimary },
         @ViewBuilder emptyContent: () -> EmptyContent = { EmptyView() }
     ) {
         self.title = title
-        self.onScroll = onScroll
         self.content = content()
         self.background = background()
         self.emptyContent = emptyContent()
@@ -177,7 +173,7 @@ public struct NavigationPageView<
 
 #Preview {
     NavigationStack {
-        NavigationPageView(
+        NavigationListView(
             "Title",
             content: {
                 LazyVStack(spacing: 0) {
@@ -210,7 +206,7 @@ public struct NavigationPageView<
 
 #Preview {
     NavigationStack {
-        NavigationPageView(
+        NavigationListView(
             "Title",
             content: { Text("Content") },
             background: { Color.backgroundSecondary },

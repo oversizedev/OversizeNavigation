@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-public extension NavigationPageView {
+public extension NavigationListView {
     func toolbarImage(_ image: Image) -> Self {
         var control = self
         control.logo = image
