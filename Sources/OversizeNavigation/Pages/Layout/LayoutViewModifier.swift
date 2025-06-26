@@ -5,8 +5,8 @@
 
 import SwiftUI
 
-public extension PageView {
-    func toolbarImage(_ image: Image?) -> PageView {
+public extension LayoutView {
+    func toolbarImage(_ image: Image?) -> LayoutView {
         var control = self
         control.logo = image
         return control

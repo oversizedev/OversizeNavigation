@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-public extension ListView {
+public extension ListLayoutView {
     func toolbarImage(_ image: Image?) -> Self {
         var control = self
         control.logo = image

@@ -7,7 +7,7 @@ import OversizeUI
 import ScrollKit
 import SwiftUI
 
-public struct ListView<
+public struct ListLayoutView<
     Content: View,
     Background: View
 >: View {
@@ -38,7 +38,7 @@ public struct ListView<
 
 #Preview {
     NavigationView {
-        ListView(
+        ListLayoutView(
             "Title",
             content: {
                 LazyVStack(spacing: 0) {
@@ -64,7 +64,7 @@ public struct ListView<
 
 #Preview {
     NavigationView {
-        ListView(
+        ListLayoutView(
             "Title",
             content: { Text("Content") },
             background: { Color.backgroundSecondary }

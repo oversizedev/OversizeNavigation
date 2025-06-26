@@ -9,7 +9,7 @@ import SwiftUI
 
 public typealias ScrollAction = @MainActor @Sendable (_ offset: CGPoint, _ headerVisibleRatio: CGFloat) -> Void
 
-public struct PageView<
+public struct LayoutView<
     Content: View,
     Background: View
 >: View {
@@ -54,7 +54,7 @@ public struct PageView<
 
 #Preview {
     NavigationView {
-        PageView(
+        LayoutView(
             "Title",
             content: {
                 LazyVStack(spacing: 0) {
@@ -80,7 +80,7 @@ public struct PageView<
 
 #Preview {
     NavigationView {
-        PageView(
+        LayoutView(
             "Title",
             content: { Text("Content") },
             background: { Color.backgroundSecondary }

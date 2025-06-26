@@ -6,7 +6,7 @@
 import OversizeUI
 import SwiftUI
 
-public extension CoverPageView {
+public extension CoverLayoutView {
     func toolbarImage(_ image: Image?) -> Self {
         var control = self
         control.logo = image

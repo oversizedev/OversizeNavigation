@@ -7,7 +7,7 @@ import NavigatorUI
 import OversizeUI
 import SwiftUI
 
-public struct NavigationCoverPageView<
+public struct NavigationCoverLayoutView<
     Content: View,
     Cover: View,
     Background: View
@@ -29,7 +29,7 @@ public struct NavigationCoverPageView<
     @State private var isPresentBackConfirmation: Bool = false
 
     public var body: some View {
-        CoverPageView(
+        CoverLayoutView(
             title,
             coverHeight: coverHeight,
             onScroll: onScroll,
@@ -133,7 +133,7 @@ public struct NavigationCoverPageView<
 
 #Preview {
     NavigationStack {
-        NavigationCoverPageView(
+        NavigationCoverLayoutView(
             "Title",
             content: {
                 LazyVStack(spacing: 0) {

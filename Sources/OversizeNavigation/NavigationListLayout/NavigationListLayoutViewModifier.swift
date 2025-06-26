@@ -1,15 +1,20 @@
 //
 // Copyright © 2025 Alexander Romanov
-// NavigationCoverPageViewModifier.swift, created on 07.06.2025
+// NavigationPageViewModifier.swift, created on 07.06.2025
 //
 
-import OversizeUI
 import SwiftUI
 
-public extension NavigationCoverPageView {
+public extension NavigationListLayoutView {
     func toolbarImage(_ image: Image) -> Self {
         var control = self
         control.logo = image
+        return control
+    }
+
+    func backButtonHidden(_ hidesBackButton: Bool = true) -> Self {
+        var control = self
+        control.isBackButtonHidden = hidesBackButton
         return control
     }
 
@@ -32,24 +37,6 @@ public extension NavigationCoverPageView {
             confirmationButtonTitle: confirmationButtonTitle,
             cancelButtonTitle: cancelButtonTitle
         )
-        return control
-    }
-
-    func coverStyle(_ coverStyle: CoverNavigationType) -> Self {
-        var control = self
-        control.coverStyle = coverStyle
-        return control
-    }
-
-    func contentCornerRadius(_ radius: CGFloat) -> Self {
-        var control = self
-        control.contentCornerRadius = radius
-        return control
-    }
-
-    func contentCornerRadius(_ radius: Radius) -> Self {
-        var control = self
-        control.contentCornerRadius = radius.rawValue
         return control
     }
 }
