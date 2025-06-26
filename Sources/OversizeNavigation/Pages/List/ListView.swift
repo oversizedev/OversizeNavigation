@@ -9,32 +9,18 @@ import SwiftUI
 
 public struct ListView<
     Content: View,
-    Background: View,
-    EmptyContent: View
+    Background: View
 >: View {
     @Environment(\.screenSize) private var screenSize
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let background: Background
-    private var emptyContent: EmptyContent?
 
     private let title: String
     var logo: Image? = nil
-    var isEmptyContent: Bool = false
 
     public var body: some View {
-        SwiftUI.Group {
-            if isEmptyContent {
-                emptyContent
-                    .frame(
-                        maxWidth: .infinity,
-                        maxHeight: .infinity,
-                        alignment: .center
-                    )
-            } else {
-                SwiftUI.List { content }
-            }
-        }
+        SwiftUI.List { content }
         .navigationTitle(title)
         .background(background.ignoresSafeArea())
     }
@@ -42,13 +28,11 @@ public struct ListView<
     public init(
         _ title: String,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { Color.backgroundPrimary },
-        @ViewBuilder emptyContent: () -> EmptyContent = { EmptyView() }
+        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
     ) {
         self.title = title
         self.content = content()
         self.background = background()
-        self.emptyContent = emptyContent()
     }
 }
 
@@ -72,14 +56,7 @@ public struct ListView<
                     }
                 }
             },
-            background: { Color.backgroundSecondary },
-            emptyContent: {
-                VStack(spacing: 0) {
-                    Text("No items available")
-                        .foregroundStyle(Color.onBackgroundPrimary)
-                        .padding()
-                }
-            }
+            background: { Color.backgroundSecondary }
         )
         .toolbarTitleDisplayMode(.inline)
     }
@@ -90,15 +67,7 @@ public struct ListView<
         ListView(
             "Title",
             content: { Text("Content") },
-            background: { Color.backgroundSecondary },
-            emptyContent: {
-                VStack(spacing: 0) {
-                    Text("No items available")
-                        .foregroundStyle(Color.onBackgroundPrimary)
-                        .padding()
-                }
-            }
+            background: { Color.backgroundSecondary }
         )
-        .emptyContent(true)
     }
 }

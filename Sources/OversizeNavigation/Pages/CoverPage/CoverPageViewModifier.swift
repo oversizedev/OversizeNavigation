@@ -13,12 +13,6 @@ public extension CoverPageView {
         return control
     }
 
-    func emptyContent(_ isEmpty: Bool = true) -> Self {
-        var control = self
-        control.isEmptyContent = isEmpty
-        return control
-    }
-
     func coverStyle(_ coverStyle: CoverNavigationType) -> Self {
         var control = self
         control.coverStyle = coverStyle

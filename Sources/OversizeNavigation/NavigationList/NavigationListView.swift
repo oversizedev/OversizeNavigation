@@ -9,19 +9,15 @@ import SwiftUI
 
 public struct NavigationListView<
     Content: View,
-    Background: View,
-    EmptyContent: View
+    Background: View
 >: View {
     @Environment(\.navigator) private var navigator
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let background: Background
 
-    private var emptyContent: EmptyContent?
-
     private let title: String
     var logo: Image? = nil
-    var isEmptyContent: Bool = false
     var backConfirmation: BackConfirmationContent?
     var isBackButtonHidden: Bool?
 
@@ -31,11 +27,9 @@ public struct NavigationListView<
         ListView(
             title,
             content: { content },
-            background: { background },
-            emptyContent: { emptyContent }
+            background: { background }
         )
         .toolbarImage(logo)
-        .emptyContent(isEmptyContent)
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
@@ -122,13 +116,11 @@ public struct NavigationListView<
     public init(
         _ title: String = "",
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { Color.backgroundPrimary },
-        @ViewBuilder emptyContent: () -> EmptyContent = { EmptyView() }
+        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
     ) {
         self.title = title
         self.content = content()
         self.background = background()
-        self.emptyContent = emptyContent()
     }
 }
 
@@ -152,14 +144,7 @@ public struct NavigationListView<
                     }
                 }
             },
-            background: { Color.backgroundSecondary },
-            emptyContent: {
-                VStack(spacing: 0) {
-                    Text("No items available")
-                        .foregroundStyle(Color.onBackgroundPrimary)
-                        .padding()
-                }
-            }
+            background: { Color.backgroundSecondary }
         )
         .toolbarTitleDisplayMode(.inline)
     }
@@ -170,15 +155,7 @@ public struct NavigationListView<
         NavigationListView(
             "Title",
             content: { Text("Content") },
-            background: { Color.backgroundSecondary },
-            emptyContent: {
-                VStack(spacing: 0) {
-                    Text("No items available")
-                        .foregroundStyle(Color.onBackgroundPrimary)
-                        .padding()
-                }
-            }
+            background: { Color.backgroundSecondary }
         )
-        .emptyContent(true)
     }
 }

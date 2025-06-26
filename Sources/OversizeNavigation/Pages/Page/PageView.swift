@@ -11,38 +11,24 @@ public typealias ScrollAction = @MainActor @Sendable (_ offset: CGPoint, _ heade
 
 public struct PageView<
     Content: View,
-    Background: View,
-    EmptyContent: View
+    Background: View
 >: View {
     @Environment(\.screenSize) private var screenSize
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let background: Background
-    private var emptyContent: EmptyContent?
 
     private let title: String
     private let onScroll: ScrollAction?
     var logo: Image? = nil
-    var isEmptyContent: Bool = false
 
     public var body: some View {
-        Group {
-            if isEmptyContent {
-                emptyContent
-                    .frame(
-                        maxWidth: .infinity,
-                        maxHeight: .infinity,
-                        alignment: .center
-                    )
-            } else {
-                ScrollView {
-                    ScrollViewOffsetTracker {
-                        content
-                    }
-                }
-                .scrollViewOffsetTracking(action: handleScrollOffset)
+        ScrollView {
+            ScrollViewOffsetTracker {
+                content
             }
         }
+        .scrollViewOffsetTracking(action: handleScrollOffset)
         .navigationTitle(title)
         .background(background.ignoresSafeArea())
     }
@@ -57,14 +43,12 @@ public struct PageView<
         _ title: String,
         onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { Color.backgroundPrimary },
-        @ViewBuilder emptyContent: () -> EmptyContent = { EmptyView() }
+        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
     ) {
         self.title = title
         self.onScroll = onScroll
         self.content = content()
         self.background = background()
-        self.emptyContent = emptyContent()
     }
 }
 
@@ -88,14 +72,7 @@ public struct PageView<
                     }
                 }
             },
-            background: { Color.backgroundSecondary },
-            emptyContent: {
-                VStack(spacing: 0) {
-                    Text("No items available")
-                        .foregroundStyle(Color.onBackgroundPrimary)
-                        .padding()
-                }
-            }
+            background: { Color.backgroundSecondary }
         )
         .toolbarTitleDisplayMode(.inline)
     }
@@ -106,15 +83,7 @@ public struct PageView<
         PageView(
             "Title",
             content: { Text("Content") },
-            background: { Color.backgroundSecondary },
-            emptyContent: {
-                VStack(spacing: 0) {
-                    Text("No items available")
-                        .foregroundStyle(Color.onBackgroundPrimary)
-                        .padding()
-                }
-            }
+            background: { Color.backgroundSecondary }
         )
-        .emptyContent(true)
     }
 }
