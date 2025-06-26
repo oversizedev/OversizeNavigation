@@ -7,7 +7,7 @@ import NavigatorUI
 import OversizeUI
 import SwiftUI
 
-public struct NavigationListView<
+public struct NavigationListLayoutView<
     Content: View,
     Background: View
 >: View {
@@ -24,7 +24,7 @@ public struct NavigationListView<
     @State private var isPresentBackConfirmation: Bool = false
 
     public var body: some View {
-        ListView(
+        ListLayoutView(
             title,
             content: { content },
             background: { background }
@@ -126,7 +126,7 @@ public struct NavigationListView<
 
 #Preview {
     NavigationStack {
-        NavigationListView(
+        NavigationListLayoutView(
             "Title",
             content: {
                 LazyVStack(spacing: 0) {
@@ -152,7 +152,7 @@ public struct NavigationListView<
 
 #Preview {
     NavigationStack {
-        NavigationListView(
+        NavigationListLayoutView(
             "Title",
             content: { Text("Content") },
             background: { Color.backgroundSecondary }

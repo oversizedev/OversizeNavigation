@@ -7,7 +7,7 @@ import NavigatorUI
 import OversizeUI
 import SwiftUI
 
-public struct NavigationPageView<
+public struct NavigationLayoutView<
     Content: View,
     Background: View
 >: View {
@@ -25,7 +25,7 @@ public struct NavigationPageView<
     @State private var isPresentBackConfirmation: Bool = false
 
     public var body: some View {
-        PageView(
+        LayoutView(
             title,
             onScroll: onScroll,
             content: { content },
@@ -128,7 +128,7 @@ public struct NavigationPageView<
 
 #Preview {
     NavigationStack {
-        NavigationPageView(
+        NavigationLayoutView(
             "Title",
             content: {
                 LazyVStack(spacing: 0) {
@@ -154,7 +154,7 @@ public struct NavigationPageView<
 
 #Preview {
     NavigationStack {
-        NavigationPageView(
+        NavigationLayoutView(
             "Title",
             content: { Text("Content") },
             background: { Color.backgroundSecondary }

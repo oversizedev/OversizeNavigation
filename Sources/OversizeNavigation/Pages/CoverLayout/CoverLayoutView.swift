@@ -11,7 +11,7 @@ public enum CoverNavigationType {
     case `static`, prallax, pinch
 }
 
-public struct CoverPageView<
+public struct CoverLayoutView<
     Content: View,
     Cover: View,
     Background: View
@@ -114,7 +114,7 @@ public struct CoverPageView<
 }
 
 #Preview("Static") {
-    CoverPageView("Title") {
+    CoverLayoutView("Title") {
         LazyVStack(spacing: 0) {
             ForEach(1 ... 100, id: \.self) { item in
                 Button {} label: {
@@ -145,7 +145,7 @@ public struct CoverPageView<
 }
 
 #Preview("Parallax") {
-    CoverPageView("Title") {
+    CoverLayoutView("Title") {
         LazyVStack(spacing: 0) {
             ForEach(1 ... 100, id: \.self) { item in
                 Button {} label: {
@@ -176,7 +176,7 @@ public struct CoverPageView<
 }
 
 #Preview("Pinch") {
-    CoverPageView("Title") {
+    CoverLayoutView("Title") {
         LazyVStack(spacing: 0) {
             ForEach(1 ... 100, id: \.self) { item in
                 Button {} label: {
@@ -208,7 +208,7 @@ public struct CoverPageView<
 
 #Preview("Title large") {
     NavigationStack {
-        CoverPageView(
+        CoverLayoutView(
             "Title large",
             content: {
                 LazyVStack(spacing: 0) {
@@ -234,7 +234,7 @@ public struct CoverPageView<
 }
 
 #Preview("Title and subtitle, large") {
-    CoverPageView(
+    CoverLayoutView(
         "Title large",
         content: {
             LazyVStack(spacing: 0) {
@@ -259,7 +259,7 @@ public struct CoverPageView<
 }
 
 #Preview {
-    CoverPageView(
+    CoverLayoutView(
         "Title",
         content: { Text("Content") },
         cover: { Image("cover") },
@@ -268,7 +268,7 @@ public struct CoverPageView<
 }
 
 #Preview {
-    CoverPageView(
+    CoverLayoutView(
         "Title",
         content: { Text("Content") },
         cover: { Image("cover") }
