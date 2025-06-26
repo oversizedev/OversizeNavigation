@@ -100,14 +100,12 @@ public struct NavigationPageView<
         if let isBackButtonHidden = isBackButtonHidden, isBackButtonHidden {
             return false
         }
-
         if navigator.isPresented {
             if navigator.isEmpty {
                 return true
             } else {
                 return backConfirmation != nil
             }
-
         } else {
             return backConfirmation != nil
         }
