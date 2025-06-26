@@ -15,7 +15,7 @@ concurrency:
 jobs:
   
   build:
-    name: Build OversizeAppStoreServices
+    name: Build
     uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm-all-platforms.yml@main
     with:
       package: OversizeNavigation
