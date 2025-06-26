@@ -14,7 +14,6 @@ public struct NavigationCoverPageView<
     EmptyContent: View
 >: View {
     @Environment(\.navigator) private var navigator
-    @Environment(\.navigationPageStyle) private var style
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let cover: Cover
@@ -76,32 +75,8 @@ public struct NavigationCoverPageView<
                 }
             }
         }
-        /* Old iOS Version
-         .alert(
-             backConfirmation?.title ?? "Are you sure?",
-             isPresented: $isPresentBackConfirmation,
-             presenting: backConfirmation
-         ) { details in
-             Button(
-                 details.confirmationButtonTitle,
-                 action: onTapConfirmationBack
-             )
-             Button(
-                 details.cancelButtonTitle ?? "Cancel",
-                 role: .cancel,
-                 action: onTapConfirmationCancel
-             )
-         } message: { details in
-             Text(details.message)
-         }
-          */
         .interactiveDismissDisabled(isInteractiveBackDisabled)
         .navigationBarBackButtonHidden(isNavigationBarBackButtonHidden)
-        #if os(iOS)
-            .if(style != .native) {
-                $0.interactivePopGestureDisabled(isInteractiveBackDisabled)
-            }
-        #endif
     }
 
     private func onTapBackButton() {
@@ -126,24 +101,14 @@ public struct NavigationCoverPageView<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        switch style {
-        case .default:
-            true
-        case .native:
-            backConfirmation != nil
-        }
+        backConfirmation != nil
     }
 
     private var isShowBackButton: Bool {
         if navigator.isPresented {
             true
         } else {
-            switch style {
-            case .default:
-                !navigator.isEmpty
-            case .native:
-                backConfirmation != nil
-            }
+            backConfirmation != nil
         }
     }
 
@@ -174,38 +139,46 @@ public struct NavigationCoverPageView<
     }
 }
 
-// #Preview {
-//    NavigationStack {
-//        NavigationCoverPageView(
-//            "Title",
-//            content: {
-//                LazyVStack(spacing: 0) {
-//                    ForEach(1 ... 100, id: \.self) { item in
-//                        Button {} label: {
-//                            VStack(spacing: 0) {
-//                                Text("Item \(item)")
-//                                    .padding()
-//                                    .frame(maxWidth: .infinity, alignment: .leading)
-//
-//                                Divider()
-//                            }
-//                            .clipShape(Rectangle())
-//                        }
-//                    }
-//                }
-//            },
-//            background: { Color.backgroundSecondary },
-//            emptyContent: {
-//                VStack(spacing: 0) {
-//                    Text("No items available")
-//                        .foregroundStyle(Color.onBackgroundPrimary)
-//                        .padding()
-//                }
-//            }
-//        )
-//        .toolbarTitleDisplayMode(.inline)
-//    }
-// }
+#Preview {
+    NavigationStack {
+        NavigationCoverPageView(
+            "Title",
+            content: {
+                LazyVStack(spacing: 0) {
+                    ForEach(1 ... 100, id: \.self) { item in
+                        Button {} label: {
+                            VStack(spacing: 0) {
+                                Text("Item \(item)")
+                                    .padding()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                                Divider()
+                            }
+                            .clipShape(Rectangle())
+                        }
+                    }
+                }
+            },
+            cover: {
+                Color.blue.overlay {
+                    Rectangle()
+                        .stroke(Color.red, lineWidth: 2)
+                }
+            },
+            background: { Color.backgroundSecondary },
+            emptyContent: {
+                VStack(spacing: 0) {
+                    Text("No items available")
+                        .foregroundStyle(Color.onBackgroundPrimary)
+                        .padding()
+                }
+            }
+        )
+        .coverStyle(.prallax)
+        .toolbarTitleDisplayMode(.inline)
+    }
+}
+
 //
 // #Preview {
 //    NavigationStack {

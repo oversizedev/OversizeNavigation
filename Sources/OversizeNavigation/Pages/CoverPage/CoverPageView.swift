@@ -18,7 +18,6 @@ public struct CoverPageView<
     EmptyContent: View
 >: View {
     @Environment(\.screenSize) private var screenSize
-    @Environment(\.navigationPageStyle) private var style
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let cover: Cover
@@ -73,11 +72,6 @@ public struct CoverPageView<
         .navigationTitle(title)
         .background(background.ignoresSafeArea())
         .scrollViewOffsetTracking(action: handleScrollOffset)
-        #if os(iOS)
-            .if(style == .default) {
-                $0.toolbarBackground(Color.surfacePrimary, for: .navigationBar)
-            }
-        #endif
     }
 
     private var coverScrollHeight: CGFloat {

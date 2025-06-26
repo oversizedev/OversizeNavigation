@@ -13,7 +13,7 @@ private struct NavigationBackModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .onChange(of: trigger) { trigger in
+            .onChange(of: trigger) { _, trigger in
                 if trigger {
                     navigator.back()
                 }

@@ -11,7 +11,7 @@ private struct NavigationDestinationValueModifier<T: Hashable & Equatable>: View
     @Environment(\.navigator) var navigator: Navigator
     func body(content: Content) -> some View {
         content
-            .onChange(of: item) { item in
+            .onChange(of: item) { _, item in
                 if let item {
                     navigator.send(item)
                     self.item = nil
@@ -21,7 +21,7 @@ private struct NavigationDestinationValueModifier<T: Hashable & Equatable>: View
 }
 
 public extension View {
-    func navigationTo<T: Hashable & Equatable>(_ item: Binding<T?>) -> some View {
+    func navigationMove<T: Hashable & Equatable>(_ item: Binding<T?>) -> some View {
         modifier(NavigationDestinationValueModifier<T>(item: item))
     }
 }
