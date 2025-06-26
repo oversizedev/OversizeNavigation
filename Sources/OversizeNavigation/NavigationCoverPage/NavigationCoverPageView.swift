@@ -10,8 +10,7 @@ import SwiftUI
 public struct NavigationCoverPageView<
     Content: View,
     Cover: View,
-    Background: View,
-    EmptyContent: View
+    Background: View
 >: View {
     @Environment(\.navigator) private var navigator
 
@@ -19,13 +18,10 @@ public struct NavigationCoverPageView<
     @ViewBuilder private let cover: Cover
     @ViewBuilder private let background: Background
 
-    private var emptyContent: EmptyContent?
-
     private let title: String
     private let coverHeight: CGFloat
     private let onScroll: ScrollAction?
     var logo: Image? = nil
-    var isEmptyContent: Bool = false
     var backConfirmation: BackConfirmationContent?
     var coverStyle: CoverNavigationType = .static
     var contentCornerRadius: CGFloat = 0
@@ -39,11 +35,9 @@ public struct NavigationCoverPageView<
             onScroll: onScroll,
             content: { content },
             cover: { cover },
-            background: { background },
-            emptyContent: { emptyContent }
+            background: { background }
         )
         .toolbarImage(logo)
-        .emptyContent(isEmptyContent)
         .coverStyle(coverStyle)
         .contentCornerRadius(contentCornerRadius)
         .toolbar {
@@ -126,8 +120,7 @@ public struct NavigationCoverPageView<
         onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder cover: () -> Cover,
-        @ViewBuilder background: () -> Background = { Color.backgroundPrimary },
-        @ViewBuilder emptyContent: () -> EmptyContent = { EmptyView() }
+        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
     ) {
         self.title = title
         self.coverHeight = coverHeight
@@ -135,7 +128,6 @@ public struct NavigationCoverPageView<
         self.content = content()
         self.cover = cover()
         self.background = background()
-        self.emptyContent = emptyContent()
     }
 }
 
@@ -165,35 +157,9 @@ public struct NavigationCoverPageView<
                         .stroke(Color.red, lineWidth: 2)
                 }
             },
-            background: { Color.backgroundSecondary },
-            emptyContent: {
-                VStack(spacing: 0) {
-                    Text("No items available")
-                        .foregroundStyle(Color.onBackgroundPrimary)
-                        .padding()
-                }
-            }
+            background: { Color.backgroundSecondary }
         )
         .coverStyle(.prallax)
         .toolbarTitleDisplayMode(.inline)
     }
 }
-
-//
-// #Preview {
-//    NavigationStack {
-//        NavigationCoverPageView(
-//            "Title",
-//            content: { Text("Content") },
-//            background: { Color.backgroundSecondary },
-//            emptyContent: {
-//                VStack(spacing: 0) {
-//                    Text("No items available")
-//                        .foregroundStyle(Color.onBackgroundPrimary)
-//                        .padding()
-//                }
-//            }
-//        )
-//        .emptyContent(true)
-//    }
-// }

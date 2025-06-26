@@ -9,20 +9,16 @@ import SwiftUI
 
 public struct NavigationPageView<
     Content: View,
-    Background: View,
-    EmptyContent: View
+    Background: View
 >: View {
     @Environment(\.navigator) private var navigator
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let background: Background
 
-    private var emptyContent: EmptyContent?
-
     private let title: String
     private let onScroll: ScrollAction?
     var logo: Image? = nil
-    var isEmptyContent: Bool = false
     var backConfirmation: BackConfirmationContent?
     var isBackButtonHidden: Bool?
 
@@ -33,11 +29,9 @@ public struct NavigationPageView<
             title,
             onScroll: onScroll,
             content: { content },
-            background: { background },
-            emptyContent: { emptyContent }
+            background: { background }
         )
         .toolbarImage(logo)
-        .emptyContent(isEmptyContent)
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
@@ -123,14 +117,12 @@ public struct NavigationPageView<
         _ title: String = "",
         onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { Color.backgroundPrimary },
-        @ViewBuilder emptyContent: () -> EmptyContent = { EmptyView() }
+        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
     ) {
         self.title = title
         self.onScroll = onScroll
         self.content = content()
         self.background = background()
-        self.emptyContent = emptyContent()
     }
 }
 
@@ -154,14 +146,7 @@ public struct NavigationPageView<
                     }
                 }
             },
-            background: { Color.backgroundSecondary },
-            emptyContent: {
-                VStack(spacing: 0) {
-                    Text("No items available")
-                        .foregroundStyle(Color.onBackgroundPrimary)
-                        .padding()
-                }
-            }
+            background: { Color.backgroundSecondary }
         )
         .toolbarTitleDisplayMode(.inline)
     }
@@ -172,15 +157,7 @@ public struct NavigationPageView<
         NavigationPageView(
             "Title",
             content: { Text("Content") },
-            background: { Color.backgroundSecondary },
-            emptyContent: {
-                VStack(spacing: 0) {
-                    Text("No items available")
-                        .foregroundStyle(Color.onBackgroundPrimary)
-                        .padding()
-                }
-            }
+            background: { Color.backgroundSecondary }
         )
-        .emptyContent(true)
     }
 }

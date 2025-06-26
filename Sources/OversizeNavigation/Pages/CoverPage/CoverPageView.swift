@@ -14,21 +14,18 @@ public enum CoverNavigationType {
 public struct CoverPageView<
     Content: View,
     Cover: View,
-    Background: View,
-    EmptyContent: View
+    Background: View
 >: View {
     @Environment(\.screenSize) private var screenSize
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let cover: Cover
     @ViewBuilder private let background: Background
-    private var emptyContent: EmptyContent?
 
     private let title: String
     private let coverHeight: CGFloat
     private let onScroll: ScrollAction?
     var logo: Image? = nil
-    var isEmptyContent: Bool = false
     var coverStyle: CoverNavigationType = .static
     var contentCornerRadius: CGFloat = 0
 
@@ -58,15 +55,6 @@ public struct CoverPageView<
                         .padding(.top, contentTopPadding)
                 }
             }
-        }
-        .opacity(isEmpty ? 0 : 1)
-        .if(isEmpty) { _ in
-            emptyContent
-                .frame(
-                    maxWidth: .infinity,
-                    maxHeight: .infinity,
-                    alignment: .center
-                )
         }
         .contentMargins(.top, coverHeight, for: .scrollIndicators)
         .navigationTitle(title)
@@ -114,8 +102,7 @@ public struct CoverPageView<
         onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder cover: () -> Cover,
-        @ViewBuilder background: () -> Background = { Color.backgroundPrimary },
-        @ViewBuilder emptyContent: () -> EmptyContent = { EmptyView() }
+        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
     ) {
         self.title = title
         self.coverHeight = coverHeight
@@ -123,7 +110,6 @@ public struct CoverPageView<
         self.content = content()
         self.cover = cover()
         self.background = background()
-        self.emptyContent = emptyContent()
     }
 }
 

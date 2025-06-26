@@ -11,10 +11,4 @@ public extension ListView {
         control.logo = image
         return control
     }
-
-    func emptyContent(_ isEmpty: Bool = true) -> Self {
-        var control = self
-        control.isEmptyContent = isEmpty
-        return control
-    }
 }

@@ -11,10 +11,4 @@ public extension PageView {
         control.logo = image
         return control
     }
-
-    func emptyContent(_ isEmpty: Bool = true) -> PageView {
-        var control = self
-        control.isEmptyContent = isEmpty
-        return control
-    }
 }

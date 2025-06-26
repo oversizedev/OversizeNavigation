@@ -12,12 +12,6 @@ public extension NavigationListView {
         return control
     }
 
-    func emptyContent(_ isEmpty: Bool = true) -> Self {
-        var control = self
-        control.isEmptyContent = isEmpty
-        return control
-    }
-
     func backButtonHidden(_ hidesBackButton: Bool = true) -> Self {
         var control = self
         control.isBackButtonHidden = hidesBackButton

@@ -13,12 +13,6 @@ public extension NavigationCoverPageView {
         return control
     }
 
-    func emptyContent(_ isEmpty: Bool = true) -> Self {
-        var control = self
-        control.isEmptyContent = isEmpty
-        return control
-    }
-
     func backConfirmationDialog(_ content: BackConfirmationContent? = .dismiss) -> Self {
         var control = self
         control.backConfirmation = content
