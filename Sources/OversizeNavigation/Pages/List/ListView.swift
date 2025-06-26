@@ -13,7 +13,6 @@ public struct ListView<
     EmptyContent: View
 >: View {
     @Environment(\.screenSize) private var screenSize
-    @Environment(\.navigationPageStyle) private var style
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let background: Background
@@ -38,11 +37,6 @@ public struct ListView<
         }
         .navigationTitle(title)
         .background(background.ignoresSafeArea())
-        #if os(iOS)
-            .if(style == .default) {
-                $0.toolbarBackground(Color.surfacePrimary, for: .navigationBar)
-            }
-        #endif
     }
 
     public init(

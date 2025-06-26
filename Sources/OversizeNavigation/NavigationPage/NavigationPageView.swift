@@ -13,7 +13,6 @@ public struct NavigationPageView<
     EmptyContent: View
 >: View {
     @Environment(\.navigator) private var navigator
-    @Environment(\.navigationPageStyle) private var style
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let background: Background
@@ -68,32 +67,8 @@ public struct NavigationPageView<
                 }
             }
         }
-        /* Old iOS Version
-         .alert(
-             backConfirmation?.title ?? "Are you sure?",
-             isPresented: $isPresentBackConfirmation,
-             presenting: backConfirmation
-         ) { details in
-             Button(
-                 details.confirmationButtonTitle,
-                 action: onTapConfirmationBack
-             )
-             Button(
-                 details.cancelButtonTitle ?? "Cancel",
-                 role: .cancel,
-                 action: onTapConfirmationCancel
-             )
-         } message: { details in
-             Text(details.message)
-         }
-          */
         .interactiveDismissDisabled(isInteractiveBackDisabled)
         .navigationBarBackButtonHidden(isNavigationBarBackButtonHidden)
-        #if os(iOS)
-            .if(style != .native) {
-                $0.interactivePopGestureDisabled(isInteractiveBackDisabled)
-            }
-        #endif
     }
 
     private func onTapBackButton() {
@@ -118,12 +93,7 @@ public struct NavigationPageView<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        switch style {
-        case .default:
-            true
-        case .native:
-            backConfirmation != nil
-        }
+        backConfirmation != nil
     }
 
     private var isShowBackButton: Bool {
@@ -132,23 +102,14 @@ public struct NavigationPageView<
         }
 
         if navigator.isPresented {
-            switch style {
-            case .default:
+            if navigator.isEmpty {
                 return true
-            case .native:
-                if navigator.isEmpty {
-                    return true
-                } else {
-                    return backConfirmation != nil
-                }
-            }
-        } else {
-            switch style {
-            case .default:
-                return !navigator.isEmpty
-            case .native:
+            } else {
                 return backConfirmation != nil
             }
+
+        } else {
+            return backConfirmation != nil
         }
     }
 

@@ -11,7 +11,7 @@ private struct NavigationDestinationValueModifier<T: Hashable & Equatable>: View
     @Environment(\.navigator) var navigator: Navigator
     func body(content: Content) -> some View {
         content
-            .onChange(of: item) { item in
+            .onChange(of: item) { _, item in
                 if let item {
                     navigator.send(item)
                     self.item = nil
