@@ -1,6 +1,6 @@
 //
 // Copyright © 2025 Alexander Romanov
-// NavigationBarAppearenceColor.swift, created on 05.06.2025
+// NavigationBarStyle.swift, created on 05.06.2025
 //
 
 import OversizeUI

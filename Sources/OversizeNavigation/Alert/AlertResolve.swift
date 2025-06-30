@@ -1,6 +1,6 @@
 //
 // Copyright © 2024 Alexander Romanov
-// AlertRouter.swift, created on 11.04.2024
+// AlertResolve.swift, created on 11.04.2024
 //
 
 import OversizeLocalizable
@@ -46,7 +46,7 @@ public extension AppAlert {
         case .discard:
             "discard"
         case .default:
-            "default`"
+            "default"
         }
     }
 }
