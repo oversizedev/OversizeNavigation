@@ -21,7 +21,6 @@ public struct NavigationCoverLayoutView<
     private let title: String
     private let coverHeight: CGFloat
     private let onScroll: CoverLayoutView.ScrollAction?
-    var logo: Image? = nil
     var backConfirmation: BackConfirmationContent?
     var coverStyle: CoverNavigationType = .static
     var contentCornerRadius: CGFloat = 0
@@ -37,7 +36,6 @@ public struct NavigationCoverLayoutView<
             cover: { cover },
             background: { background }
         )
-        .toolbarImage(logo)
         .coverStyle(coverStyle)
         .contentCornerRadius(contentCornerRadius)
         .toolbar {
@@ -159,7 +157,7 @@ public struct NavigationCoverLayoutView<
             },
             background: { Color.backgroundSecondary }
         )
-        .coverStyle(.prallax)
+        .coverStyle(.parallax)
         .toolbarTitleDisplayMode(.inline)
     }
 }

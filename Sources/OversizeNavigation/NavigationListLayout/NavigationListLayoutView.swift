@@ -17,7 +17,6 @@ public struct NavigationListLayoutView<
     @ViewBuilder private let background: Background
 
     private let title: String
-    var logo: Image? = nil
     var backConfirmation: BackConfirmationContent?
     var isBackButtonHidden: Bool?
 
@@ -29,7 +28,6 @@ public struct NavigationListLayoutView<
             content: { content },
             background: { background }
         )
-        .toolbarImage(logo)
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {

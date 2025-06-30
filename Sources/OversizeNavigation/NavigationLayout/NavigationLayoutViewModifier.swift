@@ -6,11 +6,6 @@
 import SwiftUI
 
 public extension NavigationLayoutView {
-    func toolbarImage(_ image: Image) -> Self {
-        var control = self
-        control.logo = image
-        return control
-    }
 
     func backButtonHidden(_ hidesBackButton: Bool = true) -> Self {
         var control = self

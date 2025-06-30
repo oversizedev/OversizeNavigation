@@ -18,7 +18,6 @@ public struct NavigationLayoutView<
 
     private let title: String
     private let onScroll: LayoutView.ScrollAction?
-    var logo: Image? = nil
     var backConfirmation: BackConfirmationContent?
     var isBackButtonHidden: Bool?
 
@@ -31,7 +30,6 @@ public struct NavigationLayoutView<
             content: { content },
             background: { background }
         )
-        .toolbarImage(logo)
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
