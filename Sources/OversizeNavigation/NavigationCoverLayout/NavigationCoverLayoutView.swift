@@ -25,7 +25,7 @@ public struct NavigationCoverLayoutView<
     var coverStyle: CoverNavigationType = .static
     var contentCornerRadius: CGFloat = 0
 
-    @State private var isPresentBackConfirmation: Bool = false
+    @State private var isBackConfirmationPresented: Bool = false
 
     public var body: some View {
         CoverLayoutView(
@@ -41,23 +41,23 @@ public struct NavigationCoverLayoutView<
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(action: onTapBackButton) {
+                    Button(action: handleBackButtonTap) {
                         backImage.icon()
                     }
                     .confirmationDialog(
                         backConfirmation?.title ?? "Are you sure?",
-                        isPresented: $isPresentBackConfirmation,
+                        isPresented: $isBackConfirmationPresented,
                         titleVisibility: .visible,
                         presenting: backConfirmation,
                         actions: { details in
                             Button(
                                 details.confirmationButtonTitle,
-                                action: onTapConfirmationBack
+                                action: handleConfirmationBackTap
                             )
                             Button(
                                 details.cancelButtonTitle ?? "Cancel",
                                 role: .cancel,
-                                action: onTapConfirmationCancel
+                                action: handleConfirmationCancelTap
                             )
                         },
                         message: { details in
@@ -71,21 +71,37 @@ public struct NavigationCoverLayoutView<
         .navigationBarBackButtonHidden(isNavigationBarBackButtonHidden)
     }
 
-    private func onTapBackButton() {
+    private func handleBackButtonTap() {
         if backConfirmation == nil {
             navigator.back()
         } else {
-            isPresentBackConfirmation = true
+            isBackConfirmationPresented = true
         }
     }
 
-    private func onTapConfirmationBack() {
-        isPresentBackConfirmation = false
+    private func handleConfirmationBackTap() {
+        isBackConfirmationPresented = false
         navigator.back()
     }
 
+    private func handleConfirmationCancelTap() {
+        isBackConfirmationPresented = false
+    }
+
+    // MARK: - Deprecated methods for backward compatibility
+    @available(*, deprecated, renamed: "handleBackButtonTap")
+    private func onTapBackButton() {
+        handleBackButtonTap()
+    }
+
+    @available(*, deprecated, renamed: "handleConfirmationBackTap")
+    private func onTapConfirmationBack() {
+        handleConfirmationBackTap()
+    }
+
+    @available(*, deprecated, renamed: "handleConfirmationCancelTap")
     private func onTapConfirmationCancel() {
-        isPresentBackConfirmation = false
+        handleConfirmationCancelTap()
     }
 
     private var isInteractiveBackDisabled: Bool {
