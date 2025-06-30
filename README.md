@@ -8,14 +8,14 @@ OversizeNavigation simplifies navigation in SwiftUI applications by offering pre
 
 ## Features
 
-- 🎯 **Three Navigation Layout Types**: Standard, List, and Cover layouts for different UI patterns
-- 🔒 **Back Confirmation System**: Built-in confirmation dialogs to prevent accidental navigation
-- 🎨 **Custom Navigation Bar Styling**: Comprehensive appearance customization
-- 📱 **Programmatic Navigation Control**: Modifier-based navigation management
-- 🌊 **Parallax Cover Effects**: Dynamic cover layouts with scroll-based animations
-- 🎭 **Hide/Show Controls**: Flexible back button visibility management
-- 🔗 **Navigator Integration**: Seamless integration with NavigatorUI for advanced routing
-- 🎨 **OversizeUI Integration**: Built on the Oversize design system
+- **Three Navigation Layout Types**: Standard, List, and Cover layouts for different UI patterns
+- **Back Confirmation System**: Built-in confirmation dialogs to prevent accidental navigation
+- **Custom Navigation Bar Styling**: Comprehensive appearance customization
+- **Programmatic Navigation Control**: Modifier-based navigation management
+- **Parallax Cover Effects**: Dynamic cover layouts with scroll-based animations
+- **Hide/Show Controls**: Flexible back button visibility management
+- **Navigator Integration**: Seamless integration with NavigatorUI for advanced routing
+- **OversizeUI Integration**: Built on the Oversize design system
 
 ## Installation
 
@@ -414,36 +414,14 @@ struct SettingsRow: View {
 }
 ```
 
-## Dependencies
-
-OversizeNavigation builds upon these powerful frameworks:
-
-- **[Navigator](https://github.com/hmlongco/Navigator)** (1.0.0+): Advanced navigation and routing
-- **[OversizeUI](https://github.com/oversizedev/OversizeUI)** (3.0.2+): Comprehensive UI component library
-- **[OversizeCore](https://github.com/oversizedev/OversizeCore)** (1.3.0+): Core utilities and extensions
-- **[OversizeModels](https://github.com/oversizedev/OversizeModels)** (0.1.0+): Shared data models
-
-## Related Oversize Packages
-
-Explore the complete Oversize ecosystem:
-
-- **[OversizeUI](https://github.com/oversizedev/OversizeUI)** - Comprehensive SwiftUI component library
-- **[OversizeCore](https://github.com/oversizedev/OversizeCore)** - Core utilities and extensions
-- **[OversizeModels](https://github.com/oversizedev/OversizeModels)** - Shared data models
-- **[OversizeLocalizable](https://github.com/oversizedev/OversizeLocalizable)** - Localization utilities
-- **[OversizeServices](https://github.com/oversizedev/OversizeServices)** - Network and service layer
-- **[OversizeComponents](https://github.com/oversizedev/OversizeComponents)** - Additional UI components
-
-## Author
-
-**Alexander Romanov**
-- GitHub: [@oversizedev](https://github.com/oversizedev)
-- Website: [oversize.design](https://oversize.design)
-
 ## License
 
-OversizeNavigation is available under the MIT license. See the LICENSE file for more info.
+OversizeModels is available under the MIT license. See the [LICENSE](LICENSE) file for more info.
 
 ---
 
-Made with ❤️ by the Oversize team
+<div align="center">
+
+**Made with ❤️ by the Oversize**
+
+</div>
