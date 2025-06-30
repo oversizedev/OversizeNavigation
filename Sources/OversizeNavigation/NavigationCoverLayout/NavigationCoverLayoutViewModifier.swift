@@ -7,12 +7,6 @@ import OversizeUI
 import SwiftUI
 
 public extension NavigationCoverLayoutView {
-    func toolbarImage(_ image: Image) -> Self {
-        var control = self
-        control.logo = image
-        return control
-    }
-
     func backConfirmationDialog(_ content: BackConfirmationContent? = .dismiss) -> Self {
         var control = self
         control.backConfirmation = content

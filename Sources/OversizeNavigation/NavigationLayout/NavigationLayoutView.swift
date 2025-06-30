@@ -17,8 +17,7 @@ public struct NavigationLayoutView<
     @ViewBuilder private let background: Background
 
     private let title: String
-    private let onScroll: ScrollAction?
-    var logo: Image? = nil
+    private let onScroll: LayoutView.ScrollAction?
     var backConfirmation: BackConfirmationContent?
     var isBackButtonHidden: Bool?
 
@@ -31,7 +30,6 @@ public struct NavigationLayoutView<
             content: { content },
             background: { background }
         )
-        .toolbarImage(logo)
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
@@ -115,7 +113,7 @@ public struct NavigationLayoutView<
 
     public init(
         _ title: String = "",
-        onScroll: ScrollAction? = nil,
+        onScroll: LayoutView.ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
     ) {

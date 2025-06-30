@@ -20,8 +20,7 @@ public struct NavigationCoverLayoutView<
 
     private let title: String
     private let coverHeight: CGFloat
-    private let onScroll: ScrollAction?
-    var logo: Image? = nil
+    private let onScroll: CoverLayoutView.ScrollAction?
     var backConfirmation: BackConfirmationContent?
     var coverStyle: CoverNavigationType = .static
     var contentCornerRadius: CGFloat = 0
@@ -37,7 +36,6 @@ public struct NavigationCoverLayoutView<
             cover: { cover },
             background: { background }
         )
-        .toolbarImage(logo)
         .coverStyle(coverStyle)
         .contentCornerRadius(contentCornerRadius)
         .toolbar {
@@ -117,7 +115,7 @@ public struct NavigationCoverLayoutView<
     public init(
         _ title: String,
         coverHeight: CGFloat = 350,
-        onScroll: ScrollAction? = nil,
+        onScroll: CoverLayoutView.ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder cover: () -> Cover,
         @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
@@ -159,7 +157,7 @@ public struct NavigationCoverLayoutView<
             },
             background: { Color.backgroundSecondary }
         )
-        .coverStyle(.prallax)
+        .coverStyle(.parallax)
         .toolbarTitleDisplayMode(.inline)
     }
 }
