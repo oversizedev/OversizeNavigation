@@ -1,6 +1,6 @@
 //
 // Copyright © 2025 Alexander Romanov
-// PageView.swift, created on 06.06.2025
+// NavigationListLayoutView.swift, created on 06.06.2025
 //
 
 import NavigatorUI

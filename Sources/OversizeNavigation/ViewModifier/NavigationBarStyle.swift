@@ -9,7 +9,7 @@ import SwiftUI
     import UIKit
 #endif
 
-public struct NavigationBarAppearence: ViewModifier {
+public struct NavigationBarAppearance: ViewModifier {
     public init() {
         #if os(iOS)
             if #unavailable(iOS 26.0) {
@@ -56,9 +56,14 @@ public struct NavigationBarAppearence: ViewModifier {
 }
 
 public extension View {
-    func naviagtionBarAppearenceConfiguration() -> some View {
+    func navigationBarAppearanceConfiguration() -> some View {
         modifier(
-            NavigationBarAppearence()
+            NavigationBarAppearance()
         )
+    }
+    
+    @available(*, deprecated, renamed: "navigationBarAppearanceConfiguration")
+    func naviagtionBarAppearenceConfiguration() -> some View {
+        navigationBarAppearanceConfiguration()
     }
 }
