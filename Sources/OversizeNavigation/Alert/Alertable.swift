@@ -9,11 +9,7 @@ public protocol Alertable: Equatable, Hashable, Identifiable {}
 
 public extension Alertable {
     static func == (lhs: Self, rhs: Self) -> Bool {
-        if lhs.id == rhs.id {
-            true
-        } else {
-            false
-        }
+        return lhs.id == rhs.id
     }
 
     func hash(into hasher: inout Hasher) {
