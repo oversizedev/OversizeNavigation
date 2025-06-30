@@ -20,7 +20,7 @@ public struct NavigationCoverLayoutView<
 
     private let title: String
     private let coverHeight: CGFloat
-    private let onScroll: ScrollAction?
+    private let onScroll: CoverLayoutView.ScrollAction?
     var logo: Image? = nil
     var backConfirmation: BackConfirmationContent?
     var coverStyle: CoverNavigationType = .static
@@ -117,7 +117,7 @@ public struct NavigationCoverLayoutView<
     public init(
         _ title: String,
         coverHeight: CGFloat = 350,
-        onScroll: ScrollAction? = nil,
+        onScroll: CoverLayoutView.ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder cover: () -> Cover,
         @ViewBuilder background: () -> Background = { Color.backgroundPrimary }

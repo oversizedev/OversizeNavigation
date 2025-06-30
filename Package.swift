@@ -10,12 +10,10 @@ let commonDependencies: [PackageDescription.Package.Dependency] = [
 
 let remoteDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
     .package(url: "https://github.com/oversizedev/OversizeUI.git", .upToNextMajor(from: "3.0.2")),
-    .package(url: "https://github.com/oversizedev/OversizeLocalizable.git", .upToNextMajor(from: "1.4.0")),
 ]
 
 let localDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
     .package(name: "OversizeUI", path: "../OversizeUI"),
-    .package(name: "OversizeLocalizable", path: "../OversizeLocalizable"),
 ]
 
 let dependencies: [PackageDescription.Package.Dependency] = remoteDependencies
@@ -40,7 +38,6 @@ let package = Package(
         .target(
             name: "OversizeNavigation",
             dependencies: [
-                .product(name: "OversizeLocalizable", package: "OversizeLocalizable"),
                 .product(name: "OversizeUI", package: "OversizeUI"),
                 .product(name: "ScrollKit", package: "ScrollKit"),
                 .product(name: "NavigatorUI", package: "Navigator"),
