@@ -1,6 +1,6 @@
 //
 // Copyright © 2025 Alexander Romanov
-// NavigationCoverPageViewModifier.swift, created on 07.06.2025
+// NavigationCoverLayoutViewModifier.swift, created on 07.06.2025
 //
 
 import OversizeUI

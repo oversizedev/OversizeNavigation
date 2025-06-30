@@ -1,6 +1,6 @@
 //
 // Copyright © 2025 Alexander Romanov
-// NavigationPageViewModifier.swift, created on 07.06.2025
+// NavigationListLayoutViewModifier.swift, created on 07.06.2025
 //
 
 import SwiftUI

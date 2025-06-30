@@ -1,6 +1,6 @@
 //
 // Copyright © 2025 Alexander Romanov
-// NavigationDestinationValueModifier.swift, created on 09.06.2025
+// NavigationSendValueModifier.swift, created on 09.06.2025
 //
 
 import NavigatorUI
