@@ -33,7 +33,7 @@ public struct NavigationLayoutView<
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(action: handleBackButtonTap) {
+                    Button(role: .cancel, action: handleBackButtonTap) {
                         backImage.icon()
                     }
                     .confirmationDialog(
@@ -81,6 +81,7 @@ public struct NavigationLayoutView<
     }
 
     // MARK: - Deprecated methods for backward compatibility
+
     @available(*, deprecated, renamed: "handleBackButtonTap")
     private func onTapBackButton() {
         handleBackButtonTap()

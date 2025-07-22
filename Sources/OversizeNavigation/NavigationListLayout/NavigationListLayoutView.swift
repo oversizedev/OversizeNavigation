@@ -9,12 +9,15 @@ import SwiftUI
 
 public struct NavigationListLayoutView<
     Content: View,
-    Background: View
+    Background: View,
+    SelectionValue: Hashable
 >: View {
     @Environment(\.navigator) private var navigator
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let background: Background
+
+    @Binding private var selection: Set<SelectionValue>?
 
     private let title: String
     var backConfirmation: BackConfirmationContent?
@@ -31,7 +34,7 @@ public struct NavigationListLayoutView<
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(action: handleBackButtonTap) {
+                    Button(role: .cancel, action: handleBackButtonTap) {
                         backImage.icon()
                     }
                     .confirmationDialog(
@@ -79,6 +82,7 @@ public struct NavigationListLayoutView<
     }
 
     // MARK: - Deprecated methods for backward compatibility
+
     @available(*, deprecated, renamed: "handleBackButtonTap")
     private func onTapBackButton() {
         handleBackButtonTap()
@@ -131,10 +135,23 @@ public struct NavigationListLayoutView<
         _ title: String = "",
         @ViewBuilder content: () -> Content,
         @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
+    ) where SelectionValue == Never {
+        self.title = title
+        self.content = content()
+        self.background = background()
+        _selection = .constant(nil)
+    }
+
+    public init(
+        _ title: String,
+        selection: Binding<Set<SelectionValue>?>,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
     ) {
         self.title = title
         self.content = content()
         self.background = background()
+        _selection = selection
     }
 }
 
