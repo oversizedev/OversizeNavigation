@@ -15,6 +15,7 @@ public enum HUD: HUDPresentable {
     case archive(_ text: String? = nil)
     case unarchive(_ text: String? = nil)
     case favorite(_ text: String? = nil)
+    case edited(_ text: String? = nil)
     case unfavorite(_ text: String? = nil)
 
     var title: String {
@@ -35,6 +36,8 @@ public enum HUD: HUDPresentable {
             return text ?? "Added to favorites"
         case let .unfavorite(text):
             return text ?? "Removed from favorites"
+        case let .edited(text):
+            return text ?? "edited"
         }
     }
 
@@ -42,7 +45,7 @@ public enum HUD: HUDPresentable {
         switch self {
         case .default:
             return nil
-        case .success:
+        case .success, .edited:
             return Image.Base.Check.Circle.fill.renderingMode(.template)
         case .destructive:
             return Image.Editor.TrashWithLines.fill.renderingMode(.template)
@@ -61,7 +64,7 @@ public enum HUD: HUDPresentable {
 
     var color: Color {
         switch self {
-        case .success:
+        case .success, .edited:
             return Color.success
         case .destructive, .delete:
             return Color.error
@@ -83,7 +86,7 @@ public enum HUD: HUDPresentable {
 
     var sensoryFeedback: SensoryFeedback {
         switch self {
-        case .default:
+        case .default, .edited:
             return .selection
         case .success:
             return .success
@@ -125,13 +128,17 @@ public extension HUD {
     static var unfavorite: HUD {
         return .unfavorite()
     }
+
+    static var edited: HUD {
+        return .edited()
+    }
 }
 
 public extension HUD {
     var id: String {
         switch self {
-        case let .default(text):
-            return "default_\(text))"
+        case let .default(text, duration):
+            return "default_\(text)_\(duration.components.seconds)"
         case let .success(text):
             return "success_\(text ?? "Success")"
         case let .destructive(text):
@@ -146,6 +153,8 @@ public extension HUD {
             return "favorite_\(text ?? "Added to favorites")"
         case let .unfavorite(text):
             return "unfavorite_\(text ?? "Removed from favorites")"
+        case let .edited(text):
+            return "edited\(text ?? "Removed from favorites")"
         }
     }
 }

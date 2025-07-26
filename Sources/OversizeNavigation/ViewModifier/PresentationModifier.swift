@@ -24,7 +24,6 @@ private struct PresentationModifier: ViewModifier {
                         icon: element.icon?.foregroundColor(element.color)
                     )
                     .padding(.horizontal, 8)
-                    .opacity(max(0.1, 1.0 - (0.2 * Double(hudState.displayedHUDs.count - index - 1))))
                     .scaleEffect(CGFloat(1.0 - (0.03 * Double(hudState.displayedHUDs.count - index - 1))))
                     .transition(
                         .asymmetric(

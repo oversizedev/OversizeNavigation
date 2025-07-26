@@ -13,10 +13,9 @@ public class HUDState: @unchecked Sendable {
 
     @MainActor
     public func presentHUD(_ hud: HUD) {
-        let uniqueID = "\(hud.id)_\(UUID().uuidString)"
         hudStack.append(hud)
-        log("💬 [HUD] Present \(uniqueID)")
-        dismissAfterDelay(for: hud, uniqueID: uniqueID)
+        log("💬 [HUD] Present \(hud.id)")
+        dismissAfterDelay(for: hud)
     }
 
     public var displayedHUDs: [HUD] {
@@ -31,19 +30,20 @@ public class HUDState: @unchecked Sendable {
     }
 
     @MainActor
-    private func dismissAfterDelay(for hud: HUD, uniqueID: String) {
+    private func dismissAfterDelay(for hud: HUD) {
         let task = Task { @MainActor in
             try await Task.sleep(for: hud.duration ?? .seconds(2))
             try Task.checkCancellation()
+
             if let index = hudStack.firstIndex(where: { $0.id == hud.id }) {
                 hudStack.remove(at: index)
-                log("💬 [HUD] Dismiss \(uniqueID)")
+                log("💬 [HUD] Dismiss \(hud.id)")
             }
 
-            dismissTasks.removeValue(forKey: uniqueID)
+            dismissTasks.removeValue(forKey: hud.id)
         }
 
-        dismissTasks[uniqueID] = task
+        dismissTasks[hud.id] = task
     }
 }
 
