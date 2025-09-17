@@ -17,6 +17,7 @@ public enum HUD: HUDPresentable {
     case favorite(_ text: String? = nil)
     case edited(_ text: String? = nil)
     case unfavorite(_ text: String? = nil)
+    case error(_ error: Error? = nil)
 
     var title: String {
         switch self {
@@ -38,6 +39,8 @@ public enum HUD: HUDPresentable {
             return text ?? "Removed from favorites"
         case let .edited(text):
             return text ?? "edited"
+        case let .error(error):
+            return error?.localizedDescription ?? "An error occurred"
         }
     }
 
@@ -59,12 +62,14 @@ public enum HUD: HUDPresentable {
             return Image.Base.Star.fill.renderingMode(.template)
         case .unfavorite:
             return Image.Base.Unstar.fill.renderingMode(.template)
+        case .error:
+            return Image.Base.Exclamationmark.Circle.fill.renderingMode(.template)
         }
     }
 
     var color: Color {
         switch self {
-        case .success, .edited:
+        case .success, .edited, .error:
             return Color.success
         case .destructive, .delete:
             return Color.error
@@ -90,7 +95,7 @@ public enum HUD: HUDPresentable {
             return .selection
         case .success:
             return .success
-        case .destructive, .delete:
+        case .destructive, .delete, .error:
             return .error
         case .archive, .unarchive, .favorite, .unfavorite:
             return .warning
@@ -155,6 +160,8 @@ public extension HUD {
             return "unfavorite_\(text ?? "Removed from favorites")"
         case let .edited(text):
             return "edited\(text ?? "Removed from favorites")"
+        case let .error(error):
+            return "error\(error?.localizedDescription ?? "Error")"
         }
     }
 }
