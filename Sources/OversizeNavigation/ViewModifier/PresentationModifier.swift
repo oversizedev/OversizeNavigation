@@ -41,7 +41,7 @@ private struct PresentationModifier: ViewModifier {
 }
 
 public extension View {
-    func presentationRoot() -> some View {
+    func presentationHUDRoot() -> some View {
         modifier(PresentationModifier())
     }
 }
@@ -73,5 +73,5 @@ public extension View {
         }
     }
 
-    return Container().presentationRoot()
+    return Container().presentationHUDRoot()
 }

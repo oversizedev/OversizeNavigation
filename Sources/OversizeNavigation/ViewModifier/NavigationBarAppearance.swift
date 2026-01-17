@@ -57,13 +57,6 @@ public struct NavigationBarAppearanceModifier: ViewModifier {
 
 public extension View {
     func navigationBarAppearanceConfiguration() -> some View {
-        modifier(
-            NavigationBarAppearanceModifier()
-        )
-    }
-
-    @available(*, deprecated, renamed: "navigationBarAppearanceConfiguration")
-    func naviagtionBarAppearenceConfiguration() -> some View {
-        navigationBarAppearanceConfiguration()
+        modifier(NavigationBarAppearanceModifier())
     }
 }
