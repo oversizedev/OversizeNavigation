@@ -7,15 +7,20 @@ import NavigatorUI
 import OversizeUI
 import SwiftUI
 
+@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
 public struct NavigationCoverLayoutView<
     Content: View,
     Cover: View,
+    ContentBackground: View,
+    CoverBackground: View,
     Background: View
 >: View {
     @Environment(\.navigator) private var navigator
 
     @ViewBuilder private var content: Content
     @ViewBuilder private let cover: Cover
+    @ViewBuilder private let contentBackground: ContentBackground
+    @ViewBuilder private let coverBackground: CoverBackground
     @ViewBuilder private let background: Background
 
     private let title: String
@@ -23,7 +28,6 @@ public struct NavigationCoverLayoutView<
     private let onScroll: CoverLayoutView.ScrollAction?
     var backConfirmation: BackConfirmationContent?
     var coverStyle: CoverNavigationType = .static
-    var contentOffset: CGFloat = 0
     var contentCornerRadius: CGFloat = 0
 
     @State private var isBackConfirmationPresented: Bool = false
@@ -35,10 +39,11 @@ public struct NavigationCoverLayoutView<
             onScroll: onScroll,
             content: { content },
             cover: { cover },
+            contentBackground: { contentBackground },
+            coverBackground: { coverBackground },
             background: { background }
         )
         .coverStyle(coverStyle)
-        .contentOffset(contentOffset)
         .contentCornerRadius(contentCornerRadius)
         .toolbar {
             if isShowBackButton {
@@ -90,23 +95,6 @@ public struct NavigationCoverLayoutView<
         isBackConfirmationPresented = false
     }
 
-    // MARK: - Deprecated methods for backward compatibility
-
-    @available(*, deprecated, renamed: "handleBackButtonTap")
-    private func onTapBackButton() {
-        handleBackButtonTap()
-    }
-
-    @available(*, deprecated, renamed: "handleConfirmationBackTap")
-    private func onTapConfirmationBack() {
-        handleConfirmationBackTap()
-    }
-
-    @available(*, deprecated, renamed: "handleConfirmationCancelTap")
-    private func onTapConfirmationCancel() {
-        handleConfirmationCancelTap()
-    }
-
     private var isInteractiveBackDisabled: Bool {
         backConfirmation != nil
     }
@@ -137,6 +125,8 @@ public struct NavigationCoverLayoutView<
         onScroll: CoverLayoutView.ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder cover: () -> Cover,
+        @ViewBuilder contentBackground: () -> ContentBackground = { Color.backgroundPrimary },
+        @ViewBuilder coverBackground: () -> CoverBackground = { Color.backgroundSecondary },
         @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
     ) {
         self.title = title
@@ -144,10 +134,13 @@ public struct NavigationCoverLayoutView<
         self.onScroll = onScroll
         self.content = content()
         self.cover = cover()
+        self.contentBackground = contentBackground()
+        self.coverBackground = coverBackground()
         self.background = background()
     }
 }
 
+@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
 #Preview {
     NavigationStack {
         NavigationCoverLayoutView(

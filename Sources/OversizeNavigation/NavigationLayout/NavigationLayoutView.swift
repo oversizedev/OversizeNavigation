@@ -79,24 +79,7 @@ public struct NavigationLayoutView<
     private func handleConfirmationCancelTap() {
         isBackConfirmationPresented = false
     }
-
-    // MARK: - Deprecated methods for backward compatibility
-
-    @available(*, deprecated, renamed: "handleBackButtonTap")
-    private func onTapBackButton() {
-        handleBackButtonTap()
-    }
-
-    @available(*, deprecated, renamed: "handleConfirmationBackTap")
-    private func onTapConfirmationBack() {
-        handleConfirmationBackTap()
-    }
-
-    @available(*, deprecated, renamed: "handleConfirmationCancelTap")
-    private func onTapConfirmationCancel() {
-        handleConfirmationCancelTap()
-    }
-
+    
     private var isInteractiveBackDisabled: Bool {
         backConfirmation != nil
     }

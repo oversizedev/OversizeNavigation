@@ -3,15 +3,15 @@
 // AlertResolve.swift, created on 11.04.2024
 //
 
+import OversizeCore
 import OversizeLocalizable
-import OversizeModels
 import SwiftUI
 
 public enum AppAlert: Alertable {
     case dismiss(_ action: () -> Void)
     case delete(_ action: () -> Void)
     case unsavedChanges(_ action: () -> Void)
-    case appError(error: AppError)
+    case appError(error: Error)
     case error(_ error: Error)
     case text(_ title: String)
     case discard(_ action: () -> Void)
@@ -76,10 +76,10 @@ public extension AppAlert {
                 primaryButton: .destructive(Text("Discard Changes"), action: action),
                 secondaryButton: .cancel()
             )
-        case let .appError(error: error):
+        case let .appError(error):
             Alert(
-                title: Text(error.title),
-                message: error.subtitle.map { Text($0) },
+                title: Text(errorTitle(error)),
+                message: errorSubtitle(error).map { Text($0) },
                 dismissButton: .default(Text("Close"))
             )
         case let .text(title):
@@ -109,26 +109,28 @@ public extension AppAlert {
             )
         case let .error(error):
             Alert(
-                title: Text({
-                    if let localizedError = error as? LocalizedError {
-                        return localizedError.errorDescription ?? "Error"
-                    }
-                    return error.localizedDescription
-                }()),
-                message: {
-                    let subtitle: String = {
-                        if let localizedError = error as? LocalizedError {
-                            return [
-                                localizedError.failureReason,
-                                localizedError.recoverySuggestion,
-                            ].compactMap { $0 }.joined(separator: "\n")
-                        }
-                        return ""
-                    }()
-                    return subtitle.isEmpty ? nil : Text(subtitle)
-                }(),
+                title: Text(errorTitle(error)),
+                message: errorSubtitle(error).map { Text($0) },
                 dismissButton: .default(Text("Close"))
             )
         }
     }
+}
+
+private func errorTitle(_ error: Error) -> String {
+    if let localizedError = error as? LocalizedError {
+        return localizedError.errorDescription ?? "Error"
+    }
+    return error.localizedDescription
+}
+
+private func errorSubtitle(_ error: Error) -> String? {
+    if let localizedError = error as? LocalizedError {
+        let subtitle = [
+            localizedError.failureReason,
+            localizedError.recoverySuggestion,
+        ].compactMap { $0 }.joined(separator: "\n")
+        return subtitle.isEmpty ? nil : subtitle
+    }
+    return nil
 }

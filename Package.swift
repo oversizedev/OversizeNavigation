@@ -1,6 +1,7 @@
 // swift-tools-version: 6.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
+import Foundation
 import PackageDescription
 
 let commonDependencies: [PackageDescription.Package.Dependency] = [
@@ -10,18 +11,19 @@ let commonDependencies: [PackageDescription.Package.Dependency] = [
 let remoteDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
     .package(url: "https://github.com/oversizedev/OversizeUI.git", .upToNextMajor(from: "3.0.2")),
     .package(url: "https://github.com/oversizedev/OversizeCore.git", .upToNextMajor(from: "1.3.0")),
-    .package(url: "https://github.com/oversizedev/OversizeModels.git", .upToNextMajor(from: "0.1.0")),
+    .package(url: "https://github.com/oversizedev/OversizeLocalizable.git", .upToNextMajor(from: "1.5.0")),
     .package(url: "https://github.com/oversizedev/OversizeResources.git", .upToNextMajor(from: "2.0.0")),
 ]
 
 let localDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
     .package(name: "OversizeUI", path: "../OversizeUI"),
     .package(name: "OversizeCore", path: "../OversizeCore"),
-    .package(name: "OversizeModels", path: "../OversizeModels"),
+    .package(name: "OversizeLocalizable", path: "../OversizeLocalizable"),
     .package(name: "OversizeResources", path: "../OversizeResources"),
 ]
 
-let dependencies: [PackageDescription.Package.Dependency] = localDependencies
+let isLocalDev = FileManager.default.fileExists(atPath: "\(NSHomeDirectory())/Developer/Packages/OversizeCore")
+let dependencies: [PackageDescription.Package.Dependency] = isLocalDev ? localDependencies : remoteDependencies
 
 let package = Package(
     name: "OversizeNavigation",
@@ -45,8 +47,8 @@ let package = Package(
             dependencies: [
                 .product(name: "OversizeUI", package: "OversizeUI"),
                 .product(name: "NavigatorUI", package: "Navigator"),
-                .product(name: "OversizeModels", package: "OversizeModels"),
                 .product(name: "OversizeCore", package: "OversizeCore"),
+                .product(name: "OversizeLocalizable", package: "OversizeLocalizable"),
                 .product(name: "OversizeResources", package: "OversizeResources"),
             ]
         ),
