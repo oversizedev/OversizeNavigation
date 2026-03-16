@@ -79,7 +79,7 @@ public struct NavigationLayoutView<
     private func handleConfirmationCancelTap() {
         isBackConfirmationPresented = false
     }
-    
+
     private var isInteractiveBackDisabled: Bool {
         backConfirmation != nil
     }
