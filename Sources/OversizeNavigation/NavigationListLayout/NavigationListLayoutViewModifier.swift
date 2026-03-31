@@ -3,6 +3,7 @@
 // NavigationListLayoutViewModifier.swift, created on 07.06.2025
 //
 
+import OversizeUI
 import SwiftUI
 
 public extension NavigationListLayoutView {
@@ -32,5 +33,11 @@ public extension NavigationListLayoutView {
             cancelButtonTitle: cancelButtonTitle
         )
         return control
+    }
+
+    func listLayoutStyle(_ listStyle: OversizeUI.ListLayoutStyle) -> Self {
+        var list = self
+        list.listStyle = listStyle
+        return list
     }
 }

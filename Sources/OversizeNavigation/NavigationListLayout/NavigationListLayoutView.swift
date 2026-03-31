@@ -22,6 +22,7 @@ public struct NavigationListLayoutView<
     private let title: String
     var backConfirmation: BackConfirmationContent?
     var isBackButtonHidden: Bool?
+    var listStyle: ListLayoutStyle = .plain
 
     @State private var isBackConfirmationPresented: Bool = false
 
@@ -31,6 +32,7 @@ public struct NavigationListLayoutView<
             content: { content },
             background: { background }
         )
+        .listLayoutStyle(listStyle)
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
@@ -134,7 +136,7 @@ public struct NavigationListLayoutView<
     public init(
         _ title: String = "",
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
+        @ViewBuilder background: () -> Background = { EmptyView() }
     ) where SelectionValue == Never {
         self.title = title
         self.content = content()
@@ -146,7 +148,7 @@ public struct NavigationListLayoutView<
         _ title: String,
         selection: Binding<Set<SelectionValue>?>,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
+        @ViewBuilder background: () -> Background = { EmptyView() }
     ) {
         self.title = title
         self.content = content()
