@@ -105,22 +105,34 @@ public struct NavigationCoverLayoutView<
 
     private var isShowBackButton: Bool {
         if navigator.isPresented {
-            true
+            if navigator.count == 0 {
+                return true
+            } else {
+                return backConfirmation != nil
+            }
         } else {
-            backConfirmation != nil
+            return backConfirmation != nil
         }
     }
 
     private var backImage: Image {
-        if navigator.isPresented, navigator.isEmpty {
-            Image.Base.close
+        if navigator.isPresented, navigator.count == 0 {
+            if #available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) {
+                Image(systemName: "xmark")
+            } else {
+                Image.Base.close
+            }
         } else {
-            Image.Base.chevronLeft
+            if #available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) {
+                Image(systemName: "chevron.left")
+            } else {
+                Image.Base.chevronLeft
+            }
         }
     }
 
     public init(
-        _ title: String,
+        _ title: String = "",
         coverHeight: CGFloat = 350,
         onScroll: CoverLayoutView.ScrollAction? = nil,
         @ViewBuilder content: () -> Content,

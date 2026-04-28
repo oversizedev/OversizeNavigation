@@ -5,7 +5,7 @@ import Foundation
 import PackageDescription
 
 let commonDependencies: [PackageDescription.Package.Dependency] = [
-    .package(url: "https://github.com/hmlongco/Navigator.git", .upToNextMajor(from: "1.4.6")),
+    .package(url: "https://github.com/hmlongco/Navigator.git", .upToNextMajor(from: "2.0.2")),
 ]
 
 let remoteDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
