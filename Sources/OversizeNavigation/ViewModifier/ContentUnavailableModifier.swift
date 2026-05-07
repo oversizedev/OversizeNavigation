@@ -1,15 +1,15 @@
 //
 // Copyright © 2026 Alexander Romanov
-// EmptyStateViewModifier.swift, created on 10.04.2026
+// ContentUnavailableModifier.swift, created on 10.04.2026
 //
 
 import OversizeCore
 import OversizeUI
 import SwiftUI
 
-public struct EmptyStateModifier<EmptyContent: View, Result: Sendable & Emptyable>: ViewModifier {
+public struct ContentUnavailableModifier<OverlayContent: View, Result: Sendable & Emptyable>: ViewModifier {
     let state: LoadingState<Result>
-    let emptyContent: () -> EmptyContent
+    let content: () -> OverlayContent
 
     public func body(content: Content) -> some View {
         content
@@ -18,7 +18,7 @@ public struct EmptyStateModifier<EmptyContent: View, Result: Sendable & Emptyabl
                 case let .result(result) where result.isEmpty:
                     ZStack {
                         Color.backgroundPrimary.ignoresSafeArea()
-                        emptyContent()
+                        self.content()
                     }
                 case let .error(error):
                     ZStack {
@@ -32,10 +32,12 @@ public struct EmptyStateModifier<EmptyContent: View, Result: Sendable & Emptyabl
     }
 }
 
-public struct SearchableEmptyStateModifier<EmptyResultContent: View, EmptySearchContent: View, Result: Sendable & Emptyable & SearchableState>: ViewModifier {
+public struct SearchableContentUnavailableModifier<OverlayContent: View, OverlaySearchContent: View, Result: Sendable & Emptyable>: ViewModifier {
     let state: LoadingState<Result>
-    let emptyResultContent: () -> EmptyResultContent
-    let emptySearchContent: () -> EmptySearchContent
+    let content: () -> OverlayContent
+    let searchContent: () -> OverlaySearchContent
+
+    @Environment(\.isSearching) private var isSearching
 
     public func body(content: Content) -> some View {
         content
@@ -44,10 +46,10 @@ public struct SearchableEmptyStateModifier<EmptyResultContent: View, EmptySearch
                 case let .result(result) where result.isEmpty:
                     ZStack {
                         Color.backgroundPrimary.ignoresSafeArea()
-                        if result.isSearch {
-                            emptySearchContent()
+                        if isSearching {
+                            searchContent()
                         } else {
-                            emptyResultContent()
+                            self.content()
                         }
                     }
                 case let .error(error):
@@ -64,46 +66,48 @@ public struct SearchableEmptyStateModifier<EmptyResultContent: View, EmptySearch
 
 @MainActor
 public extension View {
-    func emptyState<EmptyResultContent: View, EmptySearchContent: View, Result: Sendable & Emptyable & SearchableState>(
+    func contentUnavailable<OverlayContent: View, OverlaySearchContent: View, Result: Sendable & Emptyable>(
         _ state: LoadingState<Result>,
-        emptyResultContent: @escaping () -> EmptyResultContent,
-        emptySearchContent: @escaping () -> EmptySearchContent
+        @ViewBuilder content: @escaping () -> OverlayContent,
+        @ViewBuilder search searchContent: @escaping () -> OverlaySearchContent
     ) -> some View {
         modifier(
-            SearchableEmptyStateModifier(
+            SearchableContentUnavailableModifier(
                 state: state,
-                emptyResultContent: emptyResultContent,
-                emptySearchContent: emptySearchContent
+                content: content,
+                searchContent: searchContent
             )
         )
     }
 
-    func emptyState<EmptyContent: View, Result: Sendable & Emptyable>(
+    func contentUnavailable<OverlayContent: View, Result: Sendable & Emptyable>(
         _ state: LoadingState<Result>,
-        emptyContent: @escaping () -> EmptyContent
+        @ViewBuilder content: @escaping () -> OverlayContent
     ) -> some View {
         modifier(
-            EmptyStateModifier(
+            ContentUnavailableModifier(
                 state: state,
-                emptyContent: emptyContent
+                content: content
             )
         )
     }
 
-    func emptyState<Result: Sendable & Emptyable>(
+    func contentUnavailable<Actions: View, Result: Sendable & Emptyable>(
         _ state: LoadingState<Result>,
         image: Image? = nil,
         title: String = "Nothing Here",
-        subtitle: String? = "There is no content to show"
+        subtitle: String? = "There is no content to show",
+        @ContentViewActionsBuilder actions: @escaping () -> Actions
     ) -> some View {
         modifier(
-            EmptyStateModifier<EmptyStateView<EmptyView>, Result>(
+            ContentUnavailableModifier(
                 state: state,
-                emptyContent: {
+                content: {
                     EmptyStateView(
                         image: image,
                         title: title,
-                        subtitle: subtitle
+                        subtitle: subtitle,
+                        actions: actions
                     )
                 }
             )
