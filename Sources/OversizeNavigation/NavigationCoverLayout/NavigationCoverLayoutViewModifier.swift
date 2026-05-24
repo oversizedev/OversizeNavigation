@@ -40,4 +40,10 @@ public extension NavigationCoverLayoutView {
         control.contentCornerRadius = radius
         return control
     }
+
+    func contentOffset(_ offset: CGFloat) -> Self {
+        var control = self
+        control.contentOffset = offset
+        return control
+    }
 }

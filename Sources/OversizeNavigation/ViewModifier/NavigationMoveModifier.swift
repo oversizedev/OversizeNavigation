@@ -4,6 +4,7 @@
 //
 
 import NavigatorUI
+import OversizeCore
 import SwiftUI
 
 private struct NavigationMoveModifier<T: Hashable & Equatable>: ViewModifier {
@@ -13,6 +14,7 @@ private struct NavigationMoveModifier<T: Hashable & Equatable>: ViewModifier {
         content
             .onChange(of: item) { _, item in
                 if let item {
+                    log("🧭 [NAVIGATION] Move to: \(item)")
                     navigator.send(item)
                     self.item = nil
                 }

@@ -29,6 +29,7 @@ public struct NavigationCoverLayoutView<
     var backConfirmation: BackConfirmationContent?
     var coverStyle: CoverNavigationType = .static
     var contentCornerRadius: CGFloat = 0
+    var contentOffset: CGFloat = 0
 
     @State private var isBackConfirmationPresented: Bool = false
 
@@ -45,6 +46,7 @@ public struct NavigationCoverLayoutView<
         )
         .coverStyle(coverStyle)
         .contentCornerRadius(contentCornerRadius)
+        .contentOffset(contentOffset)
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
