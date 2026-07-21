@@ -1,25 +1,29 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
+import Foundation
 import PackageDescription
 
 let commonDependencies: [PackageDescription.Package.Dependency] = [
-    .package(url: "https://github.com/hmlongco/Navigator.git", .upToNextMajor(from: "1.0.0")),
+    .package(url: "https://github.com/hmlongco/Navigator.git", .upToNextMajor(from: "2.0.2")),
 ]
 
 let remoteDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
-    .package(url: "https://github.com/oversizedev/OversizeUI.git", .upToNextMajor(from: "3.0.2")),
+    .package(url: "https://github.com/oversizedev/OversizeUI.git", .upToNextMajor(from: "3.15.0")),
     .package(url: "https://github.com/oversizedev/OversizeCore.git", .upToNextMajor(from: "1.3.0")),
-    .package(url: "https://github.com/oversizedev/OversizeModels.git", .upToNextMajor(from: "0.1.0")),
+    .package(url: "https://github.com/oversizedev/OversizeLocalizable.git", .upToNextMajor(from: "1.5.0")),
+    .package(url: "https://github.com/oversizedev/OversizeResources.git", .upToNextMajor(from: "2.0.0")),
 ]
 
 let localDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
-    .package(name: "OversizeUI", path: "../OversizeUI"),
-    .package(name: "OversizeCore", path: "../../../Packages/OversizeCore"),
-    .package(name: "OversizeModels", path: "../../../Packages/OversizeModels"),
+    .package(name: "OversizeUI", path: "\(NSHomeDirectory())/Developer/Packages/OversizeUI"),
+    .package(name: "OversizeCore", path: "\(NSHomeDirectory())/Developer/Packages/OversizeCore"),
+    .package(name: "OversizeLocalizable", path: "\(NSHomeDirectory())/Developer/Packages/OversizeLocalizable"),
+    .package(name: "OversizeResources", path: "\(NSHomeDirectory())/Developer/Packages/OversizeResources"),
 ]
 
-let dependencies: [PackageDescription.Package.Dependency] = remoteDependencies
+let isLocalDev = FileManager.default.fileExists(atPath: "\(NSHomeDirectory())/Developer/Packages/OversizeCore")
+let dependencies: [PackageDescription.Package.Dependency] = isLocalDev ? localDependencies : remoteDependencies
 
 let package = Package(
     name: "OversizeNavigation",
@@ -43,8 +47,9 @@ let package = Package(
             dependencies: [
                 .product(name: "OversizeUI", package: "OversizeUI"),
                 .product(name: "NavigatorUI", package: "Navigator"),
-                .product(name: "OversizeModels", package: "OversizeModels"),
                 .product(name: "OversizeCore", package: "OversizeCore"),
+                .product(name: "OversizeLocalizable", package: "OversizeLocalizable"),
+                .product(name: "OversizeResources", package: "OversizeResources"),
             ]
         ),
     ]

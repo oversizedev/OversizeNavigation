@@ -1,18 +1,13 @@
 //
-// Copyright © 2025 Alexander Romanov
-// NavigationListLayoutViewModifier.swift, created on 07.06.2025
+// Copyright © 2026 Alexander Romanov
+// NavigationCoverLayoutModifier.swift, created on 26.06.2026
 //
 
 import OversizeUI
 import SwiftUI
 
-public extension NavigationListLayoutView {
-    func backButtonHidden(_ hidesBackButton: Bool = true) -> Self {
-        var control = self
-        control.isBackButtonHidden = hidesBackButton
-        return control
-    }
-
+@available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *)
+public extension NavigationCoverLayout {
     func backConfirmationDialog(_ content: BackConfirmationContent? = .dismiss) -> Self {
         var control = self
         control.backConfirmation = content
@@ -33,11 +28,5 @@ public extension NavigationListLayoutView {
             cancelButtonTitle: cancelButtonTitle
         )
         return control
-    }
-
-    func listLayoutStyle(_ listStyle: OversizeUI.ListLayoutStyle) -> Self {
-        var list = self
-        list.listStyle = listStyle
-        return list
     }
 }

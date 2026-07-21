@@ -1,20 +1,22 @@
 //
-// Copyright © 2025 Alexander Romanov
-// NavigationCoverLayoutView.swift, created on 06.06.2025
+// Copyright © 2026 Alexander Romanov
+// NavigationCoverLayout.swift, created on 26.06.2026
 //
 
 import NavigatorUI
 import OversizeUI
 import SwiftUI
 
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
-public struct NavigationCoverLayoutView<
+@available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *)
+public struct NavigationCoverLayout<
     Content: View,
     Cover: View,
     ContentBackground: View,
     CoverBackground: View,
     Background: View
 >: View {
+    public typealias ScrollAction = @MainActor @Sendable (_ offset: CGFloat, _ headerVisibleRatio: CGFloat) -> Void
+
     @Environment(\.navigator) private var navigator
 
     @ViewBuilder private var content: Content
@@ -25,16 +27,13 @@ public struct NavigationCoverLayoutView<
 
     private let title: String
     private let coverHeight: CGFloat
-    private let onScroll: CoverLayoutView.ScrollAction?
+    private let onScroll: ScrollAction?
     var backConfirmation: BackConfirmationContent?
-    var coverStyle: CoverNavigationType = .static
-    var contentCornerRadius: CGFloat = 0
-    var contentOffset: CGFloat = 0
 
     @State private var isBackConfirmationPresented: Bool = false
 
     public var body: some View {
-        CoverLayoutView(
+        CoverLayout(
             title,
             coverHeight: coverHeight,
             onScroll: onScroll,
@@ -44,9 +43,6 @@ public struct NavigationCoverLayoutView<
             coverBackground: { coverBackground },
             background: { background }
         )
-        .coverStyle(coverStyle)
-        .contentCornerRadius(contentCornerRadius)
-        .contentOffset(contentOffset)
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
@@ -135,8 +131,8 @@ public struct NavigationCoverLayoutView<
 
     public init(
         _ title: String = "",
-        coverHeight: CGFloat = 350,
-        onScroll: CoverLayoutView.ScrollAction? = nil,
+        coverHeight: CGFloat = 300,
+        onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder cover: () -> Cover,
         @ViewBuilder contentBackground: () -> ContentBackground = { Color.backgroundPrimary },
@@ -154,36 +150,29 @@ public struct NavigationCoverLayoutView<
     }
 }
 
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
+@available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *)
 #Preview {
     NavigationStack {
-        NavigationCoverLayoutView(
-            "Title",
-            content: {
-                LazyVStack(spacing: 0) {
-                    ForEach(1 ... 100, id: \.self) { item in
-                        Button {} label: {
-                            VStack(spacing: 0) {
-                                Text("Item \(item)")
-                                    .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                                Divider()
-                            }
-                            .clipShape(Rectangle())
-                        }
-                    }
-                }
-            },
-            cover: {
-                Color.blue.overlay {
-                    Rectangle()
-                        .stroke(Color.red, lineWidth: 2)
-                }
-            },
-            background: { Color.backgroundSecondary }
-        )
-        .coverStyle(.parallax)
-        .toolbarTitleDisplayMode(.inline)
+        NavigationCoverLayout("Albums") {
+            Section {
+                Text("Song 1").padding()
+                Text("Song 2").padding()
+            }
+            Section("Favorites") {
+                Row("Song 1") { print("") }
+                Row("Song 2")
+                Row("Song 3") { print("") }
+            }
+        } cover: {
+            LinearGradient(
+                colors: [Color.surfacePrimary, Color.yellow],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        } coverBackground: {
+            Color.red
+        }
+        .sectionTitlePosition(.inside)
+        .bordered()
     }
 }

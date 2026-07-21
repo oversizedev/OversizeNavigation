@@ -33,7 +33,7 @@ public struct NavigationLayoutView<
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(action: handleBackButtonTap) {
+                    Button(role: .cancel, action: handleBackButtonTap) {
                         backImage.icon()
                     }
                     .confirmationDialog(
@@ -80,22 +80,6 @@ public struct NavigationLayoutView<
         isBackConfirmationPresented = false
     }
 
-    // MARK: - Deprecated methods for backward compatibility
-    @available(*, deprecated, renamed: "handleBackButtonTap")
-    private func onTapBackButton() {
-        handleBackButtonTap()
-    }
-
-    @available(*, deprecated, renamed: "handleConfirmationBackTap")
-    private func onTapConfirmationBack() {
-        handleConfirmationBackTap()
-    }
-
-    @available(*, deprecated, renamed: "handleConfirmationCancelTap")
-    private func onTapConfirmationCancel() {
-        handleConfirmationCancelTap()
-    }
-
     private var isInteractiveBackDisabled: Bool {
         backConfirmation != nil
     }
@@ -109,7 +93,7 @@ public struct NavigationLayoutView<
             return false
         }
         if navigator.isPresented {
-            if navigator.isEmpty {
+            if navigator.count == 0 {
                 return true
             } else {
                 return backConfirmation != nil
@@ -120,10 +104,18 @@ public struct NavigationLayoutView<
     }
 
     private var backImage: Image {
-        if navigator.isPresented, navigator.isEmpty {
-            Image.Base.close
+        if navigator.isPresented, navigator.count == 0 {
+            if #available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) {
+                Image(systemName: "xmark")
+            } else {
+                Image.Base.close
+            }
         } else {
-            Image.Base.chevronLeft
+            if #available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) {
+                Image(systemName: "chevron.left")
+            } else {
+                Image.Base.chevronLeft
+            }
         }
     }
 

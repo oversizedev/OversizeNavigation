@@ -1,52 +1,38 @@
 //
-// Copyright © 2025 Alexander Romanov
-// NavigationCoverLayoutView.swift, created on 06.06.2025
+// Copyright © 2026 Alexander Romanov
+// NavigationLayout.swift, created on 26.06.2026
 //
 
 import NavigatorUI
 import OversizeUI
 import SwiftUI
 
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
-public struct NavigationCoverLayoutView<
+@available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *)
+public struct NavigationLayout<
     Content: View,
-    Cover: View,
-    ContentBackground: View,
-    CoverBackground: View,
     Background: View
 >: View {
+    public typealias ScrollAction = @MainActor @Sendable (_ offset: CGFloat, _ headerVisibleRatio: CGFloat) -> Void
+
     @Environment(\.navigator) private var navigator
 
     @ViewBuilder private var content: Content
-    @ViewBuilder private let cover: Cover
-    @ViewBuilder private let contentBackground: ContentBackground
-    @ViewBuilder private let coverBackground: CoverBackground
     @ViewBuilder private let background: Background
 
     private let title: String
-    private let coverHeight: CGFloat
-    private let onScroll: CoverLayoutView.ScrollAction?
+    private let onScroll: ScrollAction?
     var backConfirmation: BackConfirmationContent?
-    var coverStyle: CoverNavigationType = .static
-    var contentCornerRadius: CGFloat = 0
-    var contentOffset: CGFloat = 0
+    var isBackButtonHidden: Bool?
 
     @State private var isBackConfirmationPresented: Bool = false
 
     public var body: some View {
-        CoverLayoutView(
+        Layout(
             title,
-            coverHeight: coverHeight,
             onScroll: onScroll,
             content: { content },
-            cover: { cover },
-            contentBackground: { contentBackground },
-            coverBackground: { coverBackground },
             background: { background }
         )
-        .coverStyle(coverStyle)
-        .contentCornerRadius(contentCornerRadius)
-        .contentOffset(contentOffset)
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
@@ -102,10 +88,13 @@ public struct NavigationCoverLayoutView<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil
+        backConfirmation != nil || isBackButtonHidden == true
     }
 
     private var isShowBackButton: Bool {
+        if let isBackButtonHidden, isBackButtonHidden {
+            return false
+        }
         if navigator.isPresented {
             if navigator.count == 0 {
                 return true
@@ -135,55 +124,41 @@ public struct NavigationCoverLayoutView<
 
     public init(
         _ title: String = "",
-        coverHeight: CGFloat = 350,
-        onScroll: CoverLayoutView.ScrollAction? = nil,
+        onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder cover: () -> Cover,
-        @ViewBuilder contentBackground: () -> ContentBackground = { Color.backgroundPrimary },
-        @ViewBuilder coverBackground: () -> CoverBackground = { Color.backgroundSecondary },
         @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
     ) {
         self.title = title
-        self.coverHeight = coverHeight
         self.onScroll = onScroll
         self.content = content()
-        self.cover = cover()
-        self.contentBackground = contentBackground()
-        self.coverBackground = coverBackground()
         self.background = background()
     }
 }
 
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
+@available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *)
 #Preview {
     NavigationStack {
-        NavigationCoverLayoutView(
-            "Title",
-            content: {
-                LazyVStack(spacing: 0) {
-                    ForEach(1 ... 100, id: \.self) { item in
-                        Button {} label: {
-                            VStack(spacing: 0) {
-                                Text("Item \(item)")
-                                    .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+        NavigationLayout("Albums") {
+            Section {
+                Text("Song 1").padding()
+                Text("Song 2").padding()
+            }
+            Section("Favorites") {
+                Row("Song 1") { print("") }
+                Row("Song 2")
+                Row("Song 3") { print("") }
+            }
+        }
+        .sectionTitlePosition(.inside)
+        .bordered()
+    }
+}
 
-                                Divider()
-                            }
-                            .clipShape(Rectangle())
-                        }
-                    }
-                }
-            },
-            cover: {
-                Color.blue.overlay {
-                    Rectangle()
-                        .stroke(Color.red, lineWidth: 2)
-                }
-            },
-            background: { Color.backgroundSecondary }
-        )
-        .coverStyle(.parallax)
-        .toolbarTitleDisplayMode(.inline)
+@available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *)
+#Preview {
+    NavigationStack {
+        NavigationLayout("Empty") {
+            Text("Content")
+        }
     }
 }

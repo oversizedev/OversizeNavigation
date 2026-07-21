@@ -6,7 +6,6 @@
 import SwiftUI
 
 public extension NavigationLayoutView {
-
     func backButtonHidden(_ hidesBackButton: Bool = true) -> Self {
         var control = self
         control.isBackButtonHidden = hidesBackButton
