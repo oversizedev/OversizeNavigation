@@ -27,43 +27,58 @@ public struct NavigationListLayoutView<
     @State private var isBackConfirmationPresented: Bool = false
 
     public var body: some View {
+        listLayout
+            .toolbar {
+                if isShowBackButton {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(role: .cancel, action: handleBackButtonTap) {
+                            backImage.icon()
+                        }
+                        .confirmationDialog(
+                            backConfirmation?.title ?? "Are you sure?",
+                            isPresented: $isBackConfirmationPresented,
+                            titleVisibility: .visible,
+                            presenting: backConfirmation,
+                            actions: { details in
+                                Button(
+                                    details.confirmationButtonTitle,
+                                    action: handleConfirmationBackTap
+                                )
+                                Button(
+                                    details.cancelButtonTitle ?? "Cancel",
+                                    role: .cancel,
+                                    action: handleConfirmationCancelTap
+                                )
+                            },
+                            message: { details in
+                                Text(details.message)
+                            }
+                        )
+                    }
+                }
+            }
+            .interactiveDismissDisabled(isInteractiveBackDisabled)
+            .navigationBarBackButtonHidden(isNavigationBarBackButtonHidden)
+    }
+
+    @ViewBuilder
+    private var listLayout: some View {
+        #if os(watchOS)
         ListLayoutView(
             title,
             content: { content },
             background: { background }
         )
         .listLayoutStyle(listStyle)
-        .toolbar {
-            if isShowBackButton {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .cancel, action: handleBackButtonTap) {
-                        backImage.icon()
-                    }
-                    .confirmationDialog(
-                        backConfirmation?.title ?? "Are you sure?",
-                        isPresented: $isBackConfirmationPresented,
-                        titleVisibility: .visible,
-                        presenting: backConfirmation,
-                        actions: { details in
-                            Button(
-                                details.confirmationButtonTitle,
-                                action: handleConfirmationBackTap
-                            )
-                            Button(
-                                details.cancelButtonTitle ?? "Cancel",
-                                role: .cancel,
-                                action: handleConfirmationCancelTap
-                            )
-                        },
-                        message: { details in
-                            Text(details.message)
-                        }
-                    )
-                }
-            }
-        }
-        .interactiveDismissDisabled(isInteractiveBackDisabled)
-        .navigationBarBackButtonHidden(isNavigationBarBackButtonHidden)
+        #else
+        ListLayoutView(
+            title,
+            selection: $selection,
+            content: { content },
+            background: { background }
+        )
+        .listLayoutStyle(listStyle)
+        #endif
     }
 
     private func handleBackButtonTap() {
@@ -88,10 +103,13 @@ public struct NavigationListLayoutView<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil
+        backConfirmation != nil || isBackButtonHidden == true
     }
 
     private var isShowBackButton: Bool {
+        if let isBackButtonHidden, isBackButtonHidden {
+            return false
+        }
         if navigator.isPresented {
             if navigator.count == 0 {
                 return true
@@ -130,6 +148,7 @@ public struct NavigationListLayoutView<
         _selection = .constant(nil)
     }
 
+    @available(watchOS, unavailable)
     public init(
         _ title: String,
         selection: Binding<Set<SelectionValue>?>,

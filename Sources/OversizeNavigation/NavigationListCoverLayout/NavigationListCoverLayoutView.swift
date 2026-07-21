@@ -34,6 +34,43 @@ public struct NavigationListCoverLayoutView<
     @State private var isBackConfirmationPresented: Bool = false
 
     public var body: some View {
+        listCoverLayout
+            .toolbar {
+                if isShowBackButton {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(role: .cancel, action: handleBackButtonTap) {
+                            backImage.icon()
+                        }
+                        .confirmationDialog(
+                            backConfirmation?.title ?? "Are you sure?",
+                            isPresented: $isBackConfirmationPresented,
+                            titleVisibility: .visible,
+                            presenting: backConfirmation,
+                            actions: { details in
+                                Button(
+                                    details.confirmationButtonTitle,
+                                    action: handleConfirmationBackTap
+                                )
+                                Button(
+                                    details.cancelButtonTitle ?? "Cancel",
+                                    role: .cancel,
+                                    action: handleConfirmationCancelTap
+                                )
+                            },
+                            message: { details in
+                                Text(details.message)
+                            }
+                        )
+                    }
+                }
+            }
+            .interactiveDismissDisabled(isInteractiveBackDisabled)
+            .navigationBarBackButtonHidden(isNavigationBarBackButtonHidden)
+    }
+
+    @ViewBuilder
+    private var listCoverLayout: some View {
+        #if os(watchOS)
         ListCoverLayoutView(
             title,
             coverHeight: coverHeight,
@@ -44,37 +81,19 @@ public struct NavigationListCoverLayoutView<
         )
         .listLayoutStyle(listStyle)
         .coverSpacing(coverSpacing)
-        .toolbar {
-            if isShowBackButton {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .cancel, action: handleBackButtonTap) {
-                        backImage.icon()
-                    }
-                    .confirmationDialog(
-                        backConfirmation?.title ?? "Are you sure?",
-                        isPresented: $isBackConfirmationPresented,
-                        titleVisibility: .visible,
-                        presenting: backConfirmation,
-                        actions: { details in
-                            Button(
-                                details.confirmationButtonTitle,
-                                action: handleConfirmationBackTap
-                            )
-                            Button(
-                                details.cancelButtonTitle ?? "Cancel",
-                                role: .cancel,
-                                action: handleConfirmationCancelTap
-                            )
-                        },
-                        message: { details in
-                            Text(details.message)
-                        }
-                    )
-                }
-            }
-        }
-        .interactiveDismissDisabled(isInteractiveBackDisabled)
-        .navigationBarBackButtonHidden(isNavigationBarBackButtonHidden)
+        #else
+        ListCoverLayoutView(
+            title,
+            coverHeight: coverHeight,
+            selection: $selection,
+            content: { content },
+            cover: { cover },
+            coverBackground: { coverBackground },
+            background: { background }
+        )
+        .listLayoutStyle(listStyle)
+        .coverSpacing(coverSpacing)
+        #endif
     }
 
     private func handleBackButtonTap() {

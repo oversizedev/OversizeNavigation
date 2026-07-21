@@ -14,6 +14,7 @@ private struct BackConfirmationViewModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .interactiveDismissDisabled()
+            .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(confirmationContent.cancelButtonTitle ?? "Close", systemImage: "xmark", role: .cancel) {

@@ -69,9 +69,9 @@ public enum HUD: HUDPresentable {
 
     var color: Color {
         switch self {
-        case .success, .edited, .error:
+        case .success, .edited:
             return Color.success
-        case .destructive, .delete:
+        case .destructive, .delete, .error:
             return Color.error
         case .archive, .unarchive, .favorite, .unfavorite:
             return Color.warning

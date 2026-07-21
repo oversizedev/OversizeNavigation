@@ -9,17 +9,17 @@ let commonDependencies: [PackageDescription.Package.Dependency] = [
 ]
 
 let remoteDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
-    .package(url: "https://github.com/oversizedev/OversizeUI.git", .upToNextMajor(from: "3.0.2")),
+    .package(url: "https://github.com/oversizedev/OversizeUI.git", .upToNextMajor(from: "3.15.0")),
     .package(url: "https://github.com/oversizedev/OversizeCore.git", .upToNextMajor(from: "1.3.0")),
     .package(url: "https://github.com/oversizedev/OversizeLocalizable.git", .upToNextMajor(from: "1.5.0")),
     .package(url: "https://github.com/oversizedev/OversizeResources.git", .upToNextMajor(from: "2.0.0")),
 ]
 
 let localDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
-    .package(name: "OversizeUI", path: "../OversizeUI"),
-    .package(name: "OversizeCore", path: "../OversizeCore"),
-    .package(name: "OversizeLocalizable", path: "../OversizeLocalizable"),
-    .package(name: "OversizeResources", path: "../OversizeResources"),
+    .package(name: "OversizeUI", path: "\(NSHomeDirectory())/Developer/Packages/OversizeUI"),
+    .package(name: "OversizeCore", path: "\(NSHomeDirectory())/Developer/Packages/OversizeCore"),
+    .package(name: "OversizeLocalizable", path: "\(NSHomeDirectory())/Developer/Packages/OversizeLocalizable"),
+    .package(name: "OversizeResources", path: "\(NSHomeDirectory())/Developer/Packages/OversizeResources"),
 ]
 
 let isLocalDev = FileManager.default.fileExists(atPath: "\(NSHomeDirectory())/Developer/Packages/OversizeCore")

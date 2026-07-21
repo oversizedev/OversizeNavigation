@@ -4,46 +4,60 @@ import SwiftUI
 
 @Observable
 public class HUDState: @unchecked Sendable {
-    public var hudStack: [HUD] = []
-    private var dismissTasks: [String: Task<Void, Error>] = [:]
+    struct PresentedHUD: Identifiable {
+        let id: UUID
+        let hud: HUD
+    }
+
+    private var presentedStack: [PresentedHUD] = []
+    private var dismissTasks: [UUID: Task<Void, Error>] = [:]
 
     private let maxDisplayedHUDs = 3
 
     public init() {}
 
-    @MainActor
-    public func presentHUD(_ hud: HUD) {
-        hudStack.append(hud)
-        Log.debug("💬 [HUD] Present \(hud.id)")
-        dismissAfterDelay(for: hud)
+    public var hudStack: [HUD] {
+        presentedStack.map(\.hud)
     }
 
     public var displayedHUDs: [HUD] {
         Array(hudStack.suffix(maxDisplayedHUDs))
     }
 
+    var displayedPresentedHUDs: [PresentedHUD] {
+        Array(presentedStack.suffix(maxDisplayedHUDs))
+    }
+
+    @MainActor
+    public func presentHUD(_ hud: HUD) {
+        let presented = PresentedHUD(id: UUID(), hud: hud)
+        presentedStack.append(presented)
+        Log.debug("💬 [HUD] Present \(hud.id)")
+        dismissAfterDelay(for: presented)
+    }
+
     @MainActor
     public func clearAllHUDs() {
         dismissTasks.values.forEach { $0.cancel() }
         dismissTasks.removeAll()
-        hudStack.removeAll()
+        presentedStack.removeAll()
     }
 
     @MainActor
-    private func dismissAfterDelay(for hud: HUD) {
+    private func dismissAfterDelay(for presented: PresentedHUD) {
         let task = Task { @MainActor in
-            try await Task.sleep(for: hud.duration ?? .seconds(2))
+            try await Task.sleep(for: presented.hud.duration ?? .seconds(2))
             try Task.checkCancellation()
 
-            if let index = hudStack.firstIndex(where: { $0.id == hud.id }) {
-                hudStack.remove(at: index)
-                Log.debug("💬 [HUD] Dismiss \(hud.id)")
+            if let index = presentedStack.firstIndex(where: { $0.id == presented.id }) {
+                presentedStack.remove(at: index)
+                Log.debug("💬 [HUD] Dismiss \(presented.hud.id)")
             }
 
-            dismissTasks.removeValue(forKey: hud.id)
+            dismissTasks.removeValue(forKey: presented.id)
         }
 
-        dismissTasks[hud.id] = task
+        dismissTasks[presented.id] = task
     }
 }
 

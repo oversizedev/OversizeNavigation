@@ -16,15 +16,15 @@ private struct PresentationModifier: ViewModifier {
                 .environment(\.hud, hudState)
 
             VStack(spacing: -40) {
-                ForEach(hudState.displayedHUDs, id: \.id) { element in
-                    let index = hudState.displayedHUDs.firstIndex(where: { $0.id == element.id }) ?? 0
+                ForEach(hudState.displayedPresentedHUDs, id: \.id) { element in
+                    let index = hudState.displayedPresentedHUDs.firstIndex(where: { $0.id == element.id }) ?? 0
 
                     HUDContent(
-                        element.title,
-                        icon: element.icon?.foregroundColor(element.color)
+                        element.hud.title,
+                        icon: element.hud.icon?.foregroundColor(element.hud.color)
                     )
                     .padding(.horizontal, 8)
-                    .scaleEffect(CGFloat(1.0 - (0.03 * Double(hudState.displayedHUDs.count - index - 1))))
+                    .scaleEffect(CGFloat(1.0 - (0.03 * Double(hudState.displayedPresentedHUDs.count - index - 1))))
                     .transition(
                         .asymmetric(
                             insertion: .move(edge: .top).combined(with: .opacity),
@@ -33,8 +33,8 @@ private struct PresentationModifier: ViewModifier {
                     )
                 }
             }
-            .animation(.easeInOut(duration: 0.3), value: hudState.displayedHUDs.count)
-            .animation(.easeInOut(duration: 0.3), value: hudState.displayedHUDs.map(\.id))
+            .animation(.easeInOut(duration: 0.3), value: hudState.displayedPresentedHUDs.count)
+            .animation(.easeInOut(duration: 0.3), value: hudState.displayedPresentedHUDs.map(\.id))
             .safeAreaPadding(.top, 5)
         }
     }
