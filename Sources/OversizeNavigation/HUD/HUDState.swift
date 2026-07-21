@@ -14,7 +14,7 @@ public class HUDState: @unchecked Sendable {
     @MainActor
     public func presentHUD(_ hud: HUD) {
         hudStack.append(hud)
-        log("💬 [HUD] Present \(hud.id)")
+        Log.debug("💬 [HUD] Present \(hud.id)")
         dismissAfterDelay(for: hud)
     }
 
@@ -37,7 +37,7 @@ public class HUDState: @unchecked Sendable {
 
             if let index = hudStack.firstIndex(where: { $0.id == hud.id }) {
                 hudStack.remove(at: index)
-                log("💬 [HUD] Dismiss \(hud.id)")
+                Log.debug("💬 [HUD] Dismiss \(hud.id)")
             }
 
             dismissTasks.removeValue(forKey: hud.id)

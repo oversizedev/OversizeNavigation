@@ -19,7 +19,7 @@ private struct PresentationAlertModifier: ViewModifier {
         #if DEBUG
             .onChange(of: alert) { _, alert in
                 if let alert {
-                    log("🔔 [ALERT] Presented \(alert.id)")
+                    Log.debug("🔔 [ALERT] Presented \(alert.id)")
                 }
             }
         #endif
