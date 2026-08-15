@@ -8,6 +8,8 @@ import SwiftUI
 
 private struct PresentationAlertModifier: ViewModifier {
     @Binding private var alert: AppAlert?
+    @State private var sensoryFeedback: SensoryFeedback = .error
+    @State private var sensoryFeedbackTicket: Int = 0
 
     init(alert: Binding<AppAlert?>) {
         _alert = alert
@@ -16,13 +18,17 @@ private struct PresentationAlertModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .alert(item: $alert) { $0.alert }
-        #if DEBUG
-            .onChange(of: alert) { _, alert in
-                if let alert {
+            .onChange(of: alert, initial: true) { _, alert in
+                guard let alert else { return }
+                #if DEBUG
                     Log.debug("🔔 [ALERT] Presented \(alert.id)")
+                #endif
+                if let feedback = alert.sensoryFeedback {
+                    sensoryFeedback = feedback
+                    sensoryFeedbackTicket &+= 1
                 }
             }
-        #endif
+            .sensoryFeedback(sensoryFeedback, trigger: sensoryFeedbackTicket)
     }
 }
 

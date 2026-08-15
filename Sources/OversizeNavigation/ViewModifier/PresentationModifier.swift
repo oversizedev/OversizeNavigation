@@ -37,6 +37,7 @@ private struct PresentationModifier: ViewModifier {
             .animation(.easeInOut(duration: 0.3), value: hudState.displayedPresentedHUDs.map(\.id))
             .safeAreaPadding(.top, 5)
         }
+        .sensoryFeedback(hudState.sensoryFeedback, trigger: hudState.sensoryFeedbackTicket)
     }
 }
 

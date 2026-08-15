@@ -27,15 +27,15 @@ public struct NavigationLayout<
     @State private var isBackConfirmationPresented: Bool = false
 
     public var body: some View {
-        Layout(
+        OversizeUI.Layout(
             title,
             onScroll: onScroll,
             content: { content },
             background: { background }
         )
         .toolbar {
-            if isShowBackButton {
-                ToolbarItem(placement: .cancellationAction) {
+            ToolbarItem(placement: .cancellationAction) {
+                if isShowBackButton {
                     Button(role: .cancel, action: handleBackButtonTap) {
                         backImage.icon()
                     }

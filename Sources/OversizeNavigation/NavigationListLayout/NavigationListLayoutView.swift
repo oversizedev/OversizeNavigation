@@ -64,20 +64,20 @@ public struct NavigationListLayoutView<
     @ViewBuilder
     private var listLayout: some View {
         #if os(watchOS)
-        ListLayoutView(
-            title,
-            content: { content },
-            background: { background }
-        )
-        .listLayoutStyle(listStyle)
+            ListLayoutView(
+                title,
+                content: { content },
+                background: { background }
+            )
+            .listLayoutStyle(listStyle)
         #else
-        ListLayoutView(
-            title,
-            selection: $selection,
-            content: { content },
-            background: { background }
-        )
-        .listLayoutStyle(listStyle)
+            ListLayoutView(
+                title,
+                selection: $selection,
+                content: { content },
+                background: { background }
+            )
+            .listLayoutStyle(listStyle)
         #endif
     }
 

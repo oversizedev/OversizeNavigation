@@ -71,28 +71,28 @@ public struct NavigationListCoverLayoutView<
     @ViewBuilder
     private var listCoverLayout: some View {
         #if os(watchOS)
-        ListCoverLayoutView(
-            title,
-            coverHeight: coverHeight,
-            content: { content },
-            cover: { cover },
-            coverBackground: { coverBackground },
-            background: { background }
-        )
-        .listLayoutStyle(listStyle)
-        .coverSpacing(coverSpacing)
+            ListCoverLayoutView(
+                title,
+                coverHeight: coverHeight,
+                content: { content },
+                cover: { cover },
+                coverBackground: { coverBackground },
+                background: { background }
+            )
+            .listLayoutStyle(listStyle)
+            .coverSpacing(coverSpacing)
         #else
-        ListCoverLayoutView(
-            title,
-            coverHeight: coverHeight,
-            selection: $selection,
-            content: { content },
-            cover: { cover },
-            coverBackground: { coverBackground },
-            background: { background }
-        )
-        .listLayoutStyle(listStyle)
-        .coverSpacing(coverSpacing)
+            ListCoverLayoutView(
+                title,
+                coverHeight: coverHeight,
+                selection: $selection,
+                content: { content },
+                cover: { cover },
+                coverBackground: { coverBackground },
+                background: { background }
+            )
+            .listLayoutStyle(listStyle)
+            .coverSpacing(coverSpacing)
         #endif
     }
 
