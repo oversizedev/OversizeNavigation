@@ -28,6 +28,7 @@ public struct NavigationListCoverLayoutView<
     @Binding private var selection: Set<SelectionValue>?
 
     var backConfirmation: BackConfirmationContent?
+    var isBackButtonHidden: Bool?
     var listStyle: ListLayoutStyle = .plain
     var coverSpacing: CGFloat?
 
@@ -118,10 +119,17 @@ public struct NavigationListCoverLayoutView<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil
+        backConfirmation != nil || isBackButtonAtRootHidden
+    }
+
+    private var isBackButtonAtRootHidden: Bool {
+        isBackButtonHidden == true && navigator.count == 0
     }
 
     private var isShowBackButton: Bool {
+        if isBackButtonAtRootHidden {
+            return false
+        }
         if navigator.isPresented {
             if navigator.count == 0 {
                 return true

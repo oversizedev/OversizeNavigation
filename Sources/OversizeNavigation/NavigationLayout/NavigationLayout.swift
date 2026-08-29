@@ -34,8 +34,9 @@ public struct NavigationLayout<
             background: { background }
         )
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                if isShowBackButton {
+            if isShowBackButton {
+                ToolbarItem(placement: .cancellationAction) {
+                    #if os(macOS)
                     Button(role: .cancel, action: handleBackButtonTap) {
                         backImage.icon()
                     }
@@ -59,6 +60,31 @@ public struct NavigationLayout<
                             Text(details.message)
                         }
                     )
+                    #else
+                    Button(role: .cancel, action: handleBackButtonTap) {
+                        backImage.icon()
+                    }
+                    .confirmationDialog(
+                        backConfirmation?.title ?? "Are you sure?",
+                        isPresented: $isBackConfirmationPresented,
+                        titleVisibility: .visible,
+                        presenting: backConfirmation,
+                        actions: { details in
+                            Button(
+                                details.confirmationButtonTitle,
+                                action: handleConfirmationBackTap
+                            )
+                            Button(
+                                details.cancelButtonTitle ?? "Cancel",
+                                role: .cancel,
+                                action: handleConfirmationCancelTap
+                            )
+                        },
+                        message: { details in
+                            Text(details.message)
+                        }
+                    )
+                    #endif
                 }
             }
         }
@@ -88,11 +114,15 @@ public struct NavigationLayout<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil || isBackButtonHidden == true
+        backConfirmation != nil || isBackButtonAtRootHidden
+    }
+
+    private var isBackButtonAtRootHidden: Bool {
+        isBackButtonHidden == true && navigator.count == 0
     }
 
     private var isShowBackButton: Bool {
-        if let isBackButtonHidden, isBackButtonHidden {
+        if isBackButtonAtRootHidden {
             return false
         }
         if navigator.isPresented {

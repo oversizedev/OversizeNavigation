@@ -103,11 +103,15 @@ public struct NavigationListLayoutView<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil || isBackButtonHidden == true
+        backConfirmation != nil || isBackButtonAtRootHidden
+    }
+
+    private var isBackButtonAtRootHidden: Bool {
+        isBackButtonHidden == true && navigator.count == 0
     }
 
     private var isShowBackButton: Bool {
-        if let isBackButtonHidden, isBackButtonHidden {
+        if isBackButtonAtRootHidden {
             return false
         }
         if navigator.isPresented {

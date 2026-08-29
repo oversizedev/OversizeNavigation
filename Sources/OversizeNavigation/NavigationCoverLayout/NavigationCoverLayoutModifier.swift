@@ -8,6 +8,12 @@ import SwiftUI
 
 @available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *)
 public extension NavigationCoverLayout {
+    func backButtonHidden(_ hidesBackButton: Bool = true) -> Self {
+        var control = self
+        control.isBackButtonHidden = hidesBackButton
+        return control
+    }
+
     func backConfirmationDialog(_ content: BackConfirmationContent? = .dismiss) -> Self {
         var control = self
         control.backConfirmation = content
