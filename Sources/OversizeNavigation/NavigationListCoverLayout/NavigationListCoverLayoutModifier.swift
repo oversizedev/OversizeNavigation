@@ -1,13 +1,13 @@
 //
 // Copyright © 2026 Alexander Romanov
-// NavigationCoverLayoutModifier.swift, created on 26.06.2026
+// NavigationListCoverLayoutModifier.swift, created on 30.08.2026
 //
 
 import OversizeUI
 import SwiftUI
 
 @available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *)
-public extension NavigationCoverLayout {
+public extension NavigationListCoverLayout {
     func backButtonHidden(_ hidesBackButton: Bool = true) -> Self {
         var control = self
         control.isBackButtonHidden = hidesBackButton
@@ -36,21 +36,15 @@ public extension NavigationCoverLayout {
         return control
     }
 
-    func coverStyle(_ coverStyle: CoverNavigationType) -> Self {
-        var control = self
-        control.coverStyle = coverStyle
-        return control
+    func listLayoutStyle(_ listStyle: ListLayoutStyle) -> Self {
+        var list = self
+        list.listStyle = listStyle
+        return list
     }
 
-    func contentCornerRadius(_ radius: CGFloat) -> Self {
-        var control = self
-        control.contentCornerRadius = radius
-        return control
-    }
-
-    func contentOffset(_ offset: CGFloat) -> Self {
-        var control = self
-        control.contentOffset = offset
-        return control
+    func coverSpacing(_ spacing: CGFloat?) -> Self {
+        var list = self
+        list.coverSpacing = spacing
+        return list
     }
 }

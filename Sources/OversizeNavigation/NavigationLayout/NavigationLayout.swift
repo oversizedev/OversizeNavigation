@@ -37,53 +37,55 @@ public struct NavigationLayout<
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
                     #if os(macOS)
-                    Button(role: .cancel, action: handleBackButtonTap) {
-                        backImage.icon()
-                    }
-                    .confirmationDialog(
-                        backConfirmation?.title ?? "Are you sure?",
-                        isPresented: $isBackConfirmationPresented,
-                        titleVisibility: .visible,
-                        presenting: backConfirmation,
-                        actions: { details in
-                            Button(
-                                details.confirmationButtonTitle,
-                                action: handleConfirmationBackTap
-                            )
-                            Button(
-                                details.cancelButtonTitle ?? "Cancel",
-                                role: .cancel,
-                                action: handleConfirmationCancelTap
-                            )
-                        },
-                        message: { details in
-                            Text(details.message)
+                        Button(role: .cancel, action: handleBackButtonTap) {
+                            Text("Cancel")
                         }
-                    )
+                        .controlSize(.large)
+                        .confirmationDialog(
+                            backConfirmation?.title ?? "Are you sure?",
+                            isPresented: $isBackConfirmationPresented,
+                            titleVisibility: .visible,
+                            presenting: backConfirmation,
+                            actions: { details in
+                                Button(
+                                    details.confirmationButtonTitle,
+                                    action: handleConfirmationBackTap
+                                )
+                                Button(
+                                    details.cancelButtonTitle ?? "Cancel",
+                                    role: .cancel,
+                                    action: handleConfirmationCancelTap
+                                )
+                            },
+                            message: { details in
+                                Text(details.message)
+                            }
+                        )
+
                     #else
-                    Button(role: .cancel, action: handleBackButtonTap) {
-                        backImage.icon()
-                    }
-                    .confirmationDialog(
-                        backConfirmation?.title ?? "Are you sure?",
-                        isPresented: $isBackConfirmationPresented,
-                        titleVisibility: .visible,
-                        presenting: backConfirmation,
-                        actions: { details in
-                            Button(
-                                details.confirmationButtonTitle,
-                                action: handleConfirmationBackTap
-                            )
-                            Button(
-                                details.cancelButtonTitle ?? "Cancel",
-                                role: .cancel,
-                                action: handleConfirmationCancelTap
-                            )
-                        },
-                        message: { details in
-                            Text(details.message)
+                        Button(role: .cancel, action: handleBackButtonTap) {
+                            backImage.icon()
                         }
-                    )
+                        .confirmationDialog(
+                            backConfirmation?.title ?? "Are you sure?",
+                            isPresented: $isBackConfirmationPresented,
+                            titleVisibility: .visible,
+                            presenting: backConfirmation,
+                            actions: { details in
+                                Button(
+                                    details.confirmationButtonTitle,
+                                    action: handleConfirmationBackTap
+                                )
+                                Button(
+                                    details.cancelButtonTitle ?? "Cancel",
+                                    role: .cancel,
+                                    action: handleConfirmationCancelTap
+                                )
+                            },
+                            message: { details in
+                                Text(details.message)
+                            }
+                        )
                     #endif
                 }
             }
@@ -156,7 +158,7 @@ public struct NavigationLayout<
         _ title: String = "",
         onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
+        @ViewBuilder background: () -> Background = { Color.backgroundSecondary }
     ) {
         self.title = title
         self.onScroll = onScroll

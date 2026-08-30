@@ -22,7 +22,7 @@ public extension Navigator {
     ///     receives and presentations are visible without adding temporary probes.
     static func root(
         restorationKey: String? = nil,
-        verbosity: NavigationEvent.Verbosity = defaultVerbosity,
+        verbosity: NavigationEvent.Verbosity = defaultVerbosity
     ) -> Navigator {
         Navigator(
             configuration: .init(
@@ -30,16 +30,16 @@ public extension Navigator {
                 // Navigator prints to stdout by default, which is invisible unless the app was
                 // launched from a terminal. Route it through Log so events land in the unified log.
                 logger: { Log.debug("🧭 [NAVIGATION] \($0)") },
-                verbosity: verbosity,
-            ),
+                verbosity: verbosity
+            )
         )
     }
 
     static var defaultVerbosity: NavigationEvent.Verbosity {
         #if DEBUG
-        .info
+            .info
         #else
-        .warning
+            .warning
         #endif
     }
 }
