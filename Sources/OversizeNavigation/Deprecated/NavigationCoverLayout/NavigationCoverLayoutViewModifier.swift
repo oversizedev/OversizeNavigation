@@ -7,6 +7,12 @@ import OversizeUI
 import SwiftUI
 
 public extension NavigationCoverLayoutView {
+    func backButtonHidden(_ hidesBackButton: Bool = true) -> Self {
+        var control = self
+        control.isBackButtonHidden = hidesBackButton
+        return control
+    }
+
     func backConfirmationDialog(_ content: BackConfirmationContent? = .dismiss) -> Self {
         var control = self
         control.backConfirmation = content

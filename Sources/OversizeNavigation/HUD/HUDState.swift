@@ -12,6 +12,9 @@ public class HUDState: @unchecked Sendable {
     private var presentedStack: [PresentedHUD] = []
     private var dismissTasks: [UUID: Task<Void, Error>] = [:]
 
+    public private(set) var sensoryFeedback: SensoryFeedback = .selection
+    public private(set) var sensoryFeedbackTicket: Int = 0
+
     private let maxDisplayedHUDs = 3
 
     public init() {}
@@ -32,6 +35,8 @@ public class HUDState: @unchecked Sendable {
     public func presentHUD(_ hud: HUD) {
         let presented = PresentedHUD(id: UUID(), hud: hud)
         presentedStack.append(presented)
+        sensoryFeedback = hud.sensoryFeedback
+        sensoryFeedbackTicket &+= 1
         Log.debug("💬 [HUD] Present \(hud.id)")
         dismissAfterDelay(for: presented)
     }

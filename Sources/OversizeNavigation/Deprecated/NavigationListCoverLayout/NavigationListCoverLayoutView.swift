@@ -28,6 +28,7 @@ public struct NavigationListCoverLayoutView<
     @Binding private var selection: Set<SelectionValue>?
 
     var backConfirmation: BackConfirmationContent?
+    var isBackButtonHidden: Bool?
     var listStyle: ListLayoutStyle = .plain
     var coverSpacing: CGFloat?
 
@@ -71,28 +72,28 @@ public struct NavigationListCoverLayoutView<
     @ViewBuilder
     private var listCoverLayout: some View {
         #if os(watchOS)
-        ListCoverLayoutView(
-            title,
-            coverHeight: coverHeight,
-            content: { content },
-            cover: { cover },
-            coverBackground: { coverBackground },
-            background: { background }
-        )
-        .listLayoutStyle(listStyle)
-        .coverSpacing(coverSpacing)
+            ListCoverLayoutView(
+                title,
+                coverHeight: coverHeight,
+                content: { content },
+                cover: { cover },
+                coverBackground: { coverBackground },
+                background: { background }
+            )
+            .listLayoutStyle(listStyle)
+            .coverSpacing(coverSpacing)
         #else
-        ListCoverLayoutView(
-            title,
-            coverHeight: coverHeight,
-            selection: $selection,
-            content: { content },
-            cover: { cover },
-            coverBackground: { coverBackground },
-            background: { background }
-        )
-        .listLayoutStyle(listStyle)
-        .coverSpacing(coverSpacing)
+            ListCoverLayoutView(
+                title,
+                coverHeight: coverHeight,
+                selection: $selection,
+                content: { content },
+                cover: { cover },
+                coverBackground: { coverBackground },
+                background: { background }
+            )
+            .listLayoutStyle(listStyle)
+            .coverSpacing(coverSpacing)
         #endif
     }
 
@@ -118,10 +119,17 @@ public struct NavigationListCoverLayoutView<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil
+        backConfirmation != nil || isBackButtonAtRootHidden
+    }
+
+    private var isBackButtonAtRootHidden: Bool {
+        isBackButtonHidden == true && navigator.count == 0
     }
 
     private var isShowBackButton: Bool {
+        if isBackButtonAtRootHidden {
+            return false
+        }
         if navigator.isPresented {
             if navigator.count == 0 {
                 return true

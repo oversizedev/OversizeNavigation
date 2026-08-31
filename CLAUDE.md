@@ -38,6 +38,11 @@ All layout views read `@Environment(\.navigator)` from the [Navigator](https://g
 - `navigator.send<T>(_ value: T)` — send data to coordinator (used by `.navigationMove`)
 - `navigator.isPresented` + `navigator.count` — determine back button style (chevron.left for stack, xmark for modal root)
 
+SwiftUI reports `isPresented == true` for a `NavigationSplitView` detail column, so a stack that
+roots a column looks presented to Navigator and the layouts would show a close button that
+collapses the column. Screens that root a column or a tab opt out with `.backButtonHidden()`,
+which applies only while the stack is at its root — pushed screens keep their back button.
+
 ### Navigation Modifiers (`ViewModifier/`)
 
 - `.navigationBack(_ trigger: Binding<Bool>)` — programmatic pop

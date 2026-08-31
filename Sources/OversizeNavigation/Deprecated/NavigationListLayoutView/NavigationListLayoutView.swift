@@ -64,20 +64,20 @@ public struct NavigationListLayoutView<
     @ViewBuilder
     private var listLayout: some View {
         #if os(watchOS)
-        ListLayoutView(
-            title,
-            content: { content },
-            background: { background }
-        )
-        .listLayoutStyle(listStyle)
+            ListLayoutView(
+                title,
+                content: { content },
+                background: { background }
+            )
+            .listLayoutStyle(listStyle)
         #else
-        ListLayoutView(
-            title,
-            selection: $selection,
-            content: { content },
-            background: { background }
-        )
-        .listLayoutStyle(listStyle)
+            ListLayoutView(
+                title,
+                selection: $selection,
+                content: { content },
+                background: { background }
+            )
+            .listLayoutStyle(listStyle)
         #endif
     }
 
@@ -103,11 +103,15 @@ public struct NavigationListLayoutView<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil || isBackButtonHidden == true
+        backConfirmation != nil || isBackButtonAtRootHidden
+    }
+
+    private var isBackButtonAtRootHidden: Bool {
+        isBackButtonHidden == true && navigator.count == 0
     }
 
     private var isShowBackButton: Bool {
-        if let isBackButtonHidden, isBackButtonHidden {
+        if isBackButtonAtRootHidden {
             return false
         }
         if navigator.isPresented {

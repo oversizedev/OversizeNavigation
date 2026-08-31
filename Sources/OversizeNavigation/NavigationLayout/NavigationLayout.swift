@@ -27,7 +27,7 @@ public struct NavigationLayout<
     @State private var isBackConfirmationPresented: Bool = false
 
     public var body: some View {
-        Layout(
+        OversizeUI.Layout(
             title,
             onScroll: onScroll,
             content: { content },
@@ -36,29 +36,57 @@ public struct NavigationLayout<
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .cancel, action: handleBackButtonTap) {
-                        backImage.icon()
-                    }
-                    .confirmationDialog(
-                        backConfirmation?.title ?? "Are you sure?",
-                        isPresented: $isBackConfirmationPresented,
-                        titleVisibility: .visible,
-                        presenting: backConfirmation,
-                        actions: { details in
-                            Button(
-                                details.confirmationButtonTitle,
-                                action: handleConfirmationBackTap
-                            )
-                            Button(
-                                details.cancelButtonTitle ?? "Cancel",
-                                role: .cancel,
-                                action: handleConfirmationCancelTap
-                            )
-                        },
-                        message: { details in
-                            Text(details.message)
+                    #if os(macOS)
+                        Button(role: .cancel, action: handleBackButtonTap) {
+                            Text("Cancel")
                         }
-                    )
+                        .controlSize(.large)
+                        .confirmationDialog(
+                            backConfirmation?.title ?? "Are you sure?",
+                            isPresented: $isBackConfirmationPresented,
+                            titleVisibility: .visible,
+                            presenting: backConfirmation,
+                            actions: { details in
+                                Button(
+                                    details.confirmationButtonTitle,
+                                    action: handleConfirmationBackTap
+                                )
+                                Button(
+                                    details.cancelButtonTitle ?? "Cancel",
+                                    role: .cancel,
+                                    action: handleConfirmationCancelTap
+                                )
+                            },
+                            message: { details in
+                                Text(details.message)
+                            }
+                        )
+
+                    #else
+                        Button(role: .cancel, action: handleBackButtonTap) {
+                            backImage.icon()
+                        }
+                        .confirmationDialog(
+                            backConfirmation?.title ?? "Are you sure?",
+                            isPresented: $isBackConfirmationPresented,
+                            titleVisibility: .visible,
+                            presenting: backConfirmation,
+                            actions: { details in
+                                Button(
+                                    details.confirmationButtonTitle,
+                                    action: handleConfirmationBackTap
+                                )
+                                Button(
+                                    details.cancelButtonTitle ?? "Cancel",
+                                    role: .cancel,
+                                    action: handleConfirmationCancelTap
+                                )
+                            },
+                            message: { details in
+                                Text(details.message)
+                            }
+                        )
+                    #endif
                 }
             }
         }
@@ -88,11 +116,15 @@ public struct NavigationLayout<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil || isBackButtonHidden == true
+        backConfirmation != nil || isBackButtonAtRootHidden
+    }
+
+    private var isBackButtonAtRootHidden: Bool {
+        isBackButtonHidden == true && navigator.count == 0
     }
 
     private var isShowBackButton: Bool {
-        if let isBackButtonHidden, isBackButtonHidden {
+        if isBackButtonAtRootHidden {
             return false
         }
         if navigator.isPresented {
@@ -126,7 +158,7 @@ public struct NavigationLayout<
         _ title: String = "",
         onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { Color.backgroundPrimary }
+        @ViewBuilder background: () -> Background = { Color.backgroundSecondary }
     ) {
         self.title = title
         self.onScroll = onScroll

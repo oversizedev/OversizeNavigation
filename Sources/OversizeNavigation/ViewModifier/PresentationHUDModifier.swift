@@ -10,7 +10,6 @@ import SwiftUI
 private struct PresentationHUDModifier: ViewModifier {
     @Binding var hud: HUD?
     @Environment(\.hud) var hudState: HUDState
-    @State private var sensoryFeedback: SensoryFeedback = .selection
 
     func body(content: Content) -> some View {
         content
@@ -19,11 +18,9 @@ private struct PresentationHUDModifier: ViewModifier {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         hudState.presentHUD(newValue)
                     }
-                    sensoryFeedback = newValue.sensoryFeedback
                     self.hud = nil
                 }
             }
-            .sensoryFeedback(sensoryFeedback, trigger: sensoryFeedback)
     }
 }
 

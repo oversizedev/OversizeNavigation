@@ -27,6 +27,7 @@ public struct NavigationCoverLayoutView<
     private let coverHeight: CGFloat
     private let onScroll: CoverLayoutView.ScrollAction?
     var backConfirmation: BackConfirmationContent?
+    var isBackButtonHidden: Bool?
     var coverStyle: CoverNavigationType = .static
     var contentCornerRadius: CGFloat = 0
     var contentOffset: CGFloat = 0
@@ -102,10 +103,17 @@ public struct NavigationCoverLayoutView<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil
+        backConfirmation != nil || isBackButtonAtRootHidden
+    }
+
+    private var isBackButtonAtRootHidden: Bool {
+        isBackButtonHidden == true && navigator.count == 0
     }
 
     private var isShowBackButton: Bool {
+        if isBackButtonAtRootHidden {
+            return false
+        }
         if navigator.isPresented {
             if navigator.count == 0 {
                 return true

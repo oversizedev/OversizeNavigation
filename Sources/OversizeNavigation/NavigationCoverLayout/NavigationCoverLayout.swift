@@ -29,6 +29,10 @@ public struct NavigationCoverLayout<
     private let coverHeight: CGFloat
     private let onScroll: ScrollAction?
     var backConfirmation: BackConfirmationContent?
+    var isBackButtonHidden: Bool?
+    var coverStyle: CoverNavigationType = .static
+    var contentCornerRadius: CGFloat = 0
+    var contentOffset: CGFloat = 0
 
     @State private var isBackConfirmationPresented: Bool = false
 
@@ -43,6 +47,9 @@ public struct NavigationCoverLayout<
             coverBackground: { coverBackground },
             background: { background }
         )
+        .coverStyle(coverStyle)
+        .contentCornerRadius(contentCornerRadius)
+        .contentOffset(contentOffset)
         .toolbar {
             if isShowBackButton {
                 ToolbarItem(placement: .cancellationAction) {
@@ -98,10 +105,17 @@ public struct NavigationCoverLayout<
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil
+        backConfirmation != nil || isBackButtonAtRootHidden
+    }
+
+    private var isBackButtonAtRootHidden: Bool {
+        isBackButtonHidden == true && navigator.count == 0
     }
 
     private var isShowBackButton: Bool {
+        if isBackButtonAtRootHidden {
+            return false
+        }
         if navigator.isPresented {
             if navigator.count == 0 {
                 return true

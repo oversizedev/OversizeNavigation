@@ -55,6 +55,17 @@ public extension AppAlert {
 }
 
 public extension AppAlert {
+    var sensoryFeedback: SensoryFeedback? {
+        switch self {
+        case .appError, .error:
+            .error
+        case .default, .delete, .destructive, .discard, .dismiss, .text, .unsavedChanges:
+            nil
+        }
+    }
+}
+
+public extension AppAlert {
     var alert: Alert {
         switch self {
         case let .dismiss(action):
