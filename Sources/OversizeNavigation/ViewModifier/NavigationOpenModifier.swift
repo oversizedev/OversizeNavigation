@@ -7,7 +7,7 @@ import NavigatorUI
 import OversizeCore
 import SwiftUI
 
-private struct NavigationOpenModifier<Destination: NavigationDestination>: ViewModifier {
+private struct NavigationOpenModifier<Destination: Hashable & Equatable>: ViewModifier {
     @Binding var destination: Destination?
     @Environment(\.navigator) var navigator: Navigator
 
@@ -16,22 +16,33 @@ private struct NavigationOpenModifier<Destination: NavigationDestination>: ViewM
             .onChange(of: destination) { _, destination in
                 if let destination {
                     Log.debug("🧭 [NAVIGATION] Open: \(destination)")
-                    navigator.navigate(to: destination)
+                    if let navigationDestination = destination as? any NavigationDestination {
+                        open(navigationDestination, on: navigator)
+                    } else {
+                        Log.error("navigationOpen received a value that does not conform to NavigationDestination: \(destination)")
+                        navigator.push(destination)
+                    }
                     self.destination = nil
                 }
             }
     }
 }
 
+@MainActor
+private func open(_ destination: some NavigationDestination, on navigator: Navigator) {
+    navigator.navigate(to: destination)
+}
+
 public extension View {
-    /// Navigates to a `NavigationDestination` on the navigator owning this view whenever the
-    /// binding becomes non-nil, then resets it. The destination's own `NavigationMethod` decides
-    /// whether it is pushed or presented.
+    /// Navigates to a destination on the navigator owning this view whenever the binding
+    /// becomes non-nil, then resets it. When the value conforms to `NavigationDestination`,
+    /// its own `NavigationMethod` decides whether it is pushed or presented; otherwise it
+    /// is pushed as a plain `Hashable` value.
     ///
     /// Unlike ``navigationMove(_:)``, which broadcasts the value and lets an `onNavigationReceive`
     /// handler elsewhere in the tree perform the navigation, this modifier keeps the navigation
     /// local and deterministic — required for screens that are themselves pushed destinations.
-    func navigationOpen<Destination: NavigationDestination>(_ destination: Binding<Destination?>) -> some View {
+    func navigationOpen<Destination: Hashable & Equatable>(_ destination: Binding<Destination?>) -> some View {
         modifier(NavigationOpenModifier(destination: destination))
     }
 }
