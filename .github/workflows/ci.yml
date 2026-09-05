@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  
+
   build:
     name: Build
     uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm-all-platforms.yml@main
@@ -21,9 +21,28 @@ jobs:
       package: OversizeNavigation
     secrets: inherit
 
+  test:
+    name: Test
+    needs: build
+    uses: oversizedev/GithubWorkflows/.github/workflows/test.yml@main
+    secrets: inherit
+
+  build-example:
+    name: Build Example
+    needs: build
+    uses: oversizedev/GithubWorkflows/.github/workflows/build-app.yml@main
+    with:
+      path: Example/Example
+      scheme: Example
+      destination: generic/platform=iOS Simulator
+    secrets: inherit
+
   bump:
     name: Bump version
-    needs: build
+    needs:
+      - build
+      - test
+      - build-example
     if: github.ref == 'refs/heads/main'
     uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
     secrets: inherit
