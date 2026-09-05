@@ -3,21 +3,21 @@
 // SettingsScreen.swift, created on 05.09.2026
 //
 
-import NavigatorUI
 import OversizeNavigation
 import OversizeUI
 import SwiftUI
 
 struct SettingsScreen: View {
-    @Environment(\.navigator) private var navigator
+    @State private var openDestination: SettingsDestinations?
+    @State private var toggleRootType: ToggleRootType?
 
     var body: some View {
         NavigationListLayout("Settings") {
             Section("Root layout") {
                 ListRow(
                     "Switch tabs and split",
-                    subtitle: "Sent as a value, handled at the navigation root",
-                    action: { navigator.send(ToggleRootType()) }
+                    subtitle: "navigationMove broadcasts a value handled at the navigation root",
+                    action: { toggleRootType = .init() }
                 )
                 .accessibilityIdentifier("settings.toggleRoot")
             }
@@ -26,13 +26,15 @@ struct SettingsScreen: View {
                 ListRow(
                     "About",
                     subtitle: "The target of the about route",
-                    action: { navigator.navigate(to: SettingsDestinations.about) }
+                    action: { openDestination = .about }
                 )
                 .accessibilityIdentifier("settings.about")
             }
         }
         .listLayoutStyle(.insetGrouped)
         .backButtonHidden()
+        .navigationOpen($openDestination)
+        .navigationMove($toggleRootType)
     }
 }
 

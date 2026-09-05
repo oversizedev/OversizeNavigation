@@ -87,3 +87,59 @@ struct LayoutsCatalogTests {
         }
     }
 }
+
+/// A value sent through the navigator is delivered to the handler registered for its type, and
+/// only to the first one. Nothing checks that at compile time, so the routing table each stack
+/// declares with `navigationAutoReceive` is mirrored here and asserted on.
+@MainActor
+struct ReceiveHandlerTests {
+    private static let handlers: [(tab: RootTabs, destination: Any.Type)] = [
+        (.layouts, LayoutsDestinations.self),
+        (.flows, FlowsDestinations.self),
+        (.presentation, PresentationDestinations.self),
+        (.settings, SettingsDestinations.self),
+    ]
+
+    private static var receivedTypeNames: Set<String> {
+        Set(handlers.map { String(describing: $0.destination) })
+    }
+
+    @Test("Each destination type is received by exactly one stack")
+    func oneHandlerPerType() {
+        #expect(Self.receivedTypeNames.count == Self.handlers.count)
+    }
+
+    @Test("Every tab installs a handler")
+    func everyTabReceivesSomething() {
+        #expect(Set(Self.handlers.map(\.tab)) == Set(RootTabs.allCases))
+    }
+
+    @Test("A route only sends values some stack is waiting for")
+    func routesStayWithinTheTable() {
+        let received = Self.receivedTypeNames
+
+        for route in [ExampleRoutes.about, .hud, .deepPage] {
+            for value in route.values.dropFirst() {
+                #expect(received.contains(String(describing: type(of: value))))
+            }
+        }
+    }
+
+    @Test("A route pushes into the tab it selected")
+    func routesPushIntoTheTabTheySelect() {
+        let owner: [String: RootTabs] = Dictionary(
+            uniqueKeysWithValues: Self.handlers.map { (String(describing: $0.destination), $0.tab) }
+        )
+
+        for route in [ExampleRoutes.about, .hud, .deepPage] {
+            guard let tab = route.values.first as? RootTabs else {
+                Issue.record("\(route) does not start by selecting a tab")
+                continue
+            }
+
+            for value in route.values.dropFirst() {
+                #expect(owner[String(describing: type(of: value))] == tab)
+            }
+        }
+    }
+}

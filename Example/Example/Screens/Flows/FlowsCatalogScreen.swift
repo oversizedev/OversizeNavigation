@@ -3,28 +3,20 @@
 // FlowsCatalogScreen.swift, created on 05.09.2026
 //
 
-import NavigatorUI
 import OversizeNavigation
 import OversizeUI
 import SwiftUI
 
 struct FlowsCatalogScreen: View {
-    @Environment(\.navigator) private var navigator
-
     @State private var openDestination: FlowsDestinations?
     @State private var moveDestination: FlowsDestinations?
+    @State private var moveValues: [AnyHashable]?
+    @State private var route: ExampleRoutes?
     @State private var checkpointResult: Int?
 
     var body: some View {
         NavigationListLayout("Flows") {
             Section("Push") {
-                ListRow(
-                    "navigator.navigate(to:)",
-                    subtitle: "Imperative push",
-                    action: { navigator.navigate(to: FlowsDestinations.page(1)) }
-                )
-                .accessibilityIdentifier("flows.navigate")
-
                 ListRow(
                     "navigationOpen",
                     subtitle: "Local and deterministic, stays on this stack",
@@ -44,21 +36,21 @@ struct FlowsCatalogScreen: View {
                 ListRow(
                     "Managed sheet",
                     subtitle: "Destination declares .managedSheet",
-                    action: { navigator.navigate(to: FlowsDestinations.sheet) }
+                    action: { openDestination = .sheet }
                 )
                 .accessibilityIdentifier("flows.sheet")
 
                 ListRow(
                     "Managed cover",
                     subtitle: "Destination declares .managedCover",
-                    action: { navigator.navigate(to: FlowsDestinations.cover) }
+                    action: { openDestination = .cover }
                 )
                 .accessibilityIdentifier("flows.cover")
 
                 ListRow(
                     "Locked screen",
-                    subtitle: "navigationLocked blocks dismissAny",
-                    action: { navigator.navigate(to: FlowsDestinations.locked) }
+                    subtitle: "navigationLocked blocks navigationDismissAny",
+                    action: { openDestination = .locked }
                 )
                 .accessibilityIdentifier("flows.locked")
             }
@@ -67,7 +59,7 @@ struct FlowsCatalogScreen: View {
                 ListRow(
                     "Return a value",
                     subtitle: checkpointResult.map { "Last result: \($0)" } ?? "No result yet",
-                    action: { navigator.navigate(to: FlowsDestinations.checkpointResult) }
+                    action: { openDestination = .checkpointResult }
                 )
                 .accessibilityIdentifier("flows.checkpointResult")
             }
@@ -75,33 +67,35 @@ struct FlowsCatalogScreen: View {
             Section("Deep links") {
                 ListRow(
                     "Send to the HUD screen",
-                    subtitle: "Switches tab, then pushes",
-                    action: { navigator.send(RootTabs.presentation, PresentationDestinations.hud) }
+                    subtitle: "navigationMove(values:) switches tab, then pushes",
+                    action: { moveValues = [RootTabs.presentation, PresentationDestinations.hud] }
                 )
                 .accessibilityIdentifier("flows.sendHUD")
 
                 ListRow(
                     "Route to About",
                     subtitle: "One router for URLs and buttons",
-                    action: { navigator.perform(route: ExampleRoutes.about) }
+                    action: { route = .about }
                 )
                 .accessibilityIdentifier("flows.routeAbout")
 
                 ListRow(
                     "Route two pages deep",
                     subtitle: "A route may need several steps",
-                    action: { navigator.perform(route: ExampleRoutes.deepPage) }
+                    action: { route = .deepPage }
                 )
                 .accessibilityIdentifier("flows.routeDeep")
             }
         }
         .listLayoutStyle(.insetGrouped)
         .backButtonHidden()
-        .navigationCheckpoint(KnownCheckpoints.flowsResult, completion: { result in
+        .navigationCheckpoint(KnownCheckpoints.flowsResult) { result in
             checkpointResult = result
-        })
+        }
         .navigationOpen($openDestination)
         .navigationMove($moveDestination)
+        .navigationMove(values: $moveValues)
+        .navigationRoute($route)
     }
 }
 

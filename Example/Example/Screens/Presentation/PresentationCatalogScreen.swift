@@ -3,13 +3,12 @@
 // PresentationCatalogScreen.swift, created on 05.09.2026
 //
 
-import NavigatorUI
 import OversizeNavigation
 import OversizeUI
 import SwiftUI
 
 struct PresentationCatalogScreen: View {
-    @Environment(\.navigator) private var navigator
+    @State private var openDestination: PresentationDestinations?
 
     var body: some View {
         NavigationListLayout("Presentation") {
@@ -18,7 +17,7 @@ struct PresentationCatalogScreen: View {
                     ListRow(
                         destination.title,
                         subtitle: destination.subtitle,
-                        action: { navigator.navigate(to: destination) }
+                        action: { openDestination = destination }
                     )
                     .accessibilityIdentifier("presentation.\(destination.id)")
                 }
@@ -26,6 +25,7 @@ struct PresentationCatalogScreen: View {
         }
         .listLayoutStyle(.insetGrouped)
         .backButtonHidden()
+        .navigationOpen($openDestination)
     }
 }
 

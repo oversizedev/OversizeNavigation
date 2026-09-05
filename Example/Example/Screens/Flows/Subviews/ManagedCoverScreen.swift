@@ -3,13 +3,12 @@
 // ManagedCoverScreen.swift, created on 05.09.2026
 //
 
-import NavigatorUI
 import OversizeNavigation
 import OversizeUI
 import SwiftUI
 
 struct ManagedCoverScreen: View {
-    @Environment(\.navigator) private var navigator
+    @State private var isDismissed: Bool = false
 
     var body: some View {
         NavigationCoverLayout(
@@ -19,8 +18,8 @@ struct ManagedCoverScreen: View {
                 Section("Inside the cover") {
                     Row(
                         "Dismiss",
-                        subtitle: "navigator.dismiss()",
-                        action: { navigator.dismiss() }
+                        subtitle: "navigationDismiss",
+                        action: { isDismissed = true }
                     )
                     .accessibilityIdentifier("cover.dismiss")
                 }
@@ -33,6 +32,7 @@ struct ManagedCoverScreen: View {
             coverBackground: { Color.orange }
         )
         .sectionTitlePosition(.inside)
+        .navigationDismiss($isDismissed)
     }
 }
 

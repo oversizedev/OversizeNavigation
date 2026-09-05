@@ -3,7 +3,6 @@
 // CheckpointResultScreen.swift, created on 05.09.2026
 //
 
-import NavigatorUI
 import OversizeNavigation
 import OversizeUI
 import SwiftUI
@@ -11,9 +10,8 @@ import SwiftUI
 /// A value-returning checkpoint replaces the usual chain of bindings: this screen names the
 /// place it wants to return to and hands it a value.
 struct CheckpointResultScreen: View {
-    @Environment(\.navigator) private var navigator
-
     @State private var value: Int = 42
+    @State private var returnedValue: Int?
 
     var body: some View {
         NavigationListLayout("Return a value") {
@@ -25,12 +23,13 @@ struct CheckpointResultScreen: View {
             Section("Return") {
                 ListRow(
                     "Return \(value) to the flows root",
-                    action: { navigator.returnToCheckpoint(KnownCheckpoints.flowsResult, value: value) }
+                    action: { returnedValue = value }
                 )
                 .accessibilityIdentifier("checkpoint.return")
             }
         }
         .listLayoutStyle(.insetGrouped)
+        .navigationReturn(to: KnownCheckpoints.flowsResult, value: $returnedValue)
     }
 }
 

@@ -43,12 +43,57 @@ roots a column looks presented to Navigator and the layouts would show a close b
 collapses the column. Screens that root a column or a tab opt out with `.backButtonHidden()`,
 which applies only while the stack is at its root — pushed screens keep their back button.
 
+### Navigation Invariants
+
+Defects found in consumer apps (Linker, Journal) trace back to four rules. The Example app follows
+them and `Example/ExampleUITests` pins each one down:
+
+- **One receive handler per destination type in the whole tree.** `navigator.send()` is a broadcast:
+  `NavigationSendValues` hands the value to the handler that registered first and logs
+  `additional receive handlers ignored` for the rest. Two stacks receiving the same type means a
+  push lands in a tab nobody is looking at, which reads as "nothing happened".
+- **`.navigationOpen` for a screen navigating to its own stack, `.navigationMove` / `navigator.send()`
+  only for a real broadcast** (deep link, tab switch from outside, share extension). `navigationOpen`
+  navigates on the navigator in the environment, so a pushed screen — or a screen inside a sheet with
+  its own stack — presents where it actually lives instead of handing the intent to the root.
+- **Never nest `ManagedNavigationStack` inside another one.** Wrapping a `TabView` in a stack while
+  every tab builds its own gives the tab roots no navigation bar on iPhone, delays presentations
+  requested from pushed screens until the next navigation event, and stops programmatic dismiss from
+  taking effect. iPad `NavigationSplitView` hides the symptom, so it looks like an iPhone-only bug.
+- **Hold a selected tab in `@State`, not `@SceneStorage`.** `onNavigationReceive(assign:)` runs but
+  the assignment does not take on a scene-stored binding, so every cross-tab deep link dies silently.
+
+One more, outside this package but affecting anything hosting it: modifiers that read
+`UIApplication.shared` during view construction (`.screenSize` in OversizeUI's `coreServices()`)
+must be applied **below** `.presentationHUDRoot()`. Applied above the `ZStack` it creates, the
+accessibility tree stops being published — the app renders, but XCUITest sees no text and no buttons.
+
 ### Navigation Modifiers (`ViewModifier/`)
 
+A screen states an intent through a binding and the modifier performs it, so no screen reads
+`@Environment(\.navigator)` or imports `NavigatorUI`. That import belongs to the app's navigation
+layer alone — destination conformances, stacks, roots and routers. `Example/Example/Screens` is the
+reference for the split.
+
 - `.navigationBack(_ trigger: Binding<Bool>)` — programmatic pop
+- `.navigationOpen(_ destination: Binding<T?>)` — navigate on the navigator this screen lives on
 - `.navigationMove(_ item: Binding<T?>)` — navigate with data via `navigator.send()`
+- `.navigationMove(values: Binding<[AnyHashable]?>)` — broadcast an ordered list, one receiver per type
+- `.navigationRoute(_ route: Binding<Route?>)` — perform a cross-module `NavigationRoutes` value
+- `.navigationDismiss(_ trigger: Binding<Bool>)` — dismiss the presentation this screen lives in
+- `.navigationDismissAny(_ trigger:completion:)` — dismiss every presentation; fails on a locked screen
+- `.navigationLocked()` — block a global dismiss while this screen is on the stack
+- `.navigationCheckpoint(_:)` / `.navigationCheckpoint(_:completion:)` — name a place to return to
+- `.navigationReturn(to:trigger:)` / `.navigationReturn(to:value:)` — return there, optionally with a value
 - `.backConfirmationDialog(_ content:)` — confirmation before back; also sets `interactiveDismissDisabled`
 - `.navigationBarAppearanceConfiguration()` — OversizeUI bar styling (iOS < 26 only via `#if os(iOS)`)
+
+`.navigationCheckpoint()` and `.navigationLocked()` mirror NavigatorUI names and are marked
+`@_disfavoredOverload`, the same trick as `NavigationLink(to:)`: a file importing both modules gets
+NavigatorUI's, a file importing only this package gets ours.
+
+Read-only stack state comes from `@Environment(\.navigationInfo)` — `depth`, `isRoot`,
+`isPresented`, `canReturn(to:)` — instead of reading the navigator directly.
 
 ### HUD System (`HUD/`)
 
