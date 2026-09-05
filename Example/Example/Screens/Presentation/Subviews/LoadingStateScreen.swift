@@ -56,22 +56,9 @@ struct LoadingStateScreen: View {
     @State private var demoState: DemoState = .empty
     @State private var demoOverlay: DemoOverlay = .contentUnavailable
 
+    /// The overlays cover everything they are applied to, so they wrap the items alone — over the
+    /// whole screen they would also hide the pickers that pick the state being demonstrated.
     var body: some View {
-        switch demoOverlay {
-        case .contentUnavailable:
-            list.contentUnavailable(
-                state,
-                title: "Nothing here yet",
-                subtitle: "Switch the picker to see the other states"
-            ) {
-                EmptyView()
-            }
-        case .errorState:
-            list.errorState(state)
-        }
-    }
-
-    private var list: some View {
         NavigationListLayout("Loading states") {
             Section("State") {
                 Picker("State", selection: $demoState) {
@@ -93,15 +80,41 @@ struct LoadingStateScreen: View {
                 .accessibilityIdentifier("loadingState.overlay")
             }
 
-            if case let .result(items) = state, items.isEmpty == false {
-                Section("Items") {
-                    ForEach(items.values, id: \.self) { item in
-                        ListRow(item)
-                    }
-                }
+            Section("Content") {
+                overlaidItems
+                    .frame(maxWidth: .infinity, minHeight: 240)
             }
         }
         .listLayoutStyle(.insetGrouped)
+    }
+
+    @ViewBuilder
+    private var overlaidItems: some View {
+        switch demoOverlay {
+        case .contentUnavailable:
+            items.contentUnavailable(
+                state,
+                title: "Nothing here yet",
+                subtitle: "Switch the picker to see the other states"
+            ) {
+                EmptyView()
+            }
+        case .errorState:
+            items.errorState(state)
+        }
+    }
+
+    @ViewBuilder
+    private var items: some View {
+        if case let .result(items) = state, items.isEmpty == false {
+            VStack(spacing: .zero) {
+                ForEach(items.values, id: \.self) { item in
+                    ListRow(item)
+                }
+            }
+        } else {
+            Color.clear
+        }
     }
 
     private var state: LoadingState<DemoItems> {

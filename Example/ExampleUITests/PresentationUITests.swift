@@ -81,4 +81,19 @@ final class PresentationUITests: ExampleUITestCase {
 
         XCTAssertTrue(app.staticTexts["None"].waitForExistence(timeout: 5))
     }
+
+    /// The demo starts in the empty state, so its overlay is already on screen; the pickers that
+    /// drive the demo have to stay reachable underneath it.
+    @MainActor
+    func testLoadingStateControlsStayReachable() throws {
+        openTab("Presentation")
+        tapRow("presentation.loadingStates")
+        assertScreen("Loading states")
+
+        let picker = app.segmentedControls["loadingState.picker"]
+        XCTAssertTrue(picker.waitForExistence(timeout: 10), "The overlay covered the state picker")
+
+        picker.buttons["Result"].tap()
+        XCTAssertTrue(app.staticTexts["Item 1"].waitForExistence(timeout: 5))
+    }
 }
