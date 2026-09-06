@@ -21,8 +21,15 @@ struct NavigationLayoutBackToolbarModifier: ViewModifier {
                 if isShowBackButton {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(role: .cancel, action: handleBackButtonTap) {
-                            backImage.icon()
+                            #if os(macOS)
+                                Text("Cancel")
+                            #else
+                                backImage.icon()
+                            #endif
                         }
+                        #if os(macOS)
+                        .controlSize(.large)
+                        #endif
                         .confirmationDialog(
                             backConfirmation?.title ?? "Are you sure?",
                             isPresented: $isBackConfirmationPresented,
