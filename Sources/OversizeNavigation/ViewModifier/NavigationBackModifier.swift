@@ -18,13 +18,10 @@ private struct NavigationBackModifier: ViewModifier {
         content
             .onChange(of: trigger) { _, trigger in
                 guard trigger else { return }
-                // Reset before leaving: the action can tear this view down, and the write would
-                // then land on a binding nobody owns any more.
                 self.trigger = false
                 Log.debug("🧭 [NAVIGATION] Back: \(exit)")
                 do {
-                    // Bind the result before reporting it: `completion?(.success(try leave()))`
-                    // short-circuits on a nil completion and never leaves at all.
+                    // Bound first: `completion?(.success(try leave()))` short-circuits on a nil completion.
                     let didLeave = try exit.leave(on: navigator)
                     completion?(.success(didLeave))
                 } catch {
@@ -37,12 +34,8 @@ private struct NavigationBackModifier: ViewModifier {
 public extension View {
     /// Leaves the screen whenever the trigger becomes `true`, then resets it.
     ///
-    /// `exit` states how far to go, because the depths are not interchangeable and the call site
-    /// is where the difference matters — see ``NavigationExit``. The default pops one screen,
-    /// which is what a back button does.
-    ///
-    /// The completion reports whether anything was left. It only ever fails for
-    /// ``NavigationExit/allPresentations``, which a screen marked ``navigationLocked()`` blocks.
+    /// `exit` states how far to go — see ``NavigationExit``. The completion reports whether
+    /// anything was left, and only fails for ``NavigationExit/allPresentations``.
     func navigationBack(
         _ trigger: Binding<Bool>,
         to exit: NavigationExit = .screen,

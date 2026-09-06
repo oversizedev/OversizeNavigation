@@ -8,8 +8,7 @@ import SwiftUI
 import Testing
 @testable import OversizeNavigation
 
-/// Leaving a screen was three modifiers whose names hid how far each one went. They are now one
-/// modifier over ``NavigationExit``, so what distinguishes the depths is this mapping alone.
+/// The depth-to-operation mapping is the whole of what separates the three exits.
 @MainActor
 struct NavigationExitTests {
     @Test("Every depth is a case the call site can name")
@@ -17,8 +16,6 @@ struct NavigationExitTests {
         #expect(NavigationExit.allCases == [.screen, .presentation, .allPresentations])
     }
 
-    /// A root navigator has nothing pushed and is not presented, so every depth agrees there is
-    /// nothing to leave. This is the baseline the cases diverge from once a stack has depth.
     @Test("Nothing to leave at the root, whatever the depth", arguments: NavigationExit.allCases)
     func rootHasNothingToLeave(exit: NavigationExit) throws {
         let navigator = Navigator.root()
@@ -30,7 +27,6 @@ struct NavigationExitTests {
     func lockOnlyBlocksAllPresentations() throws {
         let navigator = Navigator.root()
 
-        // `back` and `presentation` never consult the lock, so they stay non-throwing.
         #expect(try NavigationExit.screen.leave(on: navigator) == false)
         #expect(try NavigationExit.presentation.leave(on: navigator) == false)
         #expect(navigator.isNavigationLocked == false)

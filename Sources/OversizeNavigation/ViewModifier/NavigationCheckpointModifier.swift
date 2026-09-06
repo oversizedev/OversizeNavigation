@@ -45,11 +45,8 @@ public extension View {
     /// Establishes a named place the navigation system can return to, however deep the stack
     /// has grown by then.
     ///
-    /// > Important: The body calls the NavigatorUI overload, not itself — `@_disfavoredOverload`
-    /// is what breaks the tie between two identical signatures. Should NavigatorUI ever rename or
-    /// re-sign it, this call binds to itself, and a `some View` whose only return is a recursive
-    /// call has no underlying type to infer, so the package stops building. The failure is loud
-    /// and local; it is not a runtime trap.
+    /// > Important: `@_disfavoredOverload` is what makes the body call the NavigatorUI overload
+    /// rather than itself. A rename there turns this into a compile error, not a runtime trap.
     @_disfavoredOverload
     func navigationCheckpoint<Value>(_ checkpoint: NavigationCheckpoint<Value>) -> some View {
         navigationCheckpoint(checkpoint)

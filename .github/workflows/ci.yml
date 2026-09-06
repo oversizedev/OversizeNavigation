@@ -49,9 +49,6 @@ jobs:
             exit 1
           fi
 
-  # A screen states navigation intents through the OversizeNavigation modifiers and never reaches
-  # for NavigatorUI. Nothing about that rule is enforced by the compiler — a screen that imports
-  # NavigatorUI builds fine and quietly erodes the facade — so it is checked here.
   lint-screen-imports:
     name: Lint screen imports
     runs-on: ubuntu-latest
