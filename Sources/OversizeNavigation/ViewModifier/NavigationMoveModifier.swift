@@ -28,11 +28,14 @@ private struct NavigationMoveValuesModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onChange(of: values) { _, values in
-                if let values, values.isEmpty == false {
+                guard let values else { return }
+                if values.isEmpty == false {
                     Log.debug("🧭 [NAVIGATION] Move to: \(values)")
+                    // Receivers match on the concrete type of the value, so the box has to be
+                    // opened first — an `AnyHashable` would find no handler at all.
                     navigator.send(values: values.compactMap { $0.base as? any Hashable })
-                    self.values = nil
                 }
+                self.values = nil
             }
     }
 }
