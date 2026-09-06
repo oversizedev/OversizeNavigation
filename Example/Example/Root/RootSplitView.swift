@@ -30,6 +30,12 @@ private struct SidebarView: View {
                     NavigationLink(value: tab) {
                         Label { Text(tab.title) } icon: { tab.icon }
                     }
+                    // Deliberately left as a container rather than collapsed with
+                    // `accessibilityElement(children: .ignore)`: collapsing it stops the row from
+                    // being published as a button, and `app.buttons["sidebar.flows"]` — which is
+                    // how every test reaches a section — silently finds nothing. The duplicate
+                    // titles this leaves in the tree are handled where they matter, in
+                    // `ExampleUITestCase.screenTitleElement`.
                     .accessibilityIdentifier("sidebar.\(tab.id)")
                 }
             }

@@ -76,7 +76,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
 
         tapRow("page.sheet")
         XCTAssertTrue(
-            app.navigationBars["Managed sheet"].waitForExistence(timeout: 3),
+            screenTitleElement("Managed sheet").waitForExistence(timeout: 3),
             "The sheet did not present while the screen that asked for it was still on screen"
         )
 
@@ -94,7 +94,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
 
         tapRow("page.backWithHUD")
         XCTAssertTrue(
-            app.navigationBars["Flows"].waitForExistence(timeout: 3),
+            screenTitleElement("Flows").waitForExistence(timeout: 3),
             "The screen stayed on display after the pop was requested"
         )
         XCTAssertTrue(app.staticTexts["Deleted"].exists)
@@ -108,12 +108,10 @@ final class NavigationFlowUITests: ExampleUITestCase {
             openTab(title)
             assertScreen(title)
 
-            for control in [BackControl.system, .confirmation, .close] {
-                XCTAssertFalse(
-                    app.buttons[control.rawValue].exists,
-                    "\(title) shows a \(control) control at the root of its tab"
-                )
-            }
+            XCTAssertFalse(
+                hasCustomBackControl(),
+                "\(title) shows a layout-installed back control at the root of its tab"
+            )
         }
     }
 

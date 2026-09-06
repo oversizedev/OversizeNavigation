@@ -190,6 +190,42 @@ Custom alert types conform to `Alertable` (Identifiable + Equatable + Hashable).
 
 iOS < 26 uses custom `ArrowLeft` image from `Media.xcassets`. iOS 26+ uses `Image(systemName: "chevron.left")` / `"xmark"`. Always gate with `#available(iOS 26, *)` or `#if os(iOS)` where needed — existing code is the reference.
 
+Two availability floors, and they are not a mistake: the package deploys to iOS 17 / macOS 14 /
+tvOS 17 / watchOS 10 because that is what `Deprecated/` supports, while every current
+`Navigation*Layout` is annotated one major higher (iOS 18 / macOS 15 / tvOS 18 / watchOS 11 /
+visionOS 2) — the version where the OversizeUI layout it wraps became available. Do not "fix" the
+gap by raising the package floor; that would drop the deprecated layer that still has callers.
+visionOS is declared at 2.0 rather than 1.0 because OversizeUI itself starts there, and SwiftPM
+rejects a floor below a direct dependency's.
+
+### macOS
+
+macOS is a supported platform, built by CI and exercised by the Example app and its UI tests, not
+an afterthought. Four things behave differently there and are worth knowing before writing a fix:
+
+- **`.managedCover` presents nothing.** NavigatorUI wraps `.fullScreenCover` in
+  `#if os(iOS) || os(tvOS) || os(watchOS)`, so a destination asking for a cover on macOS sets state
+  nothing renders and the screen silently never appears. `Models/NavigationMethodPlatform.swift`
+  states the substitution once as `.platformManagedCover` / `.platformCover`; destinations use
+  those rather than re-deriving it. Its `#if` mirrors NavigatorUI's own condition instead of
+  naming macOS, so visionOS — which has no cover either — is covered by the same line.
+- **The back control is a labelled button.** A Mac toolbar labels its controls, so
+  `NavigationLayoutBackToolbarModifier` renders text there instead of a glyph. Which word it is
+  comes from `BackButtonPolicy.backButtonRole` — `.close` at the root of a presentation, `.pop`
+  otherwise — the same value that picks the glyph on iOS and the accessibility identifier
+  (`navigationBack.close` / `navigationBack.pop`) on both. A `#if os(macOS)` branch that decides
+  the label on its own is how macOS ended up labelling every pop "Cancel".
+- **`navigationBarAppearanceConfiguration()` is a no-op**, since it configures `UINavigationBar`.
+  Mac bar styling has to come from the toolbar itself.
+- **`.sensoryFeedback` is inert**, so the HUD and alert feedback paths do nothing on macOS. Keep
+  the calls — they cost nothing and stay correct on the platforms that have haptics.
+
+The Example app starts on the split root on macOS and the tab root elsewhere
+(`RootType.defaultForPlatform`), and `ExampleUITestCase` branches per platform — a Mac has no tab
+bar, publishes `navigationTitle` into the window rather than a navigation bar, and renders a
+confirmation dialog as a sheet with a real Cancel button instead of a `PopoverDismissRegion`. Test
+bodies stay platform-free; only the helpers branch.
+
 ## File Organization
 
 - New layout type → new folder `NavigationXxxLayout/` with `NavigationXxxLayoutView.swift` + `NavigationXxxLayoutViewModifier.swift`

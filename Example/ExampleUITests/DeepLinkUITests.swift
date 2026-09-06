@@ -3,7 +3,6 @@
 // DeepLinkUITests.swift, created on 05.09.2026
 //
 
-import UIKit
 import XCTest
 
 final class DeepLinkUITests: ExampleUITestCase {
@@ -35,14 +34,24 @@ final class DeepLinkUITests: ExampleUITestCase {
     /// The split root selects its section through the same `onNavigationReceive` handler the
     /// tab bar uses, and only one of the two roots is ever mounted. In a compact width the
     /// split view collapses into a stack whose root screen hides its back control, so the
-    /// sidebar is only reachable where the layout keeps two columns.
+    /// sidebar is only reachable where the layout keeps two columns — every Mac window, and an
+    /// iPad but not an iPhone.
     @MainActor
     func testRouteWorksUnderTheSplitRoot() throws {
-        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad, "The sidebar needs a regular width")
+        if isSplitRootByDefault == false {
+            openTab("Settings")
+            tapRow("settings.toggleRoot")
+            assertScreen("Layouts")
 
-        openTab("Settings")
-        tapRow("settings.toggleRoot")
-        XCTAssertTrue(app.navigationBars["Layouts"].waitForExistence(timeout: 10))
+            // Only a compact width is a legitimate reason to skip: there the split view
+            // collapses and the sidebar is genuinely unreachable. The wait is generous because a
+            // skip here is silent — a sidebar that exists but is slow to appear would otherwise
+            // read as "iPhone" and quietly retire the test.
+            try XCTSkipUnless(
+                app.buttons["sidebar.flows"].waitForExistence(timeout: 15),
+                "The sidebar needs a regular width"
+            )
+        }
 
         openSidebarSection("flows")
         assertScreen("Flows")
@@ -58,12 +67,19 @@ final class DeepLinkUITests: ExampleUITestCase {
         assertScreen("Page 3")
     }
 
+    /// Toggling swaps which root is mounted, whichever one the platform started on.
     @MainActor
     func testRootLayoutCanBeSwapped() {
         openTab("Settings")
         tapRow("settings.toggleRoot")
 
-        XCTAssertTrue(app.navigationBars["Layouts"].waitForExistence(timeout: 10))
-        XCTAssertFalse(app.tabBars.buttons["Settings"].exists)
+        assertScreen("Layouts")
+
+        if isSplitRootByDefault {
+            XCTAssertTrue(tabControl("Settings").waitForExistence(timeout: 10))
+            XCTAssertFalse(app.buttons["sidebar.settings"].exists)
+        } else {
+            XCTAssertFalse(app.tabBars.buttons["Settings"].exists)
+        }
     }
 }

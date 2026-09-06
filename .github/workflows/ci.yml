@@ -76,6 +76,45 @@ jobs:
       destination: generic/platform=iOS Simulator
     secrets: inherit
 
+  build-example-macos:
+    name: Build Example (macOS)
+    needs: build
+    uses: oversizedev/GithubWorkflows/.github/workflows/build-app.yml@main
+    with:
+      path: Example/Example
+      scheme: Example
+      destination: platform=macOS
+    secrets: inherit
+
+  # The Mac is a supported destination for the package, so the Example has to keep working there
+  # too: it starts on the split root, has no tab bar, and substitutes a sheet for the cover
+  # NavigatorUI does not render on macOS.
+  test-example-macos:
+    name: Test Example (macOS)
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup SwiftPM Config
+        run: |
+          echo "machine github.com login oversizedev password ${{ secrets.ACTIONS_TOKEN }}" > ~/.netrc
+          chmod 600 ~/.netrc
+          set -euo pipefail
+          defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidation -bool YES
+          defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+
+      - name: Run tests
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -skipPackagePluginValidation \
+            -project Example/Example.xcodeproj \
+            -scheme Example \
+            -destination "platform=macOS" \
+            | xcpretty && exit ${PIPESTATUS[0]}
+
   test-example:
     name: Test Example (${{ matrix.family }})
     needs: build
@@ -135,6 +174,8 @@ jobs:
       - lint-screen-imports
       - build-example
       - test-example
+      - build-example-macos
+      - test-example-macos
     if: github.ref == 'refs/heads/main'
     uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
     secrets: inherit

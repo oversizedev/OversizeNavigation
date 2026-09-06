@@ -174,4 +174,34 @@ struct BackButtonPolicyTests {
             }
         }
     }
+
+    // MARK: - Role
+
+    /// The role is what the glyph, the macOS label and the accessibility identifier are all
+    /// derived from, so it is asserted over the same grid the visibility rules use.
+    @Test(
+        "The control closes a presentation only at its root",
+        arguments: [true, false], [0, 1, 3]
+    )
+    func roleMatrix(isPresented: Bool, count: Int) {
+        let policy = BackButtonPolicy(
+            isPresented: isPresented,
+            count: count,
+            isBackButtonHidden: nil,
+            hasBackConfirmation: false
+        )
+
+        let expected: BackButtonRole = isPresented && count == 0 ? .close : .pop
+
+        #expect(policy.backButtonRole == expected)
+        #expect(policy.backButtonRole == (policy.isPresentationRoot ? .close : .pop))
+    }
+
+    @Test("Each role addresses the control by a distinct identifier")
+    func roleIdentifiersAreDistinct() {
+        let identifiers = BackButtonRole.allCases.map(\.accessibilityIdentifier)
+
+        #expect(identifiers == ["navigationBack.close", "navigationBack.pop"])
+        #expect(Set(identifiers).count == identifiers.count)
+    }
 }

@@ -37,10 +37,27 @@ import OversizeNavigation
 
 ## Platform Support
 
-- **iOS**: 17.0+
-- **macOS**: 14.0+
-- **tvOS**: 17.0+
-- **watchOS**: 10.0+
+The package deploys to the floor of the deprecated layer; the current `Navigation*Layout` views
+require one major more, because that is where the OversizeUI layouts they wrap became available.
+visionOS is the exception — OversizeUI itself starts at visionOS 2, so both columns meet there.
+
+| Platform | Package floor | `Navigation*Layout` |
+|---|---|---|
+| iOS | 17.0+ | 18.0+ |
+| macOS | 14.0+ | 15.0+ |
+| tvOS | 17.0+ | 18.0+ |
+| watchOS | 10.0+ | 11.0+ |
+| visionOS | 2.0+ | 2.0+ |
+
+### macOS notes
+
+- `navigationBarAppearanceConfiguration()` styles `UINavigationBar` and is a no-op on macOS.
+- `.sensoryFeedback` is inert on macOS, so HUD and alert haptics do nothing there.
+- NavigatorUI renders `.fullScreenCover` only on iOS, tvOS and watchOS. A destination asking for
+  `.managedCover` on macOS presents nothing — use `.platformManagedCover`, which falls back to a
+  managed sheet where the platform has no cover.
+- A layout's back control is a labelled toolbar button on macOS rather than a glyph, reading
+  *Back* on a push and *Close* at the root of a presentation.
 
 ## Navigation Layout Types
 

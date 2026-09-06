@@ -4,6 +4,7 @@
 //
 
 import NavigatorUI
+import OversizeLocalizable
 import OversizeUI
 import SwiftUI
 
@@ -22,11 +23,15 @@ struct NavigationLayoutBackToolbarModifier: ViewModifier {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(role: .cancel, action: handleBackButtonTap) {
                             #if os(macOS)
-                                Text("Cancel")
+                                // The Mac toolbar labels its controls; the glyph alone reads as
+                                // decoration there. Which word it is follows the policy, so a pop
+                                // is never labelled as a close.
+                                Text(backButtonTitle)
                             #else
                                 backImage.icon()
                             #endif
                         }
+                        .accessibilityIdentifier(backButtonPolicy.backButtonRole.accessibilityIdentifier)
                         #if os(macOS)
                         .controlSize(.large)
                         #endif
@@ -95,14 +100,24 @@ struct NavigationLayoutBackToolbarModifier: ViewModifier {
         backButtonPolicy.isShowBackButton
     }
 
+    private var backButtonTitle: String {
+        switch backButtonPolicy.backButtonRole {
+        case .close:
+            L10n.Button.close
+        case .pop:
+            L10n.Button.back
+        }
+    }
+
     private var backImage: Image {
-        if backButtonPolicy.isPresentationRoot {
+        switch backButtonPolicy.backButtonRole {
+        case .close:
             if #available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) {
                 Image(systemName: "xmark")
             } else {
                 Image.Base.close
             }
-        } else {
+        case .pop:
             if #available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) {
                 Image(systemName: "chevron.left")
             } else {

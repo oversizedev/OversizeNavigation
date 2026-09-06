@@ -25,6 +25,13 @@ struct BackButtonPolicy: Equatable, Sendable {
         isPresented && count == 0
     }
 
+    /// What the control does when tapped. The glyph, the macOS label and the accessibility
+    /// identifier all read this rather than re-deriving the rule, so a layout cannot end up
+    /// labelling a pop as a close — which is what macOS did while its branch ignored the policy.
+    var backButtonRole: BackButtonRole {
+        isPresentationRoot ? .close : .pop
+    }
+
     /// `backButtonHidden(_:)` only applies while the stack sits at its root — pushed screens
     /// keep their back button.
     var isBackButtonAtRootHidden: Bool {
@@ -46,5 +53,19 @@ struct BackButtonPolicy: Equatable, Sendable {
             return false
         }
         return isPresentationRoot || hasBackConfirmation
+    }
+}
+
+/// Whether the back control leaves a presentation or moves back within a stack.
+enum BackButtonRole: String, Equatable, Sendable, CaseIterable {
+    /// The control closes the presentation the screen roots.
+    case close
+
+    /// The control returns to the previous screen on the same stack.
+    case pop
+
+    /// Identifier the UI tests address the control by, on every platform.
+    var accessibilityIdentifier: String {
+        "navigationBack.\(rawValue)"
     }
 }

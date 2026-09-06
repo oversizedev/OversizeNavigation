@@ -9,13 +9,13 @@ import XCTest
 class ExampleUITestCase: XCTestCase {
     /// The layouts install their own control only where the package documents one: the system
     /// button stays in place on an ordinary push.
-    enum BackControl: String {
+    enum BackControl {
         /// The button SwiftUI provides for a pushed screen.
-        case system = "BackButton"
-        /// The chevron a layout installs when a back confirmation is set.
-        case confirmation = "chevron.left"
-        /// The cross a layout installs at the root of a presentation.
-        case close = "xmark"
+        case system
+        /// The control a layout installs when a back confirmation is set — a pop.
+        case confirmation
+        /// The control a layout installs at the root of a presentation — a close.
+        case close
     }
 
     var app: XCUIApplication!
@@ -27,8 +27,19 @@ class ExampleUITestCase: XCTestCase {
         app.launch()
     }
 
+    /// Whether this run mounts the split root. The Mac starts there, and on iOS it is only
+    /// reached by toggling — which is what `RootType.defaultForPlatform` states.
+    var isSplitRootByDefault: Bool {
+        #if os(macOS)
+            true
+        #else
+            false
+        #endif
+    }
+
     /// The same four sections reach the screen through three different controls: a tab bar in a
-    /// compact width, a tab strip at the top on iPad, and a sidebar under the split root.
+    /// compact width, a tab strip at the top on iPad, and a sidebar under the split root — the
+    /// only one a Mac window has.
     func openTab(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
         let control = tabControl(title)
         XCTAssertTrue(
@@ -44,15 +55,17 @@ class ExampleUITestCase: XCTestCase {
     /// every button on screen, so it is only reached when neither a tab bar nor a sidebar is
     /// mounted — the iPad tab strip.
     func tabControl(_ title: String) -> XCUIElement {
-        let tab = app.tabBars.buttons[title]
-        if tab.exists {
-            return tab
-        }
-
         let sidebar = app.buttons["sidebar.\(title.lowercased())"]
         if sidebar.exists {
             return sidebar
         }
+
+        #if !os(macOS)
+            let tab = app.tabBars.buttons[title]
+            if tab.exists {
+                return tab
+            }
+        #endif
 
         return app.buttons.matching(NSPredicate(format: "label == %@", title)).firstMatch
     }
@@ -89,7 +102,7 @@ class ExampleUITestCase: XCTestCase {
     /// list style, and swiping the application element instead resolves the gesture against the
     /// whole tree — where the tab bar or a HUD can take it.
     private func scrollableContainer() -> XCUIElement {
-        for container in [app.collectionViews, app.tables, app.scrollViews] {
+        for container in [app.collectionViews, app.tables, app.scrollViews, app.outlines] {
             let candidate = container.firstMatch
             if candidate.exists {
                 return candidate
@@ -99,13 +112,17 @@ class ExampleUITestCase: XCTestCase {
     }
 
     /// Only a bar sitting at the bottom of the window can swallow a tap meant for a row; the
-    /// iPad tab strip lives at the top and covers nothing.
+    /// iPad tab strip lives at the top and covers nothing, and a Mac window has no tab bar.
     private func isCoveredByTabBar(_ element: XCUIElement) -> Bool {
-        let tabBar = app.tabBars.firstMatch
-        guard element.exists, tabBar.exists else { return false }
-        guard tabBar.frame.minY > app.frame.midY else { return false }
+        #if os(macOS)
+            return false
+        #else
+            let tabBar = app.tabBars.firstMatch
+            guard element.exists, tabBar.exists else { return false }
+            guard tabBar.frame.minY > app.frame.midY else { return false }
 
-        return element.frame.maxY > tabBar.frame.minY
+            return element.frame.maxY > tabBar.frame.minY
+        #endif
     }
 
     func tapRow(_ identifier: String, file: StaticString = #filePath, line: UInt = #line) {
@@ -131,7 +148,7 @@ class ExampleUITestCase: XCTestCase {
         let section = app.buttons["sidebar.\(tab)"]
 
         if section.waitForExistence(timeout: 5) == false {
-            let back = app.navigationBars.buttons.firstMatch
+            let back = backNavigationBars.buttons.firstMatch
             if back.exists {
                 back.tap()
             }
@@ -141,17 +158,77 @@ class ExampleUITestCase: XCTestCase {
         section.tap()
     }
 
+    /// A Mac renders `navigationTitle` into the window and its toolbar rather than into a
+    /// navigation bar, so the title has to be looked for in more than one place.
     func assertScreen(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
         XCTAssertTrue(
-            app.navigationBars[title].waitForExistence(timeout: 10),
+            screenTitleElement(title).waitForExistence(timeout: 10),
             "Expected to be on \(title)",
             file: file,
             line: line
         )
     }
 
+    /// The element that carries the current screen's title, per platform.
+    ///
+    /// On macOS the sidebar stays on screen beside the detail column and publishes a row with the
+    /// same title as the screen it opens, so a global `app.staticTexts[title]` would match the
+    /// sidebar and `assertScreen("Flows")` would pass while the detail column still shows the
+    /// previous screen. The title is therefore read from the detail column's toolbar first, and
+    /// otherwise from a text that sits clear of the sidebar's own width.
+    func screenTitleElement(_ title: String) -> XCUIElement {
+        #if os(macOS)
+            let inToolbar = app.toolbars.staticTexts[title]
+            if inToolbar.exists {
+                return inToolbar
+            }
+            return detailStaticText(title)
+        #else
+            return app.navigationBars[title]
+        #endif
+    }
+
+    #if os(macOS)
+        /// A static text with this title that is not part of the sidebar.
+        private func detailStaticText(_ title: String) -> XCUIElement {
+            let matches = app.staticTexts.matching(NSPredicate(format: "label == %@", title))
+            let sidebarWidth = sidebarTrailingEdge()
+
+            for index in 0 ..< matches.count {
+                let candidate = matches.element(boundBy: index)
+                guard candidate.exists else { continue }
+                if candidate.frame.minX >= sidebarWidth {
+                    return candidate
+                }
+            }
+
+            // No sidebar mounted (the tab root), so nothing can shadow the title.
+            return sidebarWidth == 0 ? matches.firstMatch : app.staticTexts["\(title) (detail)"]
+        }
+
+        /// Where the sidebar ends, or zero when no sidebar is mounted.
+        private func sidebarTrailingEdge() -> CGFloat {
+            let anySidebarRow = app.buttons.matching(
+                NSPredicate(format: "identifier BEGINSWITH %@", "sidebar.")
+            ).firstMatch
+
+            guard anySidebarRow.exists else { return 0 }
+            return anySidebarRow.frame.maxX
+        }
+    #endif
+
+    /// The container the back control lives in. iOS publishes a navigation bar; a Mac window
+    /// publishes a toolbar.
+    private var backNavigationBars: XCUIElementQuery {
+        #if os(macOS)
+            app.toolbars
+        #else
+            app.navigationBars
+        #endif
+    }
+
     func tapBack(_ control: BackControl, file: StaticString = #filePath, line: UInt = #line) {
-        let button = app.buttons[control.rawValue]
+        let button = backButton(control)
         XCTAssertTrue(
             button.waitForExistence(timeout: 10),
             "No \(control) back control on screen",
@@ -161,16 +238,48 @@ class ExampleUITestCase: XCTestCase {
         button.tap()
     }
 
+    /// The layouts identify the control they install by its role, so the same query works on
+    /// both platforms. The system button has no identifier of ours and is addressed per
+    /// platform instead.
+    func backButton(_ control: BackControl) -> XCUIElement {
+        switch control {
+        case .system:
+            #if os(macOS)
+                return backNavigationBars.buttons.firstMatch
+            #else
+                return app.buttons["BackButton"]
+            #endif
+        case .confirmation:
+            return app.buttons["navigationBack.pop"]
+        case .close:
+            return app.buttons["navigationBack.close"]
+        }
+    }
+
+    /// A control a layout installs itself, as opposed to one the system provides.
+    func hasCustomBackControl() -> Bool {
+        app.buttons["navigationBack.pop"].exists || app.buttons["navigationBack.close"].exists
+    }
+
     func tapDialogButton(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
         let button = app.buttons[title]
         XCTAssertTrue(button.waitForExistence(timeout: 10), "No \(title) button", file: file, line: line)
         button.tap()
     }
 
-    /// iOS renders the cancel role of a confirmation dialog as the region outside it.
+    /// iOS renders the cancel role of a confirmation dialog as the region outside it; a Mac
+    /// renders the dialog as a sheet whose cancel role is an ordinary button.
     func dismissDialog(file: StaticString = #filePath, line: UInt = #line) {
-        let region = app.otherElements["PopoverDismissRegion"]
-        XCTAssertTrue(region.waitForExistence(timeout: 10), "No dialog on screen", file: file, line: line)
-        region.tap()
+        #if os(macOS)
+            let cancel = app.sheets.buttons["Cancel"].exists
+                ? app.sheets.buttons["Cancel"]
+                : app.buttons["Cancel"]
+            XCTAssertTrue(cancel.waitForExistence(timeout: 10), "No dialog on screen", file: file, line: line)
+            cancel.tap()
+        #else
+            let region = app.otherElements["PopoverDismissRegion"]
+            XCTAssertTrue(region.waitForExistence(timeout: 10), "No dialog on screen", file: file, line: line)
+            region.tap()
+        #endif
     }
 }

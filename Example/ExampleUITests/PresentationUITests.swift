@@ -90,10 +90,21 @@ final class PresentationUITests: ExampleUITestCase {
         tapRow("presentation.loadingStates")
         assertScreen("Loading states")
 
-        let picker = app.segmentedControls["loadingState.picker"]
+        let picker = statePicker()
         XCTAssertTrue(picker.waitForExistence(timeout: 10), "The overlay covered the state picker")
 
         picker.buttons["Result"].tap()
         XCTAssertTrue(app.staticTexts["Item 1"].waitForExistence(timeout: 5))
+    }
+
+    /// A segmented picker is a segmented control on iOS and a radio group on a Mac.
+    @MainActor
+    private func statePicker() -> XCUIElement {
+        #if os(macOS)
+            let radioGroup = app.radioGroups["loadingState.picker"]
+            return radioGroup.exists ? radioGroup : app.segmentedControls["loadingState.picker"]
+        #else
+            return app.segmentedControls["loadingState.picker"]
+        #endif
     }
 }
