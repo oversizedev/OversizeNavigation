@@ -93,7 +93,7 @@ final class PresentationUITests: ExampleUITestCase {
         let picker = statePicker()
         XCTAssertTrue(picker.waitForExistence(timeout: 10), "The overlay covered the state picker")
 
-        picker.buttons["Result"].tap()
+        pickerOption(picker, "Result").tap()
         XCTAssertTrue(app.staticTexts["Item 1"].waitForExistence(timeout: 5))
     }
 
@@ -105,6 +105,18 @@ final class PresentationUITests: ExampleUITestCase {
             return radioGroup.exists ? radioGroup : app.segmentedControls["loadingState.picker"]
         #else
             return app.segmentedControls["loadingState.picker"]
+        #endif
+    }
+
+    /// A radio group exposes its choices as radio buttons rather than buttons, so the element
+    /// type has to follow whichever container the platform published.
+    @MainActor
+    private func pickerOption(_ picker: XCUIElement, _ title: String) -> XCUIElement {
+        #if os(macOS)
+            let radioButton = picker.radioButtons[title]
+            return radioButton.exists ? radioButton : picker.buttons[title]
+        #else
+            return picker.buttons[title]
         #endif
     }
 }

@@ -76,7 +76,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
 
         tapRow("page.sheet")
         XCTAssertTrue(
-            screenTitleElement("Managed sheet").waitForExistence(timeout: 3),
+            waitForScreen("Managed sheet", timeout: 3),
             "The sheet did not present while the screen that asked for it was still on screen"
         )
 
@@ -94,7 +94,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
 
         tapRow("page.backWithHUD")
         XCTAssertTrue(
-            screenTitleElement("Flows").waitForExistence(timeout: 3),
+            waitForScreen("Flows", timeout: 3),
             "The screen stayed on display after the pop was requested"
         )
         XCTAssertTrue(app.staticTexts["Deleted"].exists)

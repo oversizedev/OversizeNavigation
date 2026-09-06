@@ -33,28 +33,28 @@ struct NavigationLayoutBackToolbarModifier: ViewModifier {
                         }
                         .accessibilityIdentifier(backButtonPolicy.backButtonRole.accessibilityIdentifier)
                         #if os(macOS)
-                        .controlSize(.large)
+                            .controlSize(.large)
                         #endif
-                        .confirmationDialog(
-                            backConfirmation?.title ?? "Are you sure?",
-                            isPresented: $isBackConfirmationPresented,
-                            titleVisibility: .visible,
-                            presenting: backConfirmation,
-                            actions: { details in
-                                Button(
-                                    details.confirmationButtonTitle,
-                                    action: handleConfirmationBackTap
-                                )
-                                Button(
-                                    details.cancelButtonTitle ?? "Cancel",
-                                    role: .cancel,
-                                    action: handleConfirmationCancelTap
-                                )
-                            },
-                            message: { details in
-                                Text(details.message)
-                            }
-                        )
+                            .confirmationDialog(
+                                backConfirmation?.title ?? "Are you sure?",
+                                isPresented: $isBackConfirmationPresented,
+                                titleVisibility: .visible,
+                                presenting: backConfirmation,
+                                actions: { details in
+                                    Button(
+                                        details.confirmationButtonTitle,
+                                        action: handleConfirmationBackTap
+                                    )
+                                    Button(
+                                        details.cancelButtonTitle ?? "Cancel",
+                                        role: .cancel,
+                                        action: handleConfirmationCancelTap
+                                    )
+                                },
+                                message: { details in
+                                    Text(details.message)
+                                }
+                            )
                     }
                 }
             }

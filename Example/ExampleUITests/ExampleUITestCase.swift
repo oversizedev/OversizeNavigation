@@ -101,14 +101,33 @@ class ExampleUITestCase: XCTestCase {
     /// The layouts render as a collection view, a table or a plain scroll view depending on the
     /// list style, and swiping the application element instead resolves the gesture against the
     /// whole tree — where the tab bar or a HUD can take it.
+    ///
+    /// Under a split root the sidebar is a scrollable container too, and it precedes the detail
+    /// column, so taking `firstMatch` would scroll the sidebar while the row stays below the
+    /// fold. Containers that sit within the sidebar's width are skipped for that reason.
     private func scrollableContainer() -> XCUIElement {
-        for container in [app.collectionViews, app.tables, app.scrollViews, app.outlines] {
-            let candidate = container.firstMatch
-            if candidate.exists {
-                return candidate
+        let sidebarEdge = sidebarTrailingEdge()
+
+        for container in [app.collectionViews, app.tables, app.outlines, app.scrollViews] {
+            for index in 0 ..< container.count {
+                let candidate = container.element(boundBy: index)
+                guard candidate.exists else { continue }
+                if candidate.frame.minX >= sidebarEdge {
+                    return candidate
+                }
             }
         }
         return app
+    }
+
+    /// Where the sidebar ends, or zero when no sidebar is mounted.
+    private func sidebarTrailingEdge() -> CGFloat {
+        let anySidebarRow = app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "sidebar.")
+        ).firstMatch
+
+        guard anySidebarRow.exists else { return 0 }
+        return anySidebarRow.frame.maxX
     }
 
     /// Only a bar sitting at the bottom of the window can swallow a tap meant for a row; the
@@ -161,15 +180,79 @@ class ExampleUITestCase: XCTestCase {
     /// A Mac renders `navigationTitle` into the window and its toolbar rather than into a
     /// navigation bar, so the title has to be looked for in more than one place.
     func assertScreen(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertTrue(
-            screenTitleElement(title).waitForExistence(timeout: 10),
-            "Expected to be on \(title)",
+        if waitForScreen(title) {
+            return
+        }
+
+        XCTFail(
+            "Expected to be on \(title). \(titleDiagnostics(title))",
             file: file,
             line: line
         )
     }
 
-    /// The element that carries the current screen's title, per platform.
+    /// Where a screen title actually lives differs per platform, and a failure that only says
+    /// "not found" gives nothing to fix. Report the candidates so the log names them.
+    private func titleDiagnostics(_ title: String) -> String {
+        var report = ""
+
+        let windowTitles = (0 ..< min(app.windows.count, 3)).map { index in
+            app.windows.element(boundBy: index).title
+        }
+        report += "windows=\(windowTitles) "
+
+        let toolbarTexts = (0 ..< min(app.toolbars.staticTexts.count, 8)).map { index in
+            app.toolbars.staticTexts.element(boundBy: index).label
+        }
+        report += "toolbarTexts=\(toolbarTexts) "
+
+        let matching = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", title))
+        let kinds = (0 ..< min(matching.count, 6)).map { index -> String in
+            let element = matching.element(boundBy: index)
+            return "\(element.elementType.rawValue)@\(Int(element.frame.minX))"
+        }
+        report += "labelled=\(kinds) "
+
+        let texts = (0 ..< min(app.staticTexts.count, 12)).map { index in
+            app.staticTexts.element(boundBy: index).label
+        }
+        report += "staticTexts=\(texts)"
+
+        return report
+    }
+
+    /// Polls rather than resolving a query once. Which element carries the title on macOS depends
+    /// on how far the transition has got — before the new title is published there is no matching
+    /// text at all — so an element captured from the first snapshot can be one that will never
+    /// exist, and waiting on it fails even after the real title appears.
+    @discardableResult
+    func waitForScreen(_ title: String, timeout: TimeInterval = 10) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            if isShowingScreen(title) {
+                return true
+            }
+            Thread.sleep(forTimeInterval: 0.25)
+        } while Date() < deadline
+
+        return isShowingScreen(title)
+    }
+
+    private func isShowingScreen(_ title: String) -> Bool {
+        #if os(macOS)
+            if app.toolbars.staticTexts[title].exists {
+                return true
+            }
+            return detailStaticText(title) != nil
+        #else
+            return app.navigationBars[title].exists
+        #endif
+    }
+
+    /// The element that carries the current screen's title right now, or a query that does not
+    /// resolve if the transition has not published it yet — prefer ``waitForScreen(_:timeout:)``
+    /// when the title may still be on its way.
     ///
     /// On macOS the sidebar stays on screen beside the detail column and publishes a row with the
     /// same title as the screen it opens, so a global `app.staticTexts[title]` would match the
@@ -182,15 +265,16 @@ class ExampleUITestCase: XCTestCase {
             if inToolbar.exists {
                 return inToolbar
             }
-            return detailStaticText(title)
+            return detailStaticText(title) ?? app.staticTexts[title]
         #else
             return app.navigationBars[title]
         #endif
     }
 
     #if os(macOS)
-        /// A static text with this title that is not part of the sidebar.
-        private func detailStaticText(_ title: String) -> XCUIElement {
+        /// A static text with this title that is not part of the sidebar, or `nil` when the
+        /// screen has not published one yet.
+        private func detailStaticText(_ title: String) -> XCUIElement? {
             let matches = app.staticTexts.matching(NSPredicate(format: "label == %@", title))
             let sidebarWidth = sidebarTrailingEdge()
 
@@ -202,18 +286,7 @@ class ExampleUITestCase: XCTestCase {
                 }
             }
 
-            // No sidebar mounted (the tab root), so nothing can shadow the title.
-            return sidebarWidth == 0 ? matches.firstMatch : app.staticTexts["\(title) (detail)"]
-        }
-
-        /// Where the sidebar ends, or zero when no sidebar is mounted.
-        private func sidebarTrailingEdge() -> CGFloat {
-            let anySidebarRow = app.buttons.matching(
-                NSPredicate(format: "identifier BEGINSWITH %@", "sidebar.")
-            ).firstMatch
-
-            guard anySidebarRow.exists else { return 0 }
-            return anySidebarRow.frame.maxX
+            return nil
         }
     #endif
 
@@ -245,7 +318,19 @@ class ExampleUITestCase: XCTestCase {
         switch control {
         case .system:
             #if os(macOS)
-                return backNavigationBars.buttons.firstMatch
+                // A split view's toolbar also carries the sidebar toggle, and it comes first —
+                // `firstMatch` would collapse the sidebar instead of popping the screen.
+                let labelled = app.buttons["Back"]
+                if labelled.exists {
+                    return labelled
+                }
+                let chevron = app.buttons["chevron.backward"]
+                if chevron.exists {
+                    return chevron
+                }
+                return backNavigationBars.buttons.matching(
+                    NSPredicate(format: "label CONTAINS[c] %@", "back")
+                ).firstMatch
             #else
                 return app.buttons["BackButton"]
             #endif
