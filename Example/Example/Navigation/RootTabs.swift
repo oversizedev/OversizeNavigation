@@ -15,7 +15,9 @@ enum RootTabs: Int, Codable, CaseIterable, Sendable {
 }
 
 extension RootTabs: Tabable {
-    var id: String { "\(self)" }
+    var id: String {
+        "\(self)"
+    }
 
     var title: String {
         switch self {

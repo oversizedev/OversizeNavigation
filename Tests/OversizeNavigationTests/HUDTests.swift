@@ -4,10 +4,10 @@
 //
 
 import Foundation
+@testable import OversizeNavigation
 import OversizeUI
 import SwiftUI
 import Testing
-@testable import OversizeNavigation
 
 @MainActor
 struct HUDTests {
@@ -33,7 +33,9 @@ struct HUDTests {
     @Test("An error case uses the localized description")
     func errorTitle() {
         struct SampleError: LocalizedError {
-            var errorDescription: String? { "Sample failed" }
+            var errorDescription: String? {
+                "Sample failed"
+            }
         }
 
         #expect(HUD.error(SampleError()).title == "Sample failed")

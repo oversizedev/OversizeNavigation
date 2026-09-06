@@ -3,9 +3,9 @@
 // NavigationTableTests.swift, created on 05.09.2026
 //
 
+@testable import Example
 import NavigatorUI
 import Testing
-@testable import Example
 
 @MainActor
 struct RootTabsTests {

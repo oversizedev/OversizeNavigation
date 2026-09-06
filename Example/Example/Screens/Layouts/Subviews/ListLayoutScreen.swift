@@ -16,7 +16,9 @@ struct ListLayoutScreen: View {
         case smallInsetGrouped
         case grouped
 
-        var id: String { rawValue }
+        var id: String {
+            rawValue
+        }
 
         var title: String {
             switch self {

@@ -11,14 +11,14 @@ import XCTest
 /// depends on the tree, so it is asserted on its own.
 final class AccessibilityTreeUITests: ExampleUITestCase {
     @MainActor
-    func testTheAppPublishesAnAccessibilityTree() throws {
+    func testTheAppPublishesAnAccessibilityTree() {
         XCTAssertTrue(tabControl("Layouts").waitForExistence(timeout: 10))
         XCTAssertGreaterThan(app.staticTexts.count, 0, "The app published no text")
         XCTAssertGreaterThan(app.buttons.count, 0, "The app published no controls")
     }
 
     @MainActor
-    func testTheTreeSurvivesAPresentedHUD() throws {
+    func testTheTreeSurvivesAPresentedHUD() {
         openTab("Presentation")
         tapRow("presentation.hud")
         assertScreen("HUD")

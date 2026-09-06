@@ -13,7 +13,9 @@ struct CoverLayoutScreen: View {
         case parallax
         case pinch
 
-        var id: String { rawValue }
+        var id: String {
+            rawValue
+        }
 
         var title: String {
             switch self {

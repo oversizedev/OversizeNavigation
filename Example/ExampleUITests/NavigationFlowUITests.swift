@@ -7,7 +7,7 @@ import XCTest
 
 final class NavigationFlowUITests: ExampleUITestCase {
     @MainActor
-    func testEveryTabIsReachable() throws {
+    func testEveryTabIsReachable() {
         for title in ["Layouts", "Flows", "Presentation", "Settings"] {
             openTab(title)
             assertScreen(title)
@@ -15,7 +15,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testNavigationMovePushes() throws {
+    func testNavigationMovePushes() {
         openTab("Flows")
         tapRow("flows.move")
         assertScreen("Page 1")
@@ -26,7 +26,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     /// the second copy hides the first — so the depth is what the assertion has to read.
     /// Also covers the plain push-and-pop round trip through `NavigationLink(to:)`.
     @MainActor
-    func testNavigationLinkPushesOnce() throws {
+    func testNavigationLinkPushesOnce() {
         openTab("Flows")
         tapRow("flows.open")
         assertScreen("Page 1")
@@ -41,7 +41,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testNavigationOpenFromAPushedScreenStaysOnItsStack() throws {
+    func testNavigationOpenFromAPushedScreenStaysOnItsStack() {
         openTab("Flows")
         tapRow("flows.open")
         assertScreen("Page 1")
@@ -56,7 +56,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     /// `navigationMove` broadcasts, and the first registered handler answers — from a pushed
     /// screen that used to be a stack nobody was looking at.
     @MainActor
-    func testNavigationMoveFromAPushedScreenStaysOnItsStack() throws {
+    func testNavigationMoveFromAPushedScreenStaysOnItsStack() {
         openTab("Flows")
         tapRow("flows.open")
         assertScreen("Page 1")
@@ -69,7 +69,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     /// A pushed screen asking for a sheet used to present only after the next navigation
     /// event, so the wait is deliberately short.
     @MainActor
-    func testSheetPresentsFromAPushedScreenWithoutDelay() throws {
+    func testSheetPresentsFromAPushedScreenWithoutDelay() {
         openTab("Flows")
         tapRow("flows.open")
         assertScreen("Page 1")
@@ -87,7 +87,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     /// Popping and publishing a HUD in one state update used to leave the screen on display
     /// while the HUD was presented.
     @MainActor
-    func testPopWithAHUDLeavesImmediately() throws {
+    func testPopWithAHUDLeavesImmediately() {
         openTab("Flows")
         tapRow("flows.open")
         assertScreen("Page 1")
@@ -103,7 +103,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     /// A tab whose stack is nested inside another one reads as presented, and the layouts
     /// answer that by installing a close button over the tab root.
     @MainActor
-    func testTabRootsAreStackRoots() throws {
+    func testTabRootsAreStackRoots() {
         for title in ["Layouts", "Flows", "Presentation", "Settings"] {
             openTab(title)
             assertScreen(title)
@@ -118,7 +118,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testNavigationBackPopsProgrammatically() throws {
+    func testNavigationBackPopsProgrammatically() {
         openTab("Flows")
         tapRow("flows.open")
         assertScreen("Page 1")
@@ -128,7 +128,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testCheckpointReturnsFromDeepStack() throws {
+    func testCheckpointReturnsFromDeepStack() {
         openTab("Flows")
         tapRow("flows.open")
         assertScreen("Page 1")
@@ -144,7 +144,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testCheckpointReturnsAValue() throws {
+    func testCheckpointReturnsAValue() {
         openTab("Flows")
         tapRow("flows.checkpointResult")
         assertScreen("Return a value")
@@ -157,7 +157,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testManagedSheetDismisses() throws {
+    func testManagedSheetDismisses() {
         openTab("Flows")
         tapRow("flows.sheet")
         assertScreen("Managed sheet")
@@ -167,7 +167,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testManagedSheetPushesInsideItsOwnStack() throws {
+    func testManagedSheetPushesInsideItsOwnStack() {
         openTab("Flows")
         tapRow("flows.sheet")
         assertScreen("Managed sheet")
@@ -180,7 +180,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testManagedCoverDismisses() throws {
+    func testManagedCoverDismisses() {
         openTab("Flows")
         tapRow("flows.cover")
         assertScreen("Managed cover")
@@ -190,7 +190,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testLockedScreenSurvivesDismissAny() throws {
+    func testLockedScreenSurvivesDismissAny() {
         openTab("Flows")
         tapRow("flows.locked")
         assertScreen("Locked")

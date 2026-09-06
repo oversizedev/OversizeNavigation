@@ -4,8 +4,8 @@
 //
 
 import NavigatorUI
-import Testing
 @testable import OversizeNavigation
+import Testing
 
 @MainActor
 struct RootNavigatorTests {

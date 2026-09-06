@@ -11,7 +11,9 @@ import SwiftUI
 /// `presentationHUDRoot()` is applied once at the app root; screens only publish values.
 struct HUDScreen: View {
     private struct DemoError: LocalizedError {
-        var errorDescription: String? { "The demo request failed" }
+        var errorDescription: String? {
+            "The demo request failed"
+        }
     }
 
     @Environment(\.hud) private var hudState

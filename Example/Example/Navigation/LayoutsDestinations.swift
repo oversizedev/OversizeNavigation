@@ -17,7 +17,9 @@ enum LayoutsDestinations: Codable, CaseIterable, Hashable, Sendable {
 }
 
 extension LayoutsDestinations: Identifiable {
-    var id: String { "\(self)" }
+    var id: String {
+        "\(self)"
+    }
 }
 
 extension LayoutsDestinations: @MainActor NavigationDestination {
@@ -52,7 +54,9 @@ extension LayoutsDestinations: @MainActor NavigationDestination {
 
 extension LayoutsDestinations {
     /// The catalog is the whole enum: a new layout demo shows up in the list by existing.
-    static var catalog: [LayoutsDestinations] { allCases }
+    static var catalog: [LayoutsDestinations] {
+        allCases
+    }
 
     var title: String {
         switch self {

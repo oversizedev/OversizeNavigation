@@ -15,7 +15,9 @@ enum FlowsDestinations: Codable, Hashable, Sendable {
 }
 
 extension FlowsDestinations: Identifiable {
-    var id: String { "\(self)" }
+    var id: String {
+        "\(self)"
+    }
 }
 
 extension FlowsDestinations: @MainActor NavigationDestination {

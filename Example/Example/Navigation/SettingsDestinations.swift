@@ -11,7 +11,9 @@ enum SettingsDestinations: Codable, Hashable, Sendable {
 }
 
 extension SettingsDestinations: Identifiable {
-    var id: String { "\(self)" }
+    var id: String {
+        "\(self)"
+    }
 }
 
 extension SettingsDestinations: @MainActor NavigationDestination {

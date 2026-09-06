@@ -3,8 +3,8 @@
 // BackConfirmationContentTests.swift, created on 05.09.2026
 //
 
-import Testing
 @testable import OversizeNavigation
+import Testing
 
 struct BackConfirmationContentTests {
     @Test("The dismiss preset asks before leaving")

@@ -9,9 +9,17 @@ import SwiftUI
 
 struct AlertScreen: View {
     private struct DemoError: LocalizedError {
-        var errorDescription: String? { "The demo request failed" }
-        var failureReason: String? { "The example has no network layer" }
-        var recoverySuggestion: String? { "Try one of the other cases" }
+        var errorDescription: String? {
+            "The demo request failed"
+        }
+
+        var failureReason: String? {
+            "The example has no network layer"
+        }
+
+        var recoverySuggestion: String? {
+            "Try one of the other cases"
+        }
     }
 
     @State private var alert: AppAlert?

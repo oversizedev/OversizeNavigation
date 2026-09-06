@@ -13,7 +13,9 @@ enum PresentationDestinations: Codable, Hashable, Sendable {
 }
 
 extension PresentationDestinations: Identifiable {
-    var id: String { "\(self)" }
+    var id: String {
+        "\(self)"
+    }
 }
 
 extension PresentationDestinations: @MainActor NavigationDestination {

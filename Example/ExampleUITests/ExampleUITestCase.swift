@@ -45,10 +45,14 @@ class ExampleUITestCase: XCTestCase {
     /// mounted — the iPad tab strip.
     func tabControl(_ title: String) -> XCUIElement {
         let tab = app.tabBars.buttons[title]
-        if tab.exists { return tab }
+        if tab.exists {
+            return tab
+        }
 
         let sidebar = app.buttons["sidebar.\(title.lowercased())"]
-        if sidebar.exists { return sidebar }
+        if sidebar.exists {
+            return sidebar
+        }
 
         return app.buttons.matching(NSPredicate(format: "label == %@", title)).firstMatch
     }
@@ -87,7 +91,9 @@ class ExampleUITestCase: XCTestCase {
     private func scrollableContainer() -> XCUIElement {
         for container in [app.collectionViews, app.tables, app.scrollViews] {
             let candidate = container.firstMatch
-            if candidate.exists { return candidate }
+            if candidate.exists {
+                return candidate
+            }
         }
         return app
     }
@@ -126,7 +132,9 @@ class ExampleUITestCase: XCTestCase {
 
         if section.waitForExistence(timeout: 5) == false {
             let back = app.navigationBars.buttons.firstMatch
-            if back.exists { back.tap() }
+            if back.exists {
+                back.tap()
+            }
         }
 
         XCTAssertTrue(section.waitForExistence(timeout: 10), "No sidebar section \(tab)", file: file, line: line)

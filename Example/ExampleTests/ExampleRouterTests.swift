@@ -3,8 +3,8 @@
 // ExampleRouterTests.swift, created on 05.09.2026
 //
 
-import Testing
 @testable import Example
+import Testing
 
 /// A route names a place; the values it expands to are what actually travels through the
 /// navigator, so they are what the tests pin down.

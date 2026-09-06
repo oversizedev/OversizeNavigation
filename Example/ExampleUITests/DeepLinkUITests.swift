@@ -8,7 +8,7 @@ import XCTest
 
 final class DeepLinkUITests: ExampleUITestCase {
     @MainActor
-    func testSendSwitchesTabAndPushes() throws {
+    func testSendSwitchesTabAndPushes() {
         openTab("Flows")
         tapRow("flows.sendHUD")
         assertScreen("HUD")
@@ -18,7 +18,7 @@ final class DeepLinkUITests: ExampleUITestCase {
     /// A value is consumed by the first handler registered for its type, so a second handler
     /// on the same type answers the first route and silently drops the next one.
     @MainActor
-    func testTheSameRouteWorksTwice() throws {
+    func testTheSameRouteWorksTwice() {
         openTab("Flows")
         tapRow("flows.routeAbout")
         assertScreen("About")
@@ -52,14 +52,14 @@ final class DeepLinkUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testRouteRunsSeveralStepsInOrder() throws {
+    func testRouteRunsSeveralStepsInOrder() {
         openTab("Flows")
         tapRow("flows.routeDeep")
         assertScreen("Page 3")
     }
 
     @MainActor
-    func testRootLayoutCanBeSwapped() throws {
+    func testRootLayoutCanBeSwapped() {
         openTab("Settings")
         tapRow("settings.toggleRoot")
 

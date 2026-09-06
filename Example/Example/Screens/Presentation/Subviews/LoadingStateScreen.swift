@@ -13,12 +13,19 @@ struct LoadingStateScreen: View {
     private struct DemoItems: Emptyable {
         let values: [String]
 
-        var isEmpty: Bool { values.isEmpty }
+        var isEmpty: Bool {
+            values.isEmpty
+        }
     }
 
     private struct DemoError: LocalizedError {
-        var errorDescription: String? { "Could not load the items" }
-        var recoverySuggestion: String? { "Pick another state above" }
+        var errorDescription: String? {
+            "Could not load the items"
+        }
+
+        var recoverySuggestion: String? {
+            "Pick another state above"
+        }
     }
 
     private enum DemoState: String, CaseIterable, Identifiable {
@@ -27,7 +34,9 @@ struct LoadingStateScreen: View {
         case result
         case error
 
-        var id: String { rawValue }
+        var id: String {
+            rawValue
+        }
 
         var title: String {
             switch self {
@@ -43,7 +52,9 @@ struct LoadingStateScreen: View {
         case contentUnavailable
         case errorState
 
-        var id: String { rawValue }
+        var id: String {
+            rawValue
+        }
 
         var title: String {
             switch self {

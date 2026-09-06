@@ -15,7 +15,7 @@ final class LayoutsUITests: ExampleUITestCase {
     ]
 
     @MainActor
-    func testEveryLayoutOpensAndCloses() throws {
+    func testEveryLayoutOpensAndCloses() {
         openTab("Layouts")
 
         for layout in Self.pushedLayouts {
@@ -28,7 +28,7 @@ final class LayoutsUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testBackConfirmationCanBeCancelled() throws {
+    func testBackConfirmationCanBeCancelled() {
         openTab("Layouts")
         tapRow("layouts.backConfirmationPushed")
         assertScreen("Pushed with confirmation")
@@ -40,7 +40,7 @@ final class LayoutsUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testBackConfirmationPopsWhenConfirmed() throws {
+    func testBackConfirmationPopsWhenConfirmed() {
         openTab("Layouts")
         tapRow("layouts.backConfirmationPushed")
         assertScreen("Pushed with confirmation")
@@ -52,7 +52,7 @@ final class LayoutsUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testSheetConfirmationDismissesTheSheet() throws {
+    func testSheetConfirmationDismissesTheSheet() {
         openTab("Layouts")
         tapRow("layouts.backConfirmationSheet")
         assertScreen("Sheet with confirmation")

@@ -4,13 +4,15 @@
 //
 
 import Foundation
-import Testing
 @testable import OversizeNavigation
+import Testing
 
 @MainActor
 struct AppAlertTests {
     private struct SampleError: LocalizedError {
-        var errorDescription: String? { "Sample failed" }
+        var errorDescription: String? {
+            "Sample failed"
+        }
     }
 
     @Test("Every case has a stable identifier")

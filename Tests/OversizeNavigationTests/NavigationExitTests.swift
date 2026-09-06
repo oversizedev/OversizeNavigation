@@ -4,9 +4,9 @@
 //
 
 import NavigatorUI
+@testable import OversizeNavigation
 import SwiftUI
 import Testing
-@testable import OversizeNavigation
 
 /// The depth-to-operation mapping is the whole of what separates the three exits.
 @MainActor

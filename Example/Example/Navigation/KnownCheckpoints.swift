@@ -7,6 +7,11 @@ import NavigatorUI
 
 /// Named places the flows tab can return to without knowing how deep the stack is.
 struct KnownCheckpoints: NavigationCheckpoints {
-    static var flows: NavigationCheckpoint<Void> { checkpoint() }
-    static var flowsResult: NavigationCheckpoint<Int> { checkpoint() }
+    static var flows: NavigationCheckpoint<Void> {
+        checkpoint()
+    }
+
+    static var flowsResult: NavigationCheckpoint<Int> {
+        checkpoint()
+    }
 }

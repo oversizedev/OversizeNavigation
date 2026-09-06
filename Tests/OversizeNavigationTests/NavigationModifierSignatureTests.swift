@@ -4,9 +4,9 @@
 //
 
 import NavigatorUI
+@testable import OversizeNavigation
 import SwiftUI
 import Testing
-@testable import OversizeNavigation
 
 /// A feature package declares its destinations, while the `NavigationDestination` conformance
 /// is added in the app target. Inside that package the compiler only sees a `Hashable` value,
@@ -19,7 +19,9 @@ struct NavigationModifierSignatureTests {
     }
 
     private struct ConformingDestination: Hashable, @MainActor NavigationDestination {
-        var body: some View { Text("Destination") }
+        var body: some View {
+            Text("Destination")
+        }
     }
 
     @Test("navigationOpen accepts a value that is only Hashable in this module")

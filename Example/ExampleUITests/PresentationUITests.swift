@@ -7,7 +7,7 @@ import XCTest
 
 final class PresentationUITests: ExampleUITestCase {
     @MainActor
-    func testHUDAppearsAndDismissesItself() throws {
+    func testHUDAppearsAndDismissesItself() {
         openTab("Presentation")
         tapRow("presentation.hud")
         assertScreen("HUD")
@@ -23,7 +23,7 @@ final class PresentationUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testHUDStackKeepsOnlyThree() throws {
+    func testHUDStackKeepsOnlyThree() {
         openTab("Presentation")
         tapRow("presentation.hud")
         assertScreen("HUD")
@@ -37,7 +37,7 @@ final class PresentationUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testHUDStackCanBeCleared() throws {
+    func testHUDStackCanBeCleared() {
         openTab("Presentation")
         tapRow("presentation.hud")
         assertScreen("HUD")
@@ -53,7 +53,7 @@ final class PresentationUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testAlertConfirmationRunsItsAction() throws {
+    func testAlertConfirmationRunsItsAction() {
         openTab("Presentation")
         tapRow("presentation.alerts")
         assertScreen("Alerts")
@@ -68,7 +68,7 @@ final class PresentationUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testAlertCancellationKeepsTheState() throws {
+    func testAlertCancellationKeepsTheState() {
         openTab("Presentation")
         tapRow("presentation.alerts")
         assertScreen("Alerts")
@@ -85,7 +85,7 @@ final class PresentationUITests: ExampleUITestCase {
     /// The demo starts in the empty state, so its overlay is already on screen; the pickers that
     /// drive the demo have to stay reachable underneath it.
     @MainActor
-    func testLoadingStateControlsStayReachable() throws {
+    func testLoadingStateControlsStayReachable() {
         openTab("Presentation")
         tapRow("presentation.loadingStates")
         assertScreen("Loading states")

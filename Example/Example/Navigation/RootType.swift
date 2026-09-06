@@ -19,7 +19,9 @@ enum RootType: Int, Codable, Sendable {
 struct ToggleRootType: Hashable, Sendable {}
 
 extension RootType: Identifiable {
-    var id: Int { rawValue }
+    var id: Int {
+        rawValue
+    }
 }
 
 extension RootType: @MainActor NavigationDestination {
