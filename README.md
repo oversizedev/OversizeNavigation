@@ -231,6 +231,16 @@ struct MyView: View {
 }
 ```
 
+`navigationBack` also states *how far* to leave, so one modifier covers every depth:
+
+```swift
+.navigationBack($trigger)                          // pop one screen
+.navigationBack($trigger, to: .presentation)       // close the whole sheet or cover
+.navigationBack($trigger, to: .allPresentations) { result in
+    // back to the root; fails when a `.navigationLocked()` screen is on the stack
+}
+```
+
 #### Navigate with Data
 
 ```swift

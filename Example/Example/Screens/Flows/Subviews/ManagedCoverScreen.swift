@@ -18,7 +18,7 @@ struct ManagedCoverScreen: View {
                 Section("Inside the cover") {
                     Row(
                         "Dismiss",
-                        subtitle: "navigationDismiss",
+                        subtitle: "navigationBack(to: .presentation)",
                         action: { isDismissed = true }
                     )
                     .accessibilityIdentifier("cover.dismiss")
@@ -32,7 +32,7 @@ struct ManagedCoverScreen: View {
             coverBackground: { Color.orange }
         )
         .sectionTitlePosition(.inside)
-        .navigationDismiss($isDismissed)
+        .navigationBack($isDismissed, to: .presentation)
     }
 }
 

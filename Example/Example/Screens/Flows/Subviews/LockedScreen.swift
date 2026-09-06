@@ -35,7 +35,7 @@ struct LockedScreen: View {
         .listLayoutStyle(.insetGrouped)
         .navigationLocked()
         .navigationBack($isBackTriggered)
-        .navigationDismissAny($isDismissingAny) { result in
+        .navigationBack($isDismissingAny, to: .allPresentations) { result in
             switch result {
             case .success:
                 hud = .success("Dismissed")

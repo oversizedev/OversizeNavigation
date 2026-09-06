@@ -25,7 +25,7 @@ struct ManagedSheetScreen: View {
 
                 ListRow(
                     "Dismiss",
-                    subtitle: "navigationDismiss",
+                    subtitle: "navigationBack(to: .presentation)",
                     action: { isDismissed = true }
                 )
                 .accessibilityIdentifier("sheet.dismiss")
@@ -33,7 +33,7 @@ struct ManagedSheetScreen: View {
         }
         .listLayoutStyle(.insetGrouped)
         .navigationOpen($openDestination)
-        .navigationDismiss($isDismissed)
+        .navigationBack($isDismissed, to: .presentation)
     }
 }
 

@@ -106,29 +106,70 @@ A screen states an intent through a binding and the modifier performs it, so no 
 layer alone — destination conformances, stacks, roots and routers. `Example/Example/Screens` is the
 reference for the split.
 
-- `.navigationBack(_ trigger: Binding<Bool>)` — programmatic pop
+- `.navigationBack(_ trigger:to:completion:)` — leave the screen; `to:` is a `NavigationExit`
 - `.navigationOpen(_ destination: Binding<T?>)` — navigate on the navigator this screen lives on
 - `.navigationMove(_ item: Binding<T?>)` — navigate with data via `navigator.send()`
 - `.navigationMove(values: Binding<[AnyHashable]?>)` — broadcast an ordered list, one receiver per type
 - `.navigationRoute(_ route: Binding<Route?>)` — perform a cross-module `NavigationRoutes` value
-- `.navigationDismiss(_ trigger: Binding<Bool>)` — dismiss the presentation this screen lives in
-- `.navigationDismissAny(_ trigger:completion:)` — dismiss every presentation; fails on a locked screen
 - `.navigationLocked()` — block a global dismiss while this screen is on the stack
 - `.navigationCheckpoint(_:)` / `.navigationCheckpoint(_:completion:)` — name a place to return to
 - `.navigationReturn(to:trigger:)` / `.navigationReturn(to:value:)` — return there, optionally with a value
 - `.backConfirmationDialog(_ content:)` — confirmation before back; also sets `interactiveDismissDisabled`
 - `.navigationBarAppearanceConfiguration()` — OversizeUI bar styling (iOS < 26 only via `#if os(iOS)`)
 
-`.navigationCheckpoint()` and `.navigationLocked()` mirror NavigatorUI names and are marked
-`@_disfavoredOverload`, the same trick as `NavigationLink(to:)`: a file importing both modules gets
-NavigatorUI's, a file importing only this package gets ours. Their bodies call the NavigatorUI
-overload by the same name, so the attribute is the only thing keeping them from recursing into
-themselves. Nothing in `Tests/` covers that — the test target imports NavigatorUI and therefore
-hits the original. The screens under `Example/Example/Screens`, which import this package alone,
-are the regression test; do not "simplify" them into importing NavigatorUI.
+**One intent, one modifier.** Leaving a screen was three modifiers — `navigationBack`,
+`navigationDismiss`, `navigationDismissAny` — whose names did not say how far each went, and a
+screen at the root of a sheet left identically under the first two because NavigatorUI's `back()`
+is `pop() || dismiss()`. They are now one `.navigationBack(_:to:completion:)` over
+`Models/NavigationExit.swift` (`.screen` / `.presentation` / `.allPresentations`), so the depth is
+stated at the call site instead of chosen by picking a name. The old two are `@available(deprecated)`
+shims forwarding to it. `NavigationExit.leave(on:)` holds the whole depth→operation mapping and is
+asserted directly in `Tests/OversizeNavigationTests/NavigationExitTests.swift`; keep it there rather
+than re-deriving it inside a modifier. A new modifier that splits one intent across several names
+belongs in this shape too.
+
+Several of these look like duplicates of NavigatorUI and are not: they are the facade. A method
+declared in another module's `extension View` cannot be called without importing that module, so
+every intent a screen states has to be restated here or the no-import rule collapses. Deleting
+`.navigationMove`, `.navigationBack`, `.navigationReturn(to:trigger:)`, `.navigationCheckpoint`
+or `.navigationLocked` because "NavigatorUI already has it" means putting `import NavigatorUI` back
+into every screen. Do not.
+
+Each overlap picks one of two strategies, and a new modifier must pick one too:
+
+- **Same signature + `@_disfavoredOverload`** — `.navigationCheckpoint()`, `.navigationLocked()`,
+  `NavigationLink(to:)`. A file importing both modules gets NavigatorUI's, a file importing only
+  this package gets ours. Their bodies call the NavigatorUI overload by the same name, and the
+  attribute is what breaks the tie. If NavigatorUI renames or re-signs one, the call binds to
+  itself and the `some View` return type has nothing to infer from, so **the package stops
+  building** — the breakage is a compile error here, not a runtime trap.
+- **A deliberately different name** — `.navigationMove` for `navigationSend`, `.navigationReturn`
+  for `navigationReturnToCheckpoint`, `.navigationOpen` for `navigate(to:)`. No ambiguity to break,
+  and the name says what this package means by it.
+
+Four of them also carry behaviour NavigatorUI does not have, so they are not swappable even in
+principle:
+
+| Modifier | Delta over NavigatorUI |
+|---|---|
+| `.navigationMove(values:)` | takes `[AnyHashable]` — a deep link mixes a tab value with the destination it pushes; `navigationSend(values:)` is a homogeneous `[T]` |
+| `.navigationBack(_:to:completion:)` | one modifier over all three depths, and it reports a `Result`; NavigatorUI spreads them across `navigationDismiss`/`navigationDismissAny`, has no declarative wrapper for `back()` at all, and swallows the `dismissAny` throw with `try?` — a throw that is meaningful, since `.navigationLocked()` is what raises it |
+| `.navigationReturn(to:value:)` | returns to a checkpoint **with a value**; NavigatorUI has no declarative form of that |
+| `.navigationRoute` | NavigatorUI exposes `navigator.perform(route:)` imperatively only |
+
+`.navigationOpen` is the remaining deliberate difference: it takes `Hashable & Equatable` rather
+than `some NavigationDestination`, because a feature package states destinations whose
+`NavigationDestination` conformance is added in the app target and therefore invisible there.
+`Tests/OversizeNavigationTests/NavigationModifierSignatureTests.swift` pins that constraint by
+type. The cost is that a genuinely wrong value is caught at runtime rather than by the compiler,
+so the modifier asserts in debug before falling back to a plain push.
 
 Every modifier in the family takes a binding, performs the intent, and **resets the binding**, so
 the same intent can be stated twice in a row. A new one must do the same.
+
+The screens under `Example/Example/Screens` import this package alone and are what proves the
+facade is complete; the `lint-screen-imports` CI job fails if one of them reaches for NavigatorUI.
+Do not "simplify" them into importing it.
 
 Read-only stack state comes from `@Environment(\.navigationInfo)` — `depth`, `isRoot`,
 `isPresented`, `canReturn(to:)` — instead of reading the navigator directly.

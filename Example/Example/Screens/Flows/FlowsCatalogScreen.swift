@@ -49,7 +49,7 @@ struct FlowsCatalogScreen: View {
 
                 ListRow(
                     "Locked screen",
-                    subtitle: "navigationLocked blocks navigationDismissAny",
+                    subtitle: "navigationLocked blocks the allPresentations exit",
                     action: { openDestination = .locked }
                 )
                 .accessibilityIdentifier("flows.locked")
