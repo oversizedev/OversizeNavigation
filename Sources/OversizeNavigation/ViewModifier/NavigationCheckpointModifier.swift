@@ -46,11 +46,10 @@ public extension View {
     /// has grown by then.
     ///
     /// > Important: The body calls the NavigatorUI overload, not itself — `@_disfavoredOverload`
-    /// is what breaks the tie between two identical signatures. If NavigatorUI ever renames or
-    /// re-signs it, this binds to itself and overflows the stack at runtime with nothing to warn
-    /// you. The package tests import NavigatorUI, so they exercise the original; only a call site
-    /// importing OversizeNavigation alone covers this shim, which is what `Example/Example/Screens`
-    /// is for.
+    /// is what breaks the tie between two identical signatures. Should NavigatorUI ever rename or
+    /// re-sign it, this call binds to itself, and a `some View` whose only return is a recursive
+    /// call has no underlying type to infer, so the package stops building. The failure is loud
+    /// and local; it is not a runtime trap.
     @_disfavoredOverload
     func navigationCheckpoint<Value>(_ checkpoint: NavigationCheckpoint<Value>) -> some View {
         navigationCheckpoint(checkpoint)
