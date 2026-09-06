@@ -7,7 +7,11 @@ import NavigatorUI
 import OversizeUI
 import SwiftUI
 
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, visionOS 1.0, *)
+@available(iOS, introduced: 17.0, deprecated: 18.0, renamed: "NavigationListCoverLayout")
+@available(macOS, introduced: 14.0, deprecated: 15.0, renamed: "NavigationListCoverLayout")
+@available(tvOS, introduced: 17.0, deprecated: 18.0, renamed: "NavigationListCoverLayout")
+@available(watchOS, introduced: 10.0, deprecated: 11.0, renamed: "NavigationListCoverLayout")
+@available(visionOS, introduced: 1.0, deprecated: 2.0, renamed: "NavigationListCoverLayout")
 public struct NavigationListCoverLayoutView<
     Content: View,
     Cover: View,

@@ -41,6 +41,15 @@ All four share the same modifier surface: `.backButtonHidden()`, `.backConfirmat
 `NavigationListLayoutView`, `NavigationCoverLayoutView`, `NavigationListCoverLayoutView`).
 Keep them building, do not add to them, and route new work to the names above.
 
+They carry the same per-platform annotation OversizeUI puts on `LayoutView` and friends —
+`@available(iOS, introduced: 17.0, deprecated: 18.0, renamed: "NavigationLayout")`, one line per
+platform. Deprecating at the version where the replacement became available means the package,
+which still deploys to iOS 17, builds warning-free while a consumer on iOS 18 gets the fix-it.
+
+The fix-it is not a drop-in swap: the old views take `LayoutView.ScrollAction`
+(`(CGPoint, CGFloat)`) where the new ones take `(CGFloat, CGFloat)`, and the default background
+moved from `backgroundPrimary` to `backgroundSecondary`. Read the call site after applying it.
+
 ### Back Button
 
 Whether a layout installs its own back control, and which glyph it uses, is decided by

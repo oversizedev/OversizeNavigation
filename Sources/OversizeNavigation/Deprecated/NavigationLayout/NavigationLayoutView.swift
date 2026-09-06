@@ -7,6 +7,11 @@ import NavigatorUI
 import OversizeUI
 import SwiftUI
 
+@available(iOS, introduced: 17.0, deprecated: 18.0, renamed: "NavigationLayout")
+@available(macOS, introduced: 14.0, deprecated: 15.0, renamed: "NavigationLayout")
+@available(tvOS, introduced: 17.0, deprecated: 18.0, renamed: "NavigationLayout")
+@available(watchOS, introduced: 10.0, deprecated: 11.0, renamed: "NavigationLayout")
+@available(visionOS, introduced: 1.0, deprecated: 2.0, renamed: "NavigationLayout")
 public struct NavigationLayoutView<
     Content: View,
     Background: View
