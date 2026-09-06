@@ -32,6 +32,8 @@ struct ManagedCoverScreen: View {
             coverBackground: { Color.orange }
         )
         .sectionTitlePosition(.inside)
+        // Substituted by a sheet on macOS, which has no title bar there.
+        .accessibilityIdentifier("screen.Managed cover")
         .navigationBack($isDismissed, to: .presentation)
     }
 }

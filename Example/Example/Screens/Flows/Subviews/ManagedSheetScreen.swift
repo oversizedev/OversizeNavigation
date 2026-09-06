@@ -32,6 +32,9 @@ struct ManagedSheetScreen: View {
             }
         }
         .listLayoutStyle(.insetGrouped)
+        // macOS gives a sheet no title bar, so `navigationTitle` is published nowhere and the UI
+        // tests cannot tell which sheet is on screen without the screen naming itself.
+        .accessibilityIdentifier("screen.Managed sheet")
         .navigationOpen($openDestination)
         .navigationBack($isDismissed, to: .presentation)
     }

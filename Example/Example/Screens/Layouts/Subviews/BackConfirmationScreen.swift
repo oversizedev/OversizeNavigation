@@ -31,6 +31,8 @@ struct BackConfirmationScreen: View {
         }
         .backConfirmationDialog(.discard)
         .sectionTitlePosition(.inside)
+        // As a sheet on macOS this screen has no title bar, so it names itself for the UI tests.
+        .accessibilityIdentifier(isSheet ? "screen.Sheet with confirmation" : "screen.Pushed with confirmation")
     }
 }
 

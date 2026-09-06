@@ -158,7 +158,42 @@ class ExampleUITestCase: XCTestCase {
             file: file,
             line: line
         )
-        XCTAssertTrue(control.isSelected, "Expected \(title) to stay selected", file: file, line: line)
+
+        XCTAssertTrue(
+            isSectionSelected(title, control: control),
+            "Expected \(title) to stay selected. \(selectionDiagnostics(title))",
+            file: file,
+            line: line
+        )
+    }
+
+    /// A tab bar button reports its own selection; a sidebar row is selected through the list that
+    /// contains it, so the flag can sit on the enclosing cell rather than on the row's button.
+    private func isSectionSelected(_ title: String, control: XCUIElement) -> Bool {
+        if control.isSelected {
+            return true
+        }
+
+        #if os(macOS)
+            let identifier = "sidebar.\(title.lowercased())"
+            for container in [app.cells, app.outlineRows, app.tableRows] {
+                let row = container.containing(.any, identifier: identifier).firstMatch
+                if row.exists, row.isSelected {
+                    return true
+                }
+            }
+        #endif
+
+        return false
+    }
+
+    private func selectionDiagnostics(_ title: String) -> String {
+        let identifier = "sidebar.\(title.lowercased())"
+        let row = app.buttons[identifier]
+        var report = "control=\(row.exists ? "exists" : "missing") selected=\(row.exists ? "\(row.isSelected)" : "-") "
+        report += "cells=\(app.cells.count) outlineRows=\(app.outlineRows.count) "
+        report += "windows=\(windowTitles)"
+        return report
     }
 
     /// The split root replaces the tab bar with a sidebar, which collapses into a stack in a
@@ -237,10 +272,14 @@ class ExampleUITestCase: XCTestCase {
 
     private func isShowingScreen(_ title: String) -> Bool {
         #if os(macOS)
-            // A Mac has no navigation bar: `navigationTitle` becomes the window's title, which is
-            // where the current screen actually announces itself. The toolbar carries no text at
-            // all, and the sidebar publishes rows labelled like the screens they open, so the
-            // window title is the only unambiguous source.
+            // A sheet has no title bar on macOS, so its `navigationTitle` is published nowhere at
+            // all; those screens name themselves instead.
+            if app.descendants(matching: .any)["screen.\(title)"].exists {
+                return true
+            }
+            // Otherwise `navigationTitle` becomes the window's title, which is where the current
+            // screen announces itself. The toolbar carries no text, and the sidebar publishes rows
+            // labelled like the screens they open, so the window title is the unambiguous source.
             if windowTitles.contains(title) {
                 return true
             }
