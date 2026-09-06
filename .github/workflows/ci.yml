@@ -49,6 +49,26 @@ jobs:
             exit 1
           fi
 
+  # A screen states navigation intents through the OversizeNavigation modifiers and never reaches
+  # for NavigatorUI. Nothing about that rule is enforced by the compiler — a screen that imports
+  # NavigatorUI builds fine and quietly erodes the facade — so it is checked here.
+  lint-screen-imports:
+    name: Lint screen imports
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Screens must not import NavigatorUI
+        run: |
+          set -euo pipefail
+          if grep -rln 'import NavigatorUI' Example/Example/Screens/; then
+            echo "The screens listed above import NavigatorUI." >&2
+            echo "Screens use the OversizeNavigation modifiers only; that import belongs to" >&2
+            echo "Example/Example/Navigation and Example/Example/Root." >&2
+            exit 1
+          fi
+
   build-example:
     name: Build Example
     needs: build
@@ -115,6 +135,7 @@ jobs:
       - build
       - test
       - lint-example-project
+      - lint-screen-imports
       - build-example
       - test-example
     if: github.ref == 'refs/heads/main'
