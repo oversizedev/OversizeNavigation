@@ -177,8 +177,7 @@ class ExampleUITestCase: XCTestCase {
         section.tap()
     }
 
-    /// A Mac renders `navigationTitle` into the window and its toolbar rather than into a
-    /// navigation bar, so the title has to be looked for in more than one place.
+    /// A Mac renders `navigationTitle` as the window's title rather than into a navigation bar.
     func assertScreen(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
         if waitForScreen(title) {
             return
@@ -196,9 +195,6 @@ class ExampleUITestCase: XCTestCase {
     private func titleDiagnostics(_ title: String) -> String {
         var report = ""
 
-        let windowTitles = (0 ..< min(app.windows.count, 3)).map { index in
-            app.windows.element(boundBy: index).title
-        }
         report += "windows=\(windowTitles) "
 
         let toolbarTexts = (0 ..< min(app.toolbars.staticTexts.count, 8)).map { index in
@@ -241,6 +237,13 @@ class ExampleUITestCase: XCTestCase {
 
     private func isShowingScreen(_ title: String) -> Bool {
         #if os(macOS)
+            // A Mac has no navigation bar: `navigationTitle` becomes the window's title, which is
+            // where the current screen actually announces itself. The toolbar carries no text at
+            // all, and the sidebar publishes rows labelled like the screens they open, so the
+            // window title is the only unambiguous source.
+            if windowTitles.contains(title) {
+                return true
+            }
             if app.toolbars.staticTexts[title].exists {
                 return true
             }
@@ -248,6 +251,13 @@ class ExampleUITestCase: XCTestCase {
         #else
             return app.navigationBars[title].exists
         #endif
+    }
+
+    /// The titles of the app's windows. On macOS the frontmost one names the current screen.
+    private var windowTitles: [String] {
+        (0 ..< min(app.windows.count, 4)).map { index in
+            app.windows.element(boundBy: index).title
+        }
     }
 
     /// The element that carries the current screen's title right now, or a query that does not
