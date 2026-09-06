@@ -26,7 +26,11 @@ final class AccessibilityTreeUITests: ExampleUITestCase {
         tapRow("hud.success")
         XCTAssertTrue(app.staticTexts["Success"].waitForExistence(timeout: 5))
 
-        XCTAssertTrue(app.buttons["hud.clear"].exists, "The HUD overlay hid the screen underneath it")
+        // Assert on the row that raised the HUD: it sits at the top of the first section and is
+        // therefore on screen on every device. `hud.clear` is in the second section, below the
+        // fold on an iPhone, so a `List` never builds it — its absence says nothing about the
+        // overlay and made this test pass on iPad while failing on iPhone.
+        XCTAssertTrue(app.buttons["hud.success"].exists, "The HUD overlay hid the screen underneath it")
         XCTAssertGreaterThan(app.staticTexts.count, 1)
     }
 }
