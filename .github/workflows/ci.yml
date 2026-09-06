@@ -27,6 +27,28 @@ jobs:
     uses: oversizedev/GithubWorkflows/.github/workflows/test.yml@main
     secrets: inherit
 
+  # Xcode 27 rewrites the project to objectVersion 110 on any save — including one xcodebuild
+  # performs itself — and the runner's Xcode cannot read that, so both Example jobs die with
+  # "Unable to read project" before compiling anything. preferredProjectObjectVersion does not
+  # prevent it. Catch it here, where the message says what to do, instead of in a build log.
+  lint-example-project:
+    name: Lint Example project format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Check objectVersion
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^[[:space:]]*objectVersion = \([0-9]*\);$/\1/p' \
+            Example/Example.xcodeproj/project.pbxproj)
+          if [ "$version" != "77" ]; then
+            echo "Example.xcodeproj is saved as objectVersion $version, expected 77." >&2
+            echo "Xcode 27 upgrades it on save; set it back to 77 before pushing." >&2
+            exit 1
+          fi
+
   build-example:
     name: Build Example
     needs: build
@@ -37,12 +59,64 @@ jobs:
       destination: generic/platform=iOS Simulator
     secrets: inherit
 
+  test-example:
+    name: Test Example (${{ matrix.family }})
+    needs: build
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      # The split root only has two columns in a regular width, so the sidebar tests are
+      # skipped on iPhone — both families have to run for the suite to mean anything.
+      matrix:
+        family: [iPhone, iPad]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup SwiftPM Config
+        run: |
+          echo "machine github.com login oversizedev password ${{ secrets.ACTIONS_TOKEN }}" > ~/.netrc
+          chmod 600 ~/.netrc
+          set -euo pipefail
+          defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidation -bool YES
+          defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+
+      - name: Pick a simulator
+        id: simulator
+        run: |
+          set -euo pipefail
+          udid=$(xcrun simctl list devices available --json | jq -r --arg family "${{ matrix.family }}" '
+            [ .devices
+              | to_entries[]
+              | select(.key | test("iOS"))
+              | .value[]
+              | select(.name | startswith($family))
+            ] | last | .udid')
+          if [ -z "$udid" ] || [ "$udid" = "null" ]; then
+            echo "No ${{ matrix.family }} simulator on this runner" >&2
+            xcrun simctl list devices available >&2
+            exit 1
+          fi
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+
+      - name: Run tests
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -skipPackagePluginValidation \
+            -project Example/Example.xcodeproj \
+            -scheme Example \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
+            | xcpretty && exit ${PIPESTATUS[0]}
+
   bump:
     name: Bump version
     needs:
       - build
       - test
+      - lint-example-project
       - build-example
+      - test-example
     if: github.ref == 'refs/heads/main'
     uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
     secrets: inherit

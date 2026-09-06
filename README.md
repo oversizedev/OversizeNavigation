@@ -444,6 +444,9 @@ xcodebuild test -project Example/Example.xcodeproj -scheme Example \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
 ```
 
+CI runs both, and the Example suite on an iPhone and an iPad: the split root only keeps two
+columns in a regular width, so its sidebar tests skip themselves on iPhone.
+
 ## License
 
 OversizeModels is available under the MIT license. See the [LICENSE](LICENSE) file for more info.

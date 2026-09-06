@@ -9,7 +9,13 @@ swift build          # Build the package
 swift build -c release  # Release build
 ```
 
-No Makefile — use `swift build` directly. CI runs via `workflows/` using GitHub Actions shared workflows from `oversizedev/GithubWorkflows`.
+No Makefile — use `swift build` directly. CI runs via `.github/workflows/ci.yml`, partly from the
+shared workflows in `oversizedev/GithubWorkflows`.
+
+`Example/Example.xcodeproj` must stay at `objectVersion = 77`. Xcode 27 upgrades it to 110 on any
+save — including one `xcodebuild` performs while running the tests — and the CI runner's Xcode
+then refuses to open the project at all. `preferredProjectObjectVersion` does not prevent this, so
+check the line after any Xcode session; the `lint-example-project` CI job fails loudly if it slips.
 
 ## Local Development
 
@@ -19,29 +25,43 @@ No Makefile — use `swift build` directly. CI runs via `workflows/` using GitHu
 
 ### Layout Views
 
-Four layout types live under `Sources/OversizeNavigation/`, each in its own folder with a `View` + `ViewModifier` file pair:
+Four layout types live under `Sources/OversizeNavigation/`, each in its own folder with a
+view + `ViewModifier` file pair:
 
 | Folder | View | Use case |
 |---|---|---|
-| `NavigationLayout/` | `NavigationLayoutView` | General scrollable content |
-| `NavigationListLayout/` | `NavigationListLayoutView` | List-optimized, supports `ListLayoutStyle` |
-| `NavigationCoverLayout/` | `NavigationCoverLayoutView` | Hero/cover with optional parallax |
-| `NavigationListCoverLayout/` | `NavigationListCoverLayoutView` | List with cover header |
+| `NavigationLayout/` | `NavigationLayout` | General scrollable content |
+| `NavigationListLayout/` | `NavigationListLayout` | List-optimized, supports `ListLayoutStyle` |
+| `NavigationCoverLayout/` | `NavigationCoverLayout` | Hero/cover with optional parallax |
+| `NavigationListCoverLayout/` | `NavigationListCoverLayout` | List with cover header |
 
 All four share the same modifier surface: `.backButtonHidden()`, `.backConfirmationDialog()`.
 
-### Navigator Integration
+`Deprecated/` holds the previous generation of the same four (`NavigationLayoutView`,
+`NavigationListLayoutView`, `NavigationCoverLayoutView`, `NavigationListCoverLayoutView`).
+Keep them building, do not add to them, and route new work to the names above.
 
-All layout views read `@Environment(\.navigator)` from the [Navigator](https://github.com/hmlongco/Navigator) package. Key APIs used internally:
+### Back Button
 
-- `navigator.back()` — pop/dismiss
-- `navigator.send<T>(_ value: T)` — send data to coordinator (used by `.navigationMove`)
-- `navigator.isPresented` + `navigator.count` — determine back button style (chevron.left for stack, xmark for modal root)
+Whether a layout installs its own back control, and which glyph it uses, is decided by
+`Models/BackButtonPolicy.swift` — a plain value over `isPresented`, `count`,
+`backButtonHidden(_:)` and whether a confirmation is set. It exists so that the rule is stated
+once and tested directly (`Tests/OversizeNavigationTests/BackButtonPolicyTests.swift`) instead of
+being re-derived inside each view. Every layout renders the control through the single
+`ViewModifier/NavigationLayoutBackToolbarModifier.swift`; nothing else should build that toolbar.
 
 SwiftUI reports `isPresented == true` for a `NavigationSplitView` detail column, so a stack that
 roots a column looks presented to Navigator and the layouts would show a close button that
 collapses the column. Screens that root a column or a tab opt out with `.backButtonHidden()`,
 which applies only while the stack is at its root — pushed screens keep their back button.
+
+### Navigator Integration
+
+The layouts read `@Environment(\.navigator)` from the [Navigator](https://github.com/hmlongco/Navigator) package. Key APIs used internally:
+
+- `navigator.back()` — pop/dismiss
+- `navigator.send<T>(_ value: T)` — send data to coordinator (used by `.navigationMove`)
+- `navigator.isPresented` + `navigator.count` — the inputs to `BackButtonPolicy`
 
 ### Navigation Invariants
 
@@ -51,7 +71,9 @@ them and `Example/ExampleUITests` pins each one down:
 - **One receive handler per destination type in the whole tree.** `navigator.send()` is a broadcast:
   `NavigationSendValues` hands the value to the handler that registered first and logs
   `additional receive handlers ignored` for the rest. Two stacks receiving the same type means a
-  push lands in a tab nobody is looking at, which reads as "nothing happened".
+  push lands in a tab nobody is looking at, which reads as "nothing happened". The Example
+  states the mapping once in `RootTabs.receivedDestinationType`; the stacks install from it and
+  `ExampleTests` asserts on it, so the two cannot drift.
 - **`.navigationOpen` for a screen navigating to its own stack, `.navigationMove` / `navigator.send()`
   only for a real broadcast** (deep link, tab switch from outside, share extension). `navigationOpen`
   navigates on the navigator in the environment, so a pushed screen — or a screen inside a sheet with
@@ -90,7 +112,14 @@ reference for the split.
 
 `.navigationCheckpoint()` and `.navigationLocked()` mirror NavigatorUI names and are marked
 `@_disfavoredOverload`, the same trick as `NavigationLink(to:)`: a file importing both modules gets
-NavigatorUI's, a file importing only this package gets ours.
+NavigatorUI's, a file importing only this package gets ours. Their bodies call the NavigatorUI
+overload by the same name, so the attribute is the only thing keeping them from recursing into
+themselves. Nothing in `Tests/` covers that — the test target imports NavigatorUI and therefore
+hits the original. The screens under `Example/Example/Screens`, which import this package alone,
+are the regression test; do not "simplify" them into importing NavigatorUI.
+
+Every modifier in the family takes a binding, performs the intent, and **resets the binding**, so
+the same intent can be stated twice in a row. A new one must do the same.
 
 Read-only stack state comes from `@Environment(\.navigationInfo)` — `depth`, `isRoot`,
 `isPresented`, `canReturn(to:)` — instead of reading the navigator directly.
