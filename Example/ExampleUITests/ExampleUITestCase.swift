@@ -63,11 +63,20 @@ class ExampleUITestCase: XCTestCase {
         let control = tabControl(title)
         XCTAssertTrue(
             control.waitForExistence(timeout: elementTimeout),
-            "No control opens \(title) in this layout",
+            "No control opens \(title) in this layout. \(launchDiagnostics())",
             file: file,
             line: line
         )
         control.tap()
+    }
+
+    /// Whether the app put anything on screen at all is the first question a "no control" failure
+    /// has to answer: a macOS launch that restored a zero-window scene publishes a menu bar over
+    /// an empty tree, and that reads identically to a wrong query unless the tree size is in the
+    /// message.
+    func launchDiagnostics() -> String {
+        "state=\(app.state.rawValue) windows=\(windowTitles) "
+            + "buttons=\(app.buttons.count) texts=\(app.staticTexts.count)"
     }
 
     /// The control that selects a section, whichever root is mounted. The last branch scans

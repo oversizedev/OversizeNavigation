@@ -32,5 +32,10 @@ enum ExampleLaunch {
                 at: libraryURL.appendingPathComponent("Saved Application State")
             )
         }
+        // Deleting only clears what an earlier instance wrote; these stop the record from being
+        // written at all, so a test launch that kills its predecessor mid-save has nothing to
+        // plant. Written after the wipe above, which would otherwise erase them.
+        UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
+        UserDefaults.standard.set(true, forKey: "ApplePersistenceIgnoreState")
     }
 }
