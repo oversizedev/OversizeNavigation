@@ -219,6 +219,15 @@ an afterthought. Four things behave differently there and are worth knowing befo
   Mac bar styling has to come from the toolbar itself.
 - **`.sensoryFeedback` is inert**, so the HUD and alert feedback paths do nothing on macOS. Keep
   the calls — they cost nothing and stay correct on the platforms that have haptics.
+- **An abrupt kill can poison window restoration.** A macOS app killed mid-flight — a crashed
+  UI test runner is enough — can record a scene with zero windows in a store keyed by bundle id
+  and served by a system daemon; every later launch then shows a menu bar over no window, which a
+  UI test reads as an empty accessibility tree. `-ApplePersistenceIgnoreState` does not cure it
+  and neither does deleting the container. `ExampleApp` opts out of restoration and
+  `ExampleLaunch.resetPersistedState()` wipes the app-side record under UI testing; if a local
+  machine is already poisoned, build with a fresh `PRODUCT_BUNDLE_IDENTIFIER` to get out. The
+  crash that plants it is why `ExampleUITestCase.setUp` must stay synchronous: an XCTest failure
+  with `continueAfterFailure = false` cannot unwind through an async `setUp` and kills the runner.
 
 The Example app starts on the split root on macOS and the tab root elsewhere
 (`RootType.defaultForPlatform`), and `ExampleUITestCase` branches per platform — a Mac has no tab

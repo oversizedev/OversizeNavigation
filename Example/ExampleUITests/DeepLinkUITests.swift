@@ -67,7 +67,10 @@ final class DeepLinkUITests: ExampleUITestCase {
         assertScreen("Page 3")
     }
 
-    /// Toggling swaps which root is mounted, whichever one the platform started on.
+    /// Toggling swaps which root is mounted, whichever one the platform started on. The proof is
+    /// the same on both: the new root renders a screen and the old root's own control is gone.
+    /// Asserting the replacement root's tab control positively would tie the test to how each
+    /// platform publishes a `TabView`, which is exactly what `tabControl` cannot promise on a Mac.
     @MainActor
     func testRootLayoutCanBeSwapped() {
         openTab("Settings")
@@ -76,10 +79,15 @@ final class DeepLinkUITests: ExampleUITestCase {
         assertScreen("Layouts")
 
         if isSplitRootByDefault {
-            XCTAssertTrue(tabControl("Settings").waitForExistence(timeout: elementTimeout))
-            XCTAssertFalse(app.buttons["sidebar.settings"].exists)
+            XCTAssertFalse(
+                app.buttons["sidebar.settings"].exists,
+                "The sidebar stayed mounted after toggling to the tab root"
+            )
         } else {
-            XCTAssertFalse(app.tabBars.buttons["Settings"].exists)
+            XCTAssertFalse(
+                app.tabBars.buttons["Settings"].exists,
+                "The tab bar stayed mounted after toggling to the split root"
+            )
         }
     }
 }

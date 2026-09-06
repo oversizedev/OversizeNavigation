@@ -34,7 +34,12 @@ class ExampleUITestCase: XCTestCase {
         #endif
     }
 
-    override func setUp() async throws {
+    /// Synchronous on purpose. With `continueAfterFailure = false` XCTest stops a failed test by
+    /// raising an Objective-C exception, and an exception raised while the case still has async
+    /// machinery on the stack cannot unwind through it — on macOS the runner process dies, xcodebuild
+    /// restarts it per remaining test, and one red assertion reads as thirty. The window the app
+    /// then fails to open on those relaunches is `ExampleApp`'s side of the same incident.
+    override func setUp() {
         continueAfterFailure = false
         app = XCUIApplication()
         app.launchArguments = ["-ExampleUITesting"]
