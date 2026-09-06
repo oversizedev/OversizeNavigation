@@ -52,5 +52,9 @@ let package = Package(
                 .product(name: "OversizeResources", package: "OversizeResources"),
             ]
         ),
+        .testTarget(
+            name: "OversizeNavigationTests",
+            dependencies: ["OversizeNavigation"]
+        ),
     ]
 )

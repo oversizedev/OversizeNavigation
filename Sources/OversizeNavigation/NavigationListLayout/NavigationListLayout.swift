@@ -3,7 +3,6 @@
 // NavigationListLayout.swift, created on 30.08.2026
 //
 
-import NavigatorUI
 import OversizeUI
 import SwiftUI
 

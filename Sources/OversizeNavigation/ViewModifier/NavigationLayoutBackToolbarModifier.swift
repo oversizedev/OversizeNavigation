@@ -21,8 +21,15 @@ struct NavigationLayoutBackToolbarModifier: ViewModifier {
                 if isShowBackButton {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(role: .cancel, action: handleBackButtonTap) {
-                            backImage.icon()
+                            #if os(macOS)
+                                Text("Cancel")
+                            #else
+                                backImage.icon()
+                            #endif
                         }
+                        #if os(macOS)
+                        .controlSize(.large)
+                        #endif
                         .confirmationDialog(
                             backConfirmation?.title ?? "Are you sure?",
                             isPresented: $isBackConfirmationPresented,
@@ -67,35 +74,29 @@ struct NavigationLayoutBackToolbarModifier: ViewModifier {
         isBackConfirmationPresented = false
     }
 
+    private var backButtonPolicy: BackButtonPolicy {
+        .init(
+            isPresented: navigator.isPresented,
+            count: navigator.count,
+            isBackButtonHidden: isBackButtonHidden,
+            hasBackConfirmation: backConfirmation != nil
+        )
+    }
+
     private var isInteractiveBackDisabled: Bool {
-        backConfirmation != nil
+        backButtonPolicy.isInteractiveBackDisabled
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil || isBackButtonAtRootHidden
-    }
-
-    private var isBackButtonAtRootHidden: Bool {
-        isBackButtonHidden == true && navigator.count == 0
+        backButtonPolicy.isNavigationBarBackButtonHidden
     }
 
     private var isShowBackButton: Bool {
-        if isBackButtonAtRootHidden {
-            return false
-        }
-        if navigator.isPresented {
-            if navigator.count == 0 {
-                return true
-            } else {
-                return backConfirmation != nil
-            }
-        } else {
-            return backConfirmation != nil
-        }
+        backButtonPolicy.isShowBackButton
     }
 
     private var backImage: Image {
-        if navigator.isPresented, navigator.count == 0 {
+        if backButtonPolicy.isPresentationRoot {
             if #available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) {
                 Image(systemName: "xmark")
             } else {

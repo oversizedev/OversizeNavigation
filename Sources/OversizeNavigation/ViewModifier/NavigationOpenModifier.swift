@@ -20,6 +20,7 @@ private struct NavigationOpenModifier<Destination: Hashable & Equatable>: ViewMo
                         open(navigationDestination, on: navigator)
                     } else {
                         Log.error("navigationOpen received a value that does not conform to NavigationDestination: \(destination)")
+                        assertionFailure("navigationOpen received a value that does not conform to NavigationDestination: \(destination)")
                         navigator.push(destination)
                     }
                     self.destination = nil

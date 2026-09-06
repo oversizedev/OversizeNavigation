@@ -231,6 +231,16 @@ struct MyView: View {
 }
 ```
 
+`navigationBack` also states *how far* to leave, so one modifier covers every depth:
+
+```swift
+.navigationBack($trigger)                          // pop one screen
+.navigationBack($trigger, to: .presentation)       // close the whole sheet or cover
+.navigationBack($trigger, to: .allPresentations) { result in
+    // back to the root; fails when a `.navigationLocked()` screen is on the stack
+}
+```
+
 #### Navigate with Data
 
 ```swift
@@ -413,6 +423,39 @@ struct SettingsRow: View {
     }
 }
 ```
+
+## Example App
+
+`Example/Example.xcodeproj` contains a runnable demo built the way a real app is: one root
+navigator, one `ManagedNavigationStack` per tab, and destinations declared as enums.
+
+```
+Example/Example/
+  App/          Scene entry point, presentationHUDRoot and bar appearance
+  Root/         RootView (navigationRoot), RootTabView, RootSplitView
+  Navigation/   RootTabs, destinations, checkpoints, routes, per-tab stacks
+  Screens/      Layouts, Flows, Presentation and Settings demos
+```
+
+The four tabs cover the whole surface of the package:
+
+| Tab | What it shows |
+|---|---|
+| Layouts | All four layouts, every `ListLayoutStyle`, cover styles, and both back confirmations |
+| Flows | Push, managed sheet and cover, `navigationOpen`, `navigationMove`, `navigationBack`, checkpoints, routes and `navigationLocked` |
+| Presentation | Every `HUD` case with its three-item stack, every `AppAlert`, `contentUnavailable` and `errorState` |
+| Settings | A tab root with `backButtonHidden`, and swapping the root between tabs and split |
+
+Run it from Xcode, or drive the tests:
+
+```bash
+swift test                                   # package tests
+xcodebuild test -project Example/Example.xcodeproj -scheme Example \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
+```
+
+CI runs both, and the Example suite on an iPhone and an iPad: the split root only keeps two
+columns in a regular width, so its sidebar tests skip themselves on iPhone.
 
 ## License
 

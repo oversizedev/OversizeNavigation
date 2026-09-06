@@ -7,6 +7,11 @@ import NavigatorUI
 import OversizeUI
 import SwiftUI
 
+@available(iOS, introduced: 17.0, deprecated: 18.0, renamed: "NavigationLayout")
+@available(macOS, introduced: 14.0, deprecated: 15.0, renamed: "NavigationLayout")
+@available(tvOS, introduced: 17.0, deprecated: 18.0, renamed: "NavigationLayout")
+@available(watchOS, introduced: 10.0, deprecated: 11.0, renamed: "NavigationLayout")
+@available(visionOS, introduced: 1.0, deprecated: 2.0, renamed: "NavigationLayout")
 public struct NavigationLayoutView<
     Content: View,
     Background: View
@@ -80,35 +85,29 @@ public struct NavigationLayoutView<
         isBackConfirmationPresented = false
     }
 
+    private var backButtonPolicy: BackButtonPolicy {
+        .init(
+            isPresented: navigator.isPresented,
+            count: navigator.count,
+            isBackButtonHidden: isBackButtonHidden,
+            hasBackConfirmation: backConfirmation != nil
+        )
+    }
+
     private var isInteractiveBackDisabled: Bool {
-        backConfirmation != nil
+        backButtonPolicy.isInteractiveBackDisabled
     }
 
     private var isNavigationBarBackButtonHidden: Bool {
-        backConfirmation != nil || isBackButtonAtRootHidden
-    }
-
-    private var isBackButtonAtRootHidden: Bool {
-        isBackButtonHidden == true && navigator.count == 0
+        backButtonPolicy.isNavigationBarBackButtonHidden
     }
 
     private var isShowBackButton: Bool {
-        if isBackButtonAtRootHidden {
-            return false
-        }
-        if navigator.isPresented {
-            if navigator.count == 0 {
-                return true
-            } else {
-                return backConfirmation != nil
-            }
-        } else {
-            return backConfirmation != nil
-        }
+        backButtonPolicy.isShowBackButton
     }
 
     private var backImage: Image {
-        if navigator.isPresented, navigator.count == 0 {
+        if backButtonPolicy.isPresentationRoot {
             if #available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) {
                 Image(systemName: "xmark")
             } else {
