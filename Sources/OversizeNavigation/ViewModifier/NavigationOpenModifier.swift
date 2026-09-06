@@ -19,7 +19,11 @@ private struct NavigationOpenModifier<Destination: Hashable & Equatable>: ViewMo
                     if let navigationDestination = destination as? any NavigationDestination {
                         open(navigationDestination, on: navigator)
                     } else {
+                        // The loose constraint is what lets a feature package state a destination
+                        // it cannot see the conformance of, so this is the one place a broken
+                        // contract survives to runtime. Fail the debug build; push anyway in release.
                         Log.error("navigationOpen received a value that does not conform to NavigationDestination: \(destination)")
+                        assertionFailure("navigationOpen received a value that does not conform to NavigationDestination: \(destination)")
                         navigator.push(destination)
                     }
                     self.destination = nil
