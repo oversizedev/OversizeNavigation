@@ -7,7 +7,7 @@ import NavigatorUI
 
 /// High-level places in the app. A route may need several navigation steps, so callers
 /// only name the destination and let ``ExampleRouter`` decide how to get there.
-enum ExampleRoutes: NavigationRoutes, Sendable {
+enum ExampleRoutes: NavigationRoutes, CaseIterable, Sendable {
     case about
     case hud
     case deepPage
@@ -24,6 +24,14 @@ extension ExampleRoutes {
         case .deepPage:
             [RootTabs.flows, FlowsDestinations.page(2), FlowsDestinations.page(3)]
         }
+    }
+}
+
+extension ExampleRoutes {
+    /// The same values in the shape `navigationMove(values:)` takes, for a screen that performs
+    /// the broadcast itself instead of going through the router.
+    var moveValues: [AnyHashable] {
+        values.map { AnyHashable($0) }
     }
 }
 

@@ -9,15 +9,9 @@ import Testing
 
 @MainActor
 struct RootTabsTests {
-    @Test("Every tab is reachable from both the tab bar and the sidebar")
-    func tabsAndSidebarCoverEveryCase() {
-        #expect(RootTabs.tabs == RootTabs.allCases)
-        #expect(RootTabs.sidebar == RootTabs.allCases)
-    }
-
     @Test("Tabs keep the order the app is documented with")
     func tabOrder() {
-        #expect(RootTabs.tabs == [.layouts, .flows, .presentation, .settings])
+        #expect(RootTabs.allCases == [.layouts, .flows, .presentation, .settings])
     }
 
     @Test("Identifiers are unique and stable")
@@ -42,7 +36,7 @@ struct DestinationMethodTests {
     func layoutsMethods() {
         #expect(LayoutsDestinations.backConfirmationSheet.method == .managedSheet)
 
-        for destination in LayoutsDestinations.catalog where destination != .backConfirmationSheet {
+        for destination in LayoutsDestinations.allCases where destination != .backConfirmationSheet {
             #expect(destination.method == .push)
         }
     }
@@ -75,7 +69,7 @@ struct DestinationMethodTests {
 struct LayoutsCatalogTests {
     @Test("The catalog lists every layout destination")
     func catalogIsComplete() {
-        #expect(LayoutsDestinations.catalog.count == 7)
+        #expect(LayoutsDestinations.catalog == LayoutsDestinations.allCases)
         #expect(Set(LayoutsDestinations.catalog.map(\.id)).count == LayoutsDestinations.catalog.count)
     }
 
@@ -89,36 +83,33 @@ struct LayoutsCatalogTests {
 }
 
 /// A value sent through the navigator is delivered to the handler registered for its type, and
-/// only to the first one. Nothing checks that at compile time, so the routing table each stack
-/// declares with `navigationAutoReceive` is mirrored here and asserted on.
+/// only to the first one. `NavigationStacks` installs those handlers from
+/// ``RootTabs/receivedDestinationType``, so these tests read the same table the app does —
+/// a second stack claiming a type someone else owns shows up here rather than as a push that
+/// silently lands in a tab nobody is looking at.
 @MainActor
 struct ReceiveHandlerTests {
-    private static let handlers: [(tab: RootTabs, destination: Any.Type)] = [
-        (.layouts, LayoutsDestinations.self),
-        (.flows, FlowsDestinations.self),
-        (.presentation, PresentationDestinations.self),
-        (.settings, SettingsDestinations.self),
-    ]
-
-    private static var receivedTypeNames: Set<String> {
-        Set(handlers.map { String(describing: $0.destination) })
+    private static var receivedTypeNames: [String] {
+        RootTabs.allCases.map { String(describing: $0.receivedDestinationType) }
     }
 
     @Test("Each destination type is received by exactly one stack")
     func oneHandlerPerType() {
-        #expect(Self.receivedTypeNames.count == Self.handlers.count)
+        let names = Self.receivedTypeNames
+
+        #expect(Set(names).count == names.count)
     }
 
-    @Test("Every tab installs a handler")
+    @Test("Every tab installs a handler for a type of its own")
     func everyTabReceivesSomething() {
-        #expect(Set(Self.handlers.map(\.tab)) == Set(RootTabs.allCases))
+        #expect(Self.receivedTypeNames.count == RootTabs.allCases.count)
     }
 
     @Test("A route only sends values some stack is waiting for")
     func routesStayWithinTheTable() {
-        let received = Self.receivedTypeNames
+        let received = Set(Self.receivedTypeNames)
 
-        for route in [ExampleRoutes.about, .hud, .deepPage] {
+        for route in ExampleRoutes.allCases {
             for value in route.values.dropFirst() {
                 #expect(received.contains(String(describing: type(of: value))))
             }
@@ -128,10 +119,12 @@ struct ReceiveHandlerTests {
     @Test("A route pushes into the tab it selected")
     func routesPushIntoTheTabTheySelect() {
         let owner: [String: RootTabs] = Dictionary(
-            uniqueKeysWithValues: Self.handlers.map { (String(describing: $0.destination), $0.tab) }
+            uniqueKeysWithValues: RootTabs.allCases.map {
+                (String(describing: $0.receivedDestinationType), $0)
+            }
         )
 
-        for route in [ExampleRoutes.about, .hud, .deepPage] {
+        for route in ExampleRoutes.allCases {
             guard let tab = route.values.first as? RootTabs else {
                 Issue.record("\(route) does not start by selecting a tab")
                 continue

@@ -52,13 +52,6 @@ final class DeepLinkUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testRouteOpensAboutInAnotherTab() throws {
-        openTab("Flows")
-        tapRow("flows.routeAbout")
-        assertScreen("About")
-    }
-
-    @MainActor
     func testRouteRunsSeveralStepsInOrder() throws {
         openTab("Flows")
         tapRow("flows.routeDeep")

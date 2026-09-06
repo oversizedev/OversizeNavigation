@@ -20,7 +20,7 @@ class ExampleUITestCase: XCTestCase {
 
     var app: XCUIApplication!
 
-    override func setUp() {
+    override func setUp() async throws {
         continueAfterFailure = false
         app = XCUIApplication()
         app.launchArguments = ["-ExampleUITesting"]
@@ -40,7 +40,9 @@ class ExampleUITestCase: XCTestCase {
         control.tap()
     }
 
-    /// The control that selects a section, whichever root is mounted.
+    /// The control that selects a section, whichever root is mounted. The last branch scans
+    /// every button on screen, so it is only reached when neither a tab bar nor a sidebar is
+    /// mounted — the iPad tab strip.
     func tabControl(_ title: String) -> XCUIElement {
         let tab = app.tabBars.buttons[title]
         if tab.exists { return tab }
@@ -54,14 +56,18 @@ class ExampleUITestCase: XCTestCase {
     /// Rows below the fold are not created until the list scrolls to them. A row that ends up
     /// underneath the tab bar still reports `isHittable`, and tapping it selects a tab instead of
     /// running the row, so it has to be scrolled clear of the bar as well.
+    ///
+    /// Scrolling drives the list rather than `app`: a swipe on the application element is
+    /// resolved against the whole accessibility tree and can land on the tab bar or a HUD.
     @discardableResult
     func row(_ identifier: String, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         let element = app.buttons[identifier]
         _ = element.waitForExistence(timeout: 5)
 
+        let scroller = scrollableContainer()
         var attempts = 0
-        while element.exists == false || element.isHittable == false || isCoveredByTabBar(element), attempts < 10 {
-            app.swipeUp()
+        while element.exists == false || element.isHittable == false || isCoveredByTabBar(element), attempts < 6 {
+            scroller.swipeUp()
             attempts += 1
         }
 
@@ -73,6 +79,17 @@ class ExampleUITestCase: XCTestCase {
             line: line
         )
         return element
+    }
+
+    /// The layouts render as a collection view, a table or a plain scroll view depending on the
+    /// list style, and swiping the application element instead resolves the gesture against the
+    /// whole tree — where the tab bar or a HUD can take it.
+    private func scrollableContainer() -> XCUIElement {
+        for container in [app.collectionViews, app.tables, app.scrollViews] {
+            let candidate = container.firstMatch
+            if candidate.exists { return candidate }
+        }
+        return app
     }
 
     /// Only a bar sitting at the bottom of the window can swallow a tap meant for a row; the

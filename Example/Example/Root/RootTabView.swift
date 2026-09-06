@@ -14,7 +14,7 @@ struct RootTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            ForEach(RootTabs.tabs) { tab in
+            ForEach(RootTabs.allCases) { tab in
                 Tab(value: tab) {
                     tab
                 } label: {

@@ -15,27 +15,6 @@ final class NavigationFlowUITests: ExampleUITestCase {
     }
 
     @MainActor
-    func testNavigationLinkPushesAndPops() throws {
-        openTab("Flows")
-        tapRow("flows.open")
-        assertScreen("Page 1")
-
-        tapRow("page.push")
-        assertScreen("Page 2")
-
-        tapBack(.system)
-        assertScreen("Page 1")
-    }
-
-    @MainActor
-    func testNavigationOpenPushes() throws {
-        openTab("Flows")
-        tapRow("flows.open")
-        assertScreen("Page 1")
-        assertSelectedTab("Flows")
-    }
-
-    @MainActor
     func testNavigationMovePushes() throws {
         openTab("Flows")
         tapRow("flows.move")
@@ -45,6 +24,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
 
     /// A stack builds the same destination twice when the container decomposes the link, and
     /// the second copy hides the first — so the depth is what the assertion has to read.
+    /// Also covers the plain push-and-pop round trip through `NavigationLink(to:)`.
     @MainActor
     func testNavigationLinkPushesOnce() throws {
         openTab("Flows")

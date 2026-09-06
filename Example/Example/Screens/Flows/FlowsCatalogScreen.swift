@@ -68,7 +68,7 @@ struct FlowsCatalogScreen: View {
                 ListRow(
                     "Send to the HUD screen",
                     subtitle: "navigationMove(values:) switches tab, then pushes",
-                    action: { moveValues = [RootTabs.presentation, PresentationDestinations.hud] }
+                    action: { moveValues = ExampleRoutes.hud.moveValues }
                 )
                 .accessibilityIdentifier("flows.sendHUD")
 

@@ -37,8 +37,17 @@ extension RootTabs: Tabable {
 }
 
 extension RootTabs {
-    static var tabs: [RootTabs] { allCases }
-    static var sidebar: [RootTabs] { allCases }
+    /// The destination type this tab installs a receive handler for. `navigator.send()` is a
+    /// broadcast that only the first registered handler answers, so the whole tree may declare
+    /// a type once — the stacks and the tests both read this single table.
+    var receivedDestinationType: any ReceivableDestination.Type {
+        switch self {
+        case .layouts: LayoutsDestinations.self
+        case .flows: FlowsDestinations.self
+        case .presentation: PresentationDestinations.self
+        case .settings: SettingsDestinations.self
+        }
+    }
 }
 
 extension RootTabs: @MainActor NavigationDestination {

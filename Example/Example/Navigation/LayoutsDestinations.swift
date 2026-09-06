@@ -6,7 +6,7 @@
 import NavigatorUI
 import SwiftUI
 
-enum LayoutsDestinations: Codable, Hashable, Sendable {
+enum LayoutsDestinations: Codable, CaseIterable, Hashable, Sendable {
     case navigationLayout
     case listLayout
     case selectableListLayout
@@ -51,17 +51,8 @@ extension LayoutsDestinations: @MainActor NavigationDestination {
 }
 
 extension LayoutsDestinations {
-    static var catalog: [LayoutsDestinations] {
-        [
-            .navigationLayout,
-            .listLayout,
-            .selectableListLayout,
-            .coverLayout,
-            .listCoverLayout,
-            .backConfirmationPushed,
-            .backConfirmationSheet,
-        ]
-    }
+    /// The catalog is the whole enum: a new layout demo shows up in the list by existing.
+    static var catalog: [LayoutsDestinations] { allCases }
 
     var title: String {
         switch self {

@@ -40,7 +40,7 @@ struct ExampleRouterTests {
 
     @Test("Every route starts by selecting the tab that owns the screen")
     func everyRouteStartsWithATab() {
-        for route in [ExampleRoutes.about, .hud, .deepPage] {
+        for route in ExampleRoutes.allCases {
             #expect(route.values.first as? RootTabs != nil)
         }
     }

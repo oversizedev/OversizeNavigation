@@ -26,7 +26,7 @@ private struct SidebarView: View {
     var body: some View {
         List(selection: $selectedTab) {
             Section("Example") {
-                ForEach(RootTabs.sidebar) { tab in
+                ForEach(RootTabs.allCases) { tab in
                     NavigationLink(value: tab) {
                         Label { Text(tab.title) } icon: { tab.icon }
                     }
