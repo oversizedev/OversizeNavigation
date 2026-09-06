@@ -34,7 +34,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
         tapRow("page.push")
         assertScreen("Page 2")
 
-        XCTAssertTrue(app.staticTexts["Pushed 2 deep"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Pushed 2 deep"].waitForExistence(timeout: elementTimeout / 2))
 
         tapBack(.system)
         assertScreen("Page 1")
@@ -50,7 +50,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
         assertScreen("Page 2")
         assertSelectedTab("Flows")
 
-        XCTAssertTrue(app.staticTexts["Pushed 2 deep"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Pushed 2 deep"].waitForExistence(timeout: elementTimeout / 2))
     }
 
     /// `navigationMove` broadcasts, and the first registered handler answers — from a pushed
@@ -76,7 +76,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
 
         tapRow("page.sheet")
         XCTAssertTrue(
-            waitForScreen("Managed sheet", timeout: 3),
+            waitForScreen("Managed sheet", timeout: elementTimeout / 4),
             "The sheet did not present while the screen that asked for it was still on screen"
         )
 
@@ -94,7 +94,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
 
         tapRow("page.backWithHUD")
         XCTAssertTrue(
-            waitForScreen("Flows", timeout: 3),
+            waitForScreen("Flows", timeout: elementTimeout / 4),
             "The screen stayed on display after the pop was requested"
         )
         XCTAssertTrue(app.staticTexts["Deleted"].exists)

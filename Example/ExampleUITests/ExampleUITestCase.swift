@@ -20,6 +20,20 @@ class ExampleUITestCase: XCTestCase {
 
     var app: XCUIApplication!
 
+    /// How long to wait for an element before calling it missing.
+    ///
+    /// A Mac runner is markedly slower to bring the window up than a simulator: the CI log shows
+    /// a passing `testEveryTabIsReachable` taking nine seconds, with other tests failing at the
+    /// ten second mark on the very same sidebar. A short budget turns that into "no control
+    /// opens Flows", which reads like a broken query rather than a slow launch.
+    var elementTimeout: TimeInterval {
+        #if os(macOS)
+            30
+        #else
+            10
+        #endif
+    }
+
     override func setUp() async throws {
         continueAfterFailure = false
         app = XCUIApplication()
@@ -43,7 +57,7 @@ class ExampleUITestCase: XCTestCase {
     func openTab(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
         let control = tabControl(title)
         XCTAssertTrue(
-            control.waitForExistence(timeout: 10),
+            control.waitForExistence(timeout: elementTimeout),
             "No control opens \(title) in this layout",
             file: file,
             line: line
@@ -79,7 +93,7 @@ class ExampleUITestCase: XCTestCase {
     @discardableResult
     func row(_ identifier: String, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
         let element = app.buttons[identifier]
-        _ = element.waitForExistence(timeout: 5)
+        _ = element.waitForExistence(timeout: elementTimeout / 2)
 
         let scroller = scrollableContainer()
         var attempts = 0
@@ -153,7 +167,7 @@ class ExampleUITestCase: XCTestCase {
     func assertSelectedTab(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
         let control = tabControl(title)
         XCTAssertTrue(
-            control.waitForExistence(timeout: 10),
+            control.waitForExistence(timeout: elementTimeout),
             "No control opens \(title) in this layout",
             file: file,
             line: line
@@ -201,14 +215,19 @@ class ExampleUITestCase: XCTestCase {
     func openSidebarSection(_ tab: String, file: StaticString = #filePath, line: UInt = #line) {
         let section = app.buttons["sidebar.\(tab)"]
 
-        if section.waitForExistence(timeout: 5) == false {
+        if section.waitForExistence(timeout: elementTimeout / 2) == false {
             let back = backNavigationBars.buttons.firstMatch
             if back.exists {
                 back.tap()
             }
         }
 
-        XCTAssertTrue(section.waitForExistence(timeout: 10), "No sidebar section \(tab)", file: file, line: line)
+        XCTAssertTrue(
+            section.waitForExistence(timeout: elementTimeout),
+            "No sidebar section \(tab)",
+            file: file,
+            line: line
+        )
         section.tap()
     }
 
@@ -258,7 +277,8 @@ class ExampleUITestCase: XCTestCase {
     /// text at all — so an element captured from the first snapshot can be one that will never
     /// exist, and waiting on it fails even after the real title appears.
     @discardableResult
-    func waitForScreen(_ title: String, timeout: TimeInterval = 10) -> Bool {
+    func waitForScreen(_ title: String, timeout: TimeInterval? = nil) -> Bool {
+        let timeout = timeout ?? elementTimeout
         let deadline = Date().addingTimeInterval(timeout)
         repeat {
             if isShowingScreen(title) {
@@ -352,7 +372,7 @@ class ExampleUITestCase: XCTestCase {
     func tapBack(_ control: BackControl, file: StaticString = #filePath, line: UInt = #line) {
         let button = backButton(control)
         XCTAssertTrue(
-            button.waitForExistence(timeout: 10),
+            button.waitForExistence(timeout: elementTimeout),
             "No \(control) back control on screen",
             file: file,
             line: line
@@ -397,7 +417,12 @@ class ExampleUITestCase: XCTestCase {
 
     func tapDialogButton(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
         let button = app.buttons[title]
-        XCTAssertTrue(button.waitForExistence(timeout: 10), "No \(title) button", file: file, line: line)
+        XCTAssertTrue(
+            button.waitForExistence(timeout: elementTimeout),
+            "No \(title) button",
+            file: file,
+            line: line
+        )
         button.tap()
     }
 
@@ -408,11 +433,21 @@ class ExampleUITestCase: XCTestCase {
             let cancel = app.sheets.buttons["Cancel"].exists
                 ? app.sheets.buttons["Cancel"]
                 : app.buttons["Cancel"]
-            XCTAssertTrue(cancel.waitForExistence(timeout: 10), "No dialog on screen", file: file, line: line)
+            XCTAssertTrue(
+                cancel.waitForExistence(timeout: elementTimeout),
+                "No dialog on screen",
+                file: file,
+                line: line
+            )
             cancel.tap()
         #else
             let region = app.otherElements["PopoverDismissRegion"]
-            XCTAssertTrue(region.waitForExistence(timeout: 10), "No dialog on screen", file: file, line: line)
+            XCTAssertTrue(
+                region.waitForExistence(timeout: elementTimeout),
+                "No dialog on screen",
+                file: file,
+                line: line
+            )
             region.tap()
         #endif
     }

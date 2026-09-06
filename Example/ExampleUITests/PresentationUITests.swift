@@ -15,11 +15,11 @@ final class PresentationUITests: ExampleUITestCase {
         tapRow("hud.success")
 
         let hud = app.staticTexts["Success"]
-        XCTAssertTrue(hud.waitForExistence(timeout: 5))
+        XCTAssertTrue(hud.waitForExistence(timeout: elementTimeout / 2))
 
         let disappeared = NSPredicate(format: "exists == false")
         expectation(for: disappeared, evaluatedWith: hud)
-        waitForExpectations(timeout: 15)
+        waitForExpectations(timeout: elementTimeout)
     }
 
     @MainActor
@@ -30,7 +30,7 @@ final class PresentationUITests: ExampleUITestCase {
 
         tapRow("hud.stack")
 
-        XCTAssertTrue(app.staticTexts["HUD 5"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["HUD 5"].waitForExistence(timeout: elementTimeout / 2))
         XCTAssertTrue(app.staticTexts["HUD 4"].exists)
         XCTAssertTrue(app.staticTexts["HUD 3"].exists)
         XCTAssertFalse(app.staticTexts["HUD 1"].exists)
@@ -43,13 +43,13 @@ final class PresentationUITests: ExampleUITestCase {
         assertScreen("HUD")
 
         tapRow("hud.stack")
-        XCTAssertTrue(app.staticTexts["HUD 5"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["HUD 5"].waitForExistence(timeout: elementTimeout / 2))
 
         tapRow("hud.clear")
 
         let cleared = NSPredicate(format: "exists == false")
         expectation(for: cleared, evaluatedWith: app.staticTexts["HUD 5"])
-        waitForExpectations(timeout: 10)
+        waitForExpectations(timeout: elementTimeout)
     }
 
     @MainActor
@@ -61,10 +61,10 @@ final class PresentationUITests: ExampleUITestCase {
         tapRow("alert.discard")
 
         let confirm = app.alerts.buttons["Discard"]
-        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        XCTAssertTrue(confirm.waitForExistence(timeout: elementTimeout / 2))
         confirm.tap()
 
-        XCTAssertTrue(app.staticTexts["discard"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["discard"].waitForExistence(timeout: elementTimeout / 2))
     }
 
     @MainActor
@@ -76,10 +76,10 @@ final class PresentationUITests: ExampleUITestCase {
         tapRow("alert.discard")
 
         let cancel = app.alerts.buttons["Cancel"]
-        XCTAssertTrue(cancel.waitForExistence(timeout: 5))
+        XCTAssertTrue(cancel.waitForExistence(timeout: elementTimeout / 2))
         cancel.tap()
 
-        XCTAssertTrue(app.staticTexts["None"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["None"].waitForExistence(timeout: elementTimeout / 2))
     }
 
     /// The demo starts in the empty state, so its overlay is already on screen; the pickers that
@@ -91,10 +91,10 @@ final class PresentationUITests: ExampleUITestCase {
         assertScreen("Loading states")
 
         let picker = statePicker()
-        XCTAssertTrue(picker.waitForExistence(timeout: 10), "The overlay covered the state picker")
+        XCTAssertTrue(picker.waitForExistence(timeout: elementTimeout), "The overlay covered the state picker")
 
         pickerOption(picker, "Result").tap()
-        XCTAssertTrue(app.staticTexts["Item 1"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Item 1"].waitForExistence(timeout: elementTimeout / 2))
     }
 
     /// A segmented picker is a segmented control on iOS and a radio group on a Mac.
