@@ -81,9 +81,11 @@ class ExampleUITestCase: XCTestCase {
 
     /// A sidebar row by its identifier, whatever element type the platform publishes it as.
     /// A `NavigationLink` row was a button; a plain selectable `Label` row is a cell on macOS
-    /// and a static text elsewhere, so the query cannot commit to a type.
+    /// and a static text elsewhere, so the query cannot commit to a type. `firstMatch` because
+    /// iPadOS publishes the identifier on the cell and again on its content — a strict query
+    /// refuses to tap what is one row on screen.
     func sidebarRow(_ identifier: String) -> XCUIElement {
-        app.descendants(matching: .any)[identifier]
+        app.descendants(matching: .any)[identifier].firstMatch
     }
 
     /// The control that selects a section, whichever root is mounted. The last branch scans

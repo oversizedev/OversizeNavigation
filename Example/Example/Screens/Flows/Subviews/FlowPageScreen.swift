@@ -18,6 +18,8 @@ struct FlowPageScreen: View {
     @State private var moveDestination: FlowsDestinations?
     @State private var hud: OversizeNavigation.HUD?
     @State private var backReport: String = "none"
+    @State private var depthHistory: String = ""
+    @State private var appearedAt: Date = .init()
 
     var body: some View {
         NavigationLayout("Page \(number)") {
@@ -27,6 +29,9 @@ struct FlowPageScreen: View {
 
                 Row("Back result", subtitle: "back=\(backReport)")
                     .accessibilityIdentifier("page.backReport")
+
+                Row("Depth history", subtitle: "history=\(depthHistory)")
+                    .accessibilityIdentifier("page.depthHistory")
             }
 
             Section("Go deeper") {
@@ -87,6 +92,13 @@ struct FlowPageScreen: View {
             }
         }
         .sectionTitlePosition(.inside)
+        // When the split root wipes the stack's path, the wipe is invisible on screen — the
+        // pushed view stays up while the navigator reads empty. Recording every depth change
+        // with its offset from appearance puts the exact moment into the failure diagnostics.
+        .onChange(of: navigationInfo.depth) { oldDepth, newDepth in
+            let offset = String(format: "%.1f", Date().timeIntervalSince(appearedAt))
+            depthHistory += " \(oldDepth)>\(newDepth)@\(offset)s"
+        }
         .navigationBack($isBackTriggered) { result in
             // Rendered so a UI test failure can read whether the pop ran and what it claimed:
             // `true` means the navigator removed a path entry that never left the screen,
