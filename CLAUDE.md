@@ -209,12 +209,22 @@ an afterthought. Four things behave differently there and are worth knowing befo
   states the substitution once as `.platformManagedCover` / `.platformCover`; destinations use
   those rather than re-deriving it. Its `#if` mirrors NavigatorUI's own condition instead of
   naming macOS, so visionOS — which has no cover either — is covered by the same line.
-- **The back control is a labelled button.** A Mac toolbar labels its controls, so
-  `NavigationLayoutBackToolbarModifier` renders text there instead of a glyph. Which word it is
-  comes from `BackButtonPolicy.backButtonRole` — `.close` at the root of a presentation, `.pop`
-  otherwise — the same value that picks the glyph on iOS and the accessibility identifier
-  (`navigationBack.close` / `navigationBack.pop`) on both. A `#if os(macOS)` branch that decides
-  the label on its own is how macOS ended up labelling every pop "Cancel".
+- **The back control is a labelled button in a pane header, not a window toolbar item.**
+  `NavigationLayoutBackToolbarModifier` renders it through `safeAreaInset(edge: .top)` on macOS:
+  the stacks live beside a plain split pane (see the next bullet), and a window toolbar cannot
+  place an item over a pane — SwiftUI has no tracking separator. The header shows on every
+  pushed screen (replacing the system back button it hides) and wherever the policy installs a
+  control. Which word it is comes from `BackButtonPolicy.backButtonRole` — `.close` at the root
+  of a presentation, `.pop` otherwise — the same value that picks the glyph on iOS and the
+  accessibility identifier (`navigationBack.close` / `navigationBack.pop`) on both. A
+  `#if os(macOS)` branch that decides the label on its own is how macOS ended up labelling every
+  pop "Cancel".
+- **A stack cannot sit in a `NavigationSplitView` detail column.** The column races the stack
+  for its bound path on macOS: a programmatic push renders the screen while the path is wiped
+  back to empty, so every later pop and push silently dies — whatever drives the sidebar
+  selection, and however the operation is deferred. The same stack inside a sheet keeps its
+  path. The Example hosts its macOS sidebar beside an `HSplitView` instead; iPadOS keeps the
+  native split, which has no such race.
 - **`navigationBarAppearanceConfiguration()` is a no-op**, since it configures `UINavigationBar`.
   Mac bar styling has to come from the toolbar itself.
 - **`.sensoryFeedback` is inert**, so the HUD and alert feedback paths do nothing on macOS. Keep
