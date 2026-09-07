@@ -17,12 +17,16 @@ struct FlowPageScreen: View {
     @State private var openDestination: FlowsDestinations?
     @State private var moveDestination: FlowsDestinations?
     @State private var hud: OversizeNavigation.HUD?
+    @State private var backReport: String = "none"
 
     var body: some View {
         NavigationLayout("Page \(number)") {
             Section("Where am I") {
                 Row("Depth", subtitle: "Pushed \(navigationInfo.depth) deep")
                     .accessibilityIdentifier("page.depth")
+
+                Row("Back result", subtitle: "back=\(backReport)")
+                    .accessibilityIdentifier("page.backReport")
             }
 
             Section("Go deeper") {
@@ -83,7 +87,17 @@ struct FlowPageScreen: View {
             }
         }
         .sectionTitlePosition(.inside)
-        .navigationBack($isBackTriggered)
+        .navigationBack($isBackTriggered) { result in
+            // Rendered so a UI test failure can read whether the pop ran and what it claimed:
+            // `true` means the navigator removed a path entry that never left the screen,
+            // `false` means it found nothing to pop — two very different macOS defects.
+            switch result {
+            case let .success(didLeave):
+                backReport = "left=\(didLeave) depth=\(navigationInfo.depth)"
+            case let .failure(error):
+                backReport = "error=\(error)"
+            }
+        }
         .navigationReturn(to: KnownCheckpoints.flows, trigger: $isReturningToFlows)
         .navigationOpen($openDestination)
         .navigationMove($moveDestination)

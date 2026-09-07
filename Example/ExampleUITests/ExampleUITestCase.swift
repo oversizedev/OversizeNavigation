@@ -278,8 +278,12 @@ class ExampleUITestCase: XCTestCase {
         }
         report += "labelled=\(kinds) "
 
-        let texts = (0 ..< min(app.staticTexts.count, 12)).map { index in
-            app.staticTexts.element(boundBy: index).label
+        // Label and value both: macOS publishes some SwiftUI texts with the string in the
+        // element's value and an empty label, and a label-only report hides exactly the
+        // texts a failure needs to see.
+        let texts = (0 ..< min(app.staticTexts.count, 14)).map { index -> String in
+            let element = app.staticTexts.element(boundBy: index)
+            return "\(element.label)|\(element.value.map { "\($0)" } ?? "")"
         }
         report += "staticTexts=\(texts)"
 
@@ -478,6 +482,25 @@ class ExampleUITestCase: XCTestCase {
                 line: line
             )
             return button
+        #endif
+    }
+
+    /// Taps a button of the presented alert. macOS publishes alert buttons with no frame
+    /// (`{{inf, inf}, {0, 0}}`), so a pointer tap has no hit point there — the alert is driven
+    /// through its keyboard equivalents instead: Escape for the cancel role, Return for the
+    /// default action.
+    func tapAlertButton(
+        _ title: String,
+        cancels: Bool = false,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let button = alertButton(title, file: file, line: line)
+        #if os(macOS)
+            _ = button
+            app.typeKey(cancels ? XCUIKeyboardKey.escape : .return, modifierFlags: [])
+        #else
+            button.tap()
         #endif
     }
 

@@ -60,7 +60,7 @@ final class PresentationUITests: ExampleUITestCase {
 
         tapRow("alert.discard")
 
-        alertButton("Discard").tap()
+        tapAlertButton("Discard")
 
         XCTAssertTrue(staticText("discard").waitForExistence(timeout: elementTimeout / 2))
     }
@@ -73,7 +73,7 @@ final class PresentationUITests: ExampleUITestCase {
 
         tapRow("alert.discard")
 
-        alertButton("Cancel").tap()
+        tapAlertButton("Cancel", cancels: true)
 
         XCTAssertTrue(staticText("None").waitForExistence(timeout: elementTimeout / 2))
     }
