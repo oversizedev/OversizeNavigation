@@ -125,29 +125,6 @@ final class NavigationFlowUITests: ExampleUITestCase {
         assertScreen("Flows")
     }
 
-    /// Temporary probe, macOS only: the same programmatic push-and-pop that fails under the
-    /// split root, exercised under the tab root instead. Where this passes tells which half of
-    /// NavigationSplitView + NavigationStack owns the path wipe.
-    @MainActor
-    func testProgrammaticPopUnderTheTabRoot() throws {
-        #if os(macOS)
-            openTab("Settings")
-            tapRow("settings.toggleRoot")
-            assertScreen("Layouts")
-
-            openTab("Flows")
-            assertScreen("Flows")
-
-            tapRow("flows.open")
-            assertScreen("Page 1")
-
-            tapRow("page.back")
-            assertScreen("Flows")
-        #else
-            throw XCTSkip("The probe isolates a macOS split-view defect")
-        #endif
-    }
-
     @MainActor
     func testCheckpointReturnsFromDeepStack() {
         openTab("Flows")
