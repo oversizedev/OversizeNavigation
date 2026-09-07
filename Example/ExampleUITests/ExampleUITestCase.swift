@@ -79,11 +79,18 @@ class ExampleUITestCase: XCTestCase {
             + "buttons=\(app.buttons.count) texts=\(app.staticTexts.count)"
     }
 
+    /// A sidebar row by its identifier, whatever element type the platform publishes it as.
+    /// A `NavigationLink` row was a button; a plain selectable `Label` row is a cell on macOS
+    /// and a static text elsewhere, so the query cannot commit to a type.
+    func sidebarRow(_ identifier: String) -> XCUIElement {
+        app.descendants(matching: .any)[identifier]
+    }
+
     /// The control that selects a section, whichever root is mounted. The last branch scans
     /// every button on screen, so it is only reached when neither a tab bar nor a sidebar is
     /// mounted — the iPad tab strip.
     func tabControl(_ title: String) -> XCUIElement {
-        let sidebar = app.buttons["sidebar.\(title.lowercased())"]
+        let sidebar = sidebarRow("sidebar.\(title.lowercased())")
         if sidebar.exists {
             return sidebar
         }
@@ -150,7 +157,7 @@ class ExampleUITestCase: XCTestCase {
 
     /// Where the sidebar ends, or zero when no sidebar is mounted.
     private func sidebarTrailingEdge() -> CGFloat {
-        let anySidebarRow = app.buttons.matching(
+        let anySidebarRow = app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier BEGINSWITH %@", "sidebar.")
         ).firstMatch
 
@@ -217,7 +224,7 @@ class ExampleUITestCase: XCTestCase {
 
     private func selectionDiagnostics(_ title: String) -> String {
         let identifier = "sidebar.\(title.lowercased())"
-        let row = app.buttons[identifier]
+        let row = sidebarRow(identifier)
         var report = "control=\(row.exists ? "exists" : "missing") selected=\(row.exists ? "\(row.isSelected)" : "-") "
         report += "cells=\(app.cells.count) outlineRows=\(app.outlineRows.count) "
         report += "windows=\(windowTitles)"
@@ -227,7 +234,7 @@ class ExampleUITestCase: XCTestCase {
     /// The split root replaces the tab bar with a sidebar, which collapses into a stack in a
     /// compact width — there the sidebar is only reachable after popping the detail column.
     func openSidebarSection(_ tab: String, file: StaticString = #filePath, line: UInt = #line) {
-        let section = app.buttons["sidebar.\(tab)"]
+        let section = sidebarRow("sidebar.\(tab)")
 
         if section.waitForExistence(timeout: elementTimeout / 2) == false {
             let back = backNavigationBars.buttons.firstMatch
@@ -362,7 +369,12 @@ class ExampleUITestCase: XCTestCase {
         /// A static text with this title that is not part of the sidebar, or `nil` when the
         /// screen has not published one yet.
         private func detailStaticText(_ title: String) -> XCUIElement? {
-            let matches = app.staticTexts.matching(NSPredicate(format: "label == %@", title))
+            // Label or value: macOS publishes some SwiftUI texts with the string in the value —
+            // a sheet's pushed screen carries its title only there, since a Mac sheet has no
+            // title bar and no toolbar text.
+            let matches = app.staticTexts.matching(
+                NSPredicate(format: "label == %@ OR value == %@", title, title)
+            )
             let sidebarWidth = sidebarTrailingEdge()
 
             for index in 0 ..< matches.count {
@@ -486,9 +498,9 @@ class ExampleUITestCase: XCTestCase {
     }
 
     /// Taps a button of the presented alert. macOS publishes alert buttons with no frame
-    /// (`{{inf, inf}, {0, 0}}`), so a pointer tap has no hit point there — the alert is driven
-    /// through its keyboard equivalents instead: Escape for the cancel role, Return for the
-    /// default action.
+    /// (`{{inf, inf}, {0, 0}}`), so a plain pointer tap has no hit point there. The cancel role
+    /// has a reliable keyboard equivalent — Escape — but a destructive action deliberately has
+    /// none, so it is clicked through whichever related element still carries real geometry.
     func tapAlertButton(
         _ title: String,
         cancels: Bool = false,
@@ -497,11 +509,37 @@ class ExampleUITestCase: XCTestCase {
     ) {
         let button = alertButton(title, file: file, line: line)
         #if os(macOS)
-            _ = button
-            app.typeKey(cancels ? XCUIKeyboardKey.escape : .return, modifierFlags: [])
+            if cancels {
+                app.typeKey(XCUIKeyboardKey.escape, modifierFlags: [])
+                return
+            }
+            if button.isHittable {
+                button.tap()
+                return
+            }
+            let innerText = app.staticTexts.matching(
+                NSPredicate(format: "label == %@ OR value == %@", title, title)
+            ).firstMatch
+            if innerText.exists, innerText.isHittable {
+                innerText.tap()
+                return
+            }
+            app.typeKey(XCUIKeyboardKey.return, modifierFlags: [])
         #else
             button.tap()
         #endif
+    }
+
+    /// What the presented alert actually looks like to the tree, for failures around it.
+    func alertDiagnostics() -> String {
+        var report = "windows=\(windowTitles) dialogs=\(app.dialogs.count) sheets=\(app.sheets.count) alerts=\(app.alerts.count) "
+        let buttons = (0 ..< min(app.buttons.count, 20)).compactMap { index -> String? in
+            let element = app.buttons.element(boundBy: index)
+            guard element.identifier.hasPrefix("action-button") || element.frame.origin.x.isInfinite else { return nil }
+            return "\(element.identifier)|\(element.title)@\(element.frame.origin.x)"
+        }
+        report += "alertButtons=\(buttons)"
+        return report
     }
 
     /// A static text matched by label or value. macOS publishes some SwiftUI texts with the

@@ -48,7 +48,7 @@ final class DeepLinkUITests: ExampleUITestCase {
             // skip here is silent — a sidebar that exists but is slow to appear would otherwise
             // read as "iPhone" and quietly retire the test.
             try XCTSkipUnless(
-                app.buttons["sidebar.flows"].waitForExistence(timeout: elementTimeout),
+                sidebarRow("sidebar.flows").waitForExistence(timeout: elementTimeout),
                 "The sidebar needs a regular width"
             )
         }
@@ -80,7 +80,7 @@ final class DeepLinkUITests: ExampleUITestCase {
 
         if isSplitRootByDefault {
             XCTAssertFalse(
-                app.buttons["sidebar.settings"].exists,
+                sidebarRow("sidebar.settings").exists,
                 "The sidebar stayed mounted after toggling to the tab root"
             )
         } else {

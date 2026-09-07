@@ -62,7 +62,10 @@ final class PresentationUITests: ExampleUITestCase {
 
         tapAlertButton("Discard")
 
-        XCTAssertTrue(staticText("discard").waitForExistence(timeout: elementTimeout / 2))
+        XCTAssertTrue(
+            staticText("discard").waitForExistence(timeout: elementTimeout / 2),
+            "The discard action never ran. \(alertDiagnostics())"
+        )
     }
 
     @MainActor

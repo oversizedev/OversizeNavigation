@@ -27,16 +27,16 @@ private struct SidebarView: View {
         List(selection: $selectedTab) {
             Section("Example") {
                 ForEach(RootTabs.allCases) { tab in
-                    NavigationLink(value: tab) {
-                        Label { Text(tab.title) } icon: { tab.icon }
-                    }
-                    // Deliberately left as a container rather than collapsed with
-                    // `accessibilityElement(children: .ignore)`: collapsing it stops the row from
-                    // being published as a button, and `app.buttons["sidebar.flows"]` — which is
-                    // how every test reaches a section — silently finds nothing. The duplicate
-                    // titles this leaves in the tree are handled where they matter, in
-                    // `ExampleUITestCase.screenTitleElement`.
-                    .accessibilityIdentifier("sidebar.\(tab.id)")
+                    // A plain selectable row, not `NavigationLink(value:)`: a sidebar link makes
+                    // the split view treat the detail column as its navigation target, and on
+                    // macOS that wipes the detail stack's bound path after every push — the
+                    // pushed screen stays visible while the navigator reads an empty path, so
+                    // pops and further programmatic pushes silently stop working.
+                    Label { Text(tab.title) } icon: { tab.icon }
+                        .tag(tab)
+                        // The duplicate titles this row leaves in the tree are handled where
+                        // they matter, in `ExampleUITestCase.screenTitleElement`.
+                        .accessibilityIdentifier("sidebar.\(tab.id)")
                 }
             }
         }
