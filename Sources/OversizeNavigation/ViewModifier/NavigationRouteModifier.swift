@@ -16,8 +16,10 @@ private struct NavigationRouteModifier<Route: NavigationRoutes>: ViewModifier {
             .onChange(of: route) { _, route in
                 if let route {
                     Log.debug("🧭 [NAVIGATION] Route to: \(route)")
-                    navigator.perform(route: route)
                     self.route = nil
+                    deferNavigation { [navigator] in
+                        navigator.perform(route: route)
+                    }
                 }
             }
     }

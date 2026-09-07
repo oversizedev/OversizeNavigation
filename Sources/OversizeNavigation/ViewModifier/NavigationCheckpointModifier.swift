@@ -17,8 +17,10 @@ private struct NavigationReturnTriggerModifier<Value>: ViewModifier {
             .onChange(of: trigger) { _, trigger in
                 if trigger {
                     Log.debug("🧭 [NAVIGATION] Return to checkpoint: \(checkpoint.name)")
-                    navigator.returnToCheckpoint(checkpoint)
                     self.trigger = false
+                    deferNavigation { [checkpoint, navigator] in
+                        navigator.returnToCheckpoint(checkpoint)
+                    }
                 }
             }
     }
@@ -34,8 +36,10 @@ private struct NavigationReturnValueModifier<Value: Hashable>: ViewModifier {
             .onChange(of: value) { _, value in
                 if let value {
                     Log.debug("🧭 [NAVIGATION] Return to checkpoint: \(checkpoint.name) with: \(value)")
-                    navigator.returnToCheckpoint(checkpoint, value: value)
                     self.value = nil
+                    deferNavigation { [checkpoint, navigator] in
+                        navigator.returnToCheckpoint(checkpoint, value: value)
+                    }
                 }
             }
     }

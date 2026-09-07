@@ -429,8 +429,17 @@ class ExampleUITestCase: XCTestCase {
         app.buttons["navigationBack.pop"].exists || app.buttons["navigationBack.close"].exists
     }
 
+    /// The dialog's own sheet is queried first on macOS: the action it names can also exist in
+    /// the screen underneath, and the bare `app.buttons[title]` then matches both and refuses
+    /// the tap.
     func tapDialogButton(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
-        let button = app.buttons[title]
+        #if os(macOS)
+            let button = app.sheets.buttons[title].exists
+                ? app.sheets.buttons[title]
+                : app.buttons[title].firstMatch
+        #else
+            let button = app.buttons[title]
+        #endif
         XCTAssertTrue(
             button.waitForExistence(timeout: elementTimeout),
             "No \(title) button",
@@ -438,6 +447,46 @@ class ExampleUITestCase: XCTestCase {
             line: line
         )
         button.tap()
+    }
+
+    /// The button of a presented alert. iOS publishes alerts under `alerts`; a Mac renders them
+    /// as a dialog or sheet, and which container carries the buttons is only knowable once the
+    /// alert is actually on screen — so the containers are polled rather than resolved once.
+    func alertButton(_ title: String, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
+        #if os(macOS)
+            let candidates = [
+                app.alerts.buttons[title],
+                app.dialogs.buttons[title],
+                app.sheets.buttons[title],
+            ]
+            let deadline = Date().addingTimeInterval(elementTimeout / 2)
+            repeat {
+                if let present = candidates.first(where: { $0.exists }) {
+                    return present
+                }
+                Thread.sleep(forTimeInterval: 0.25)
+            } while Date() < deadline
+
+            XCTFail("No alert with a \(title) button on screen", file: file, line: line)
+            return app.alerts.buttons[title]
+        #else
+            let button = app.alerts.buttons[title]
+            XCTAssertTrue(
+                button.waitForExistence(timeout: elementTimeout / 2),
+                "No alert with a \(title) button on screen",
+                file: file,
+                line: line
+            )
+            return button
+        #endif
+    }
+
+    /// A static text matched by label or value. macOS publishes some SwiftUI texts with the
+    /// string in the element's value and an empty label, where iOS always uses the label.
+    func staticText(_ string: String) -> XCUIElement {
+        app.staticTexts.matching(
+            NSPredicate(format: "label == %@ OR value == %@", string, string)
+        ).firstMatch
     }
 
     /// iOS renders the cancel role of a confirmation dialog as the region outside it; a Mac

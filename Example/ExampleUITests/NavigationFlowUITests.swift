@@ -34,7 +34,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
         tapRow("page.push")
         assertScreen("Page 2")
 
-        XCTAssertTrue(app.staticTexts["Pushed 2 deep"].waitForExistence(timeout: elementTimeout / 2))
+        XCTAssertTrue(staticText("Pushed 2 deep").waitForExistence(timeout: elementTimeout / 2))
 
         tapBack(.system)
         assertScreen("Page 1")
@@ -50,7 +50,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
         assertScreen("Page 2")
         assertSelectedTab("Flows")
 
-        XCTAssertTrue(app.staticTexts["Pushed 2 deep"].waitForExistence(timeout: elementTimeout / 2))
+        XCTAssertTrue(staticText("Pushed 2 deep").waitForExistence(timeout: elementTimeout / 2))
     }
 
     /// `navigationMove` broadcasts, and the first registered handler answers — from a pushed

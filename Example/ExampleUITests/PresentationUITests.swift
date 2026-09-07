@@ -60,11 +60,9 @@ final class PresentationUITests: ExampleUITestCase {
 
         tapRow("alert.discard")
 
-        let confirm = app.alerts.buttons["Discard"]
-        XCTAssertTrue(confirm.waitForExistence(timeout: elementTimeout / 2))
-        confirm.tap()
+        alertButton("Discard").tap()
 
-        XCTAssertTrue(app.staticTexts["discard"].waitForExistence(timeout: elementTimeout / 2))
+        XCTAssertTrue(staticText("discard").waitForExistence(timeout: elementTimeout / 2))
     }
 
     @MainActor
@@ -75,11 +73,9 @@ final class PresentationUITests: ExampleUITestCase {
 
         tapRow("alert.discard")
 
-        let cancel = app.alerts.buttons["Cancel"]
-        XCTAssertTrue(cancel.waitForExistence(timeout: elementTimeout / 2))
-        cancel.tap()
+        alertButton("Cancel").tap()
 
-        XCTAssertTrue(app.staticTexts["None"].waitForExistence(timeout: elementTimeout / 2))
+        XCTAssertTrue(staticText("None").waitForExistence(timeout: elementTimeout / 2))
     }
 
     /// The demo starts in the empty state, so its overlay is already on screen; the pickers that

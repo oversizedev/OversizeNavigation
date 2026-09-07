@@ -20,12 +20,14 @@ private struct NavigationBackModifier: ViewModifier {
                 guard trigger else { return }
                 self.trigger = false
                 Log.debug("🧭 [NAVIGATION] Back: \(exit)")
-                do {
-                    // Bound first: `completion?(.success(try leave()))` short-circuits on a nil completion.
-                    let didLeave = try exit.leave(on: navigator)
-                    completion?(.success(didLeave))
-                } catch {
-                    completion?(.failure(error))
+                deferNavigation { [exit, completion, navigator] in
+                    do {
+                        // Bound first: `completion?(.success(try leave()))` short-circuits on a nil completion.
+                        let didLeave = try exit.leave(on: navigator)
+                        completion?(.success(didLeave))
+                    } catch {
+                        completion?(.failure(error))
+                    }
                 }
             }
     }
