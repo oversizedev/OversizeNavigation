@@ -10,28 +10,13 @@ struct RootSplitView: View {
     @State private var selectedTab: RootTabs? = .layouts
 
     var body: some View {
-        // macOS gets a plain split pane rather than NavigationSplitView: a detail column there
-        // races the stack for its bound path — a programmatic push renders the screen while the
-        // path is wiped back to empty, so every pop and further push silently dies. The same
-        // stack inside a sheet, or beside an HSplitView sidebar, keeps its path. iPadOS has no
-        // such race and keeps the native split behaviour, collapsing included.
-        #if os(macOS)
-            HSplitView {
-                SidebarView(selectedTab: $selectedTab)
-                    .frame(minWidth: 200, maxWidth: 280)
-                selectedTab
-                    .frame(minWidth: 480, maxWidth: .infinity, maxHeight: .infinity)
-            }
-            .onNavigationReceive(assign: $selectedTab, delay: 0.8)
-        #else
-            NavigationSplitView {
-                SidebarView(selectedTab: $selectedTab)
-                    .navigationSplitViewColumnWidth(220)
-            } detail: {
-                selectedTab
-            }
-            .onNavigationReceive(assign: $selectedTab, delay: 0.8)
-        #endif
+        NavigationSplitView {
+            SidebarView(selectedTab: $selectedTab)
+                .navigationSplitViewColumnWidth(220)
+        } detail: {
+            selectedTab
+        }
+        .onNavigationReceive(assign: $selectedTab, delay: 0.8)
     }
 }
 
@@ -39,28 +24,51 @@ private struct SidebarView: View {
     @Binding var selectedTab: RootTabs?
 
     var body: some View {
-        List(selection: $selectedTab) {
-            Section("Example") {
-                ForEach(RootTabs.allCases) { tab in
-                    // A plain selectable row, not `NavigationLink(value:)`: a sidebar link makes
-                    // the split view treat the detail column as its navigation target, and on
-                    // macOS that wipes the detail stack's bound path after every push — the
-                    // pushed screen stays visible while the navigator reads an empty path, so
-                    // pops and further programmatic pushes silently stop working.
-                    Label { Text(tab.title) } icon: { tab.icon }
-                        .tag(tab)
-                        // The duplicate titles this row leaves in the tree are handled where
-                        // they matter, in `ExampleUITestCase.screenTitleElement`.
+        #if os(macOS)
+            // The sidebar drives the section through plain buttons rather than a `List`
+            // selection binding or `NavigationLink(value:)`. Both give the split view's own
+            // selection machinery a hand in the detail column, and on macOS that races the
+            // detail stack for its bound path — a programmatic push renders the screen while
+            // the path is wiped back to empty, so every pop and further push silently dies.
+            // The same stack inside a sheet keeps its path, which is what points at the split.
+            List {
+                Section("Example") {
+                    ForEach(RootTabs.allCases) { tab in
+                        Button {
+                            selectedTab = tab
+                        } label: {
+                            Label { Text(tab.title) } icon: { tab.icon }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .listRowBackground(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(tab == selectedTab ? Color.gray.opacity(0.2) : Color.clear)
+                        )
+                        // The tests read the current section from this trait, the way a bound
+                        // selection would have published it.
+                        .accessibilityAddTraits(tab == selectedTab ? [.isSelected] : [])
                         .accessibilityIdentifier("sidebar.\(tab.id)")
+                    }
                 }
             }
-        }
-        // The HSplitView host has no split column dressing the list up, so the sidebar look is
-        // stated explicitly; NavigationSplitView applies the same style on its own. The title
-        // stays off macOS: outside a split column it would write into the window title, which
-        // is where every screen publishes its own name.
-        .listStyle(.sidebar)
-        #if !os(macOS)
+            .listStyle(.sidebar)
+        #else
+            List(selection: $selectedTab) {
+                Section("Example") {
+                    ForEach(RootTabs.allCases) { tab in
+                        // A plain selectable row, not `NavigationLink(value:)` — a sidebar link
+                        // navigates the detail column instead of just selecting.
+                        Label { Text(tab.title) } icon: { tab.icon }
+                            .tag(tab)
+                            // The duplicate titles this row leaves in the tree are handled where
+                            // they matter, in `ExampleUITestCase.screenTitleElement`.
+                            .accessibilityIdentifier("sidebar.\(tab.id)")
+                    }
+                }
+            }
+            .listStyle(.sidebar)
             .navigationTitle("OversizeNavigation")
         #endif
     }
