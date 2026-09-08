@@ -32,8 +32,16 @@ struct ManagedSheetScreen: View {
             }
         }
         .listLayoutStyle(.insetGrouped)
+        // macOS gives a sheet no title bar, so `navigationTitle` is published nowhere and the UI
+        // tests cannot tell which sheet is on screen without the screen naming itself.
+        .accessibilityIdentifier("screen.Managed sheet")
         .navigationOpen($openDestination)
         .navigationBack($isDismissed, to: .presentation)
+        // A Mac sheet sizes itself to its content's ideal height, and a `List` reports none —
+        // the sheet collapses to a strip too small for its own rows to be hittable.
+        #if os(macOS)
+            .frame(minWidth: 480, minHeight: 420)
+        #endif
     }
 }
 

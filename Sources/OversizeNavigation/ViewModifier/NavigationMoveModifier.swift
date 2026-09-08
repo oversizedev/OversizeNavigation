@@ -15,8 +15,10 @@ private struct NavigationMoveModifier<T: Hashable & Equatable>: ViewModifier {
             .onChange(of: item) { _, item in
                 if let item {
                     Log.debug("🧭 [NAVIGATION] Move to: \(item)")
-                    navigator.send(item)
                     self.item = nil
+                    deferNavigation { [navigator] in
+                        navigator.send(item)
+                    }
                 }
             }
     }
@@ -29,13 +31,15 @@ private struct NavigationMoveValuesModifier: ViewModifier {
         content
             .onChange(of: values) { _, values in
                 guard let values else { return }
+                self.values = nil
                 if values.isEmpty == false {
                     Log.debug("🧭 [NAVIGATION] Move to: \(values)")
-                    // Receivers match on the concrete type of the value, so the box has to be
-                    // opened first — an `AnyHashable` would find no handler at all.
-                    navigator.send(values: values.compactMap { $0.base as? any Hashable })
+                    deferNavigation { [navigator] in
+                        // Receivers match on the concrete type of the value, so the box has to be
+                        // opened first — an `AnyHashable` would find no handler at all.
+                        navigator.send(values: values.compactMap { $0.base as? any Hashable })
+                    }
                 }
-                self.values = nil
             }
     }
 }

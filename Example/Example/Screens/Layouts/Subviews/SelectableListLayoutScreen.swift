@@ -20,12 +20,17 @@ struct SelectableListLayoutScreen: View {
             }
         }
         .listLayoutStyle(.insetGrouped)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                EditButton()
-                    .accessibilityIdentifier("selection.edit")
+        .accessibilityIdentifier("screen.Selection")
+        #if !os(macOS)
+            // A Mac list selects on click and has no editing mode to enter, so `EditButton` is
+            // unavailable there rather than merely unnecessary.
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    EditButton()
+                        .accessibilityIdentifier("selection.edit")
+                }
             }
-        }
+        #endif
     }
 }
 

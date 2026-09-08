@@ -18,6 +18,7 @@ struct AboutScreen: View {
         }
         .sectionTitlePosition(.inside)
         .bordered()
+        .accessibilityIdentifier("screen.About")
     }
 }
 

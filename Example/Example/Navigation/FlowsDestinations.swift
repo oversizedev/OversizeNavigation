@@ -4,6 +4,7 @@
 //
 
 import NavigatorUI
+import OversizeNavigation
 import SwiftUI
 
 enum FlowsDestinations: Codable, Hashable, Sendable {
@@ -41,7 +42,9 @@ extension FlowsDestinations: @MainActor NavigationDestination {
         case .sheet:
             .managedSheet
         case .cover:
-            .managedCover
+            // NavigatorUI has no full screen cover on macOS, so asking for one there presents
+            // nothing at all.
+            .platformManagedCover
         default:
             .push
         }

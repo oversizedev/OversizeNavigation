@@ -83,6 +83,9 @@ struct FlowPageScreen: View {
             }
         }
         .sectionTitlePosition(.inside)
+        // A page pushed inside a managed sheet has no title bar to publish `navigationTitle`
+        // into on macOS, so it names itself the way the sheet roots do.
+        .accessibilityIdentifier("screen.Page \(number)")
         .navigationBack($isBackTriggered)
         .navigationReturn(to: KnownCheckpoints.flows, trigger: $isReturningToFlows)
         .navigationOpen($openDestination)

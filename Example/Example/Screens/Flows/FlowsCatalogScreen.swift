@@ -42,7 +42,7 @@ struct FlowsCatalogScreen: View {
 
                 ListRow(
                     "Managed cover",
-                    subtitle: "Destination declares .managedCover",
+                    subtitle: "Destination declares .platformManagedCover",
                     action: { openDestination = .cover }
                 )
                 .accessibilityIdentifier("flows.cover")
@@ -96,6 +96,7 @@ struct FlowsCatalogScreen: View {
         .navigationMove($moveDestination)
         .navigationMove(values: $moveValues)
         .navigationRoute($route)
+        .accessibilityIdentifier("screen.Flows")
     }
 }
 

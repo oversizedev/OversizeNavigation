@@ -34,7 +34,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
         tapRow("page.push")
         assertScreen("Page 2")
 
-        XCTAssertTrue(app.staticTexts["Pushed 2 deep"].waitForExistence(timeout: 5))
+        XCTAssertTrue(staticText("Pushed 2 deep").waitForExistence(timeout: elementTimeout / 2))
 
         tapBack(.system)
         assertScreen("Page 1")
@@ -50,7 +50,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
         assertScreen("Page 2")
         assertSelectedTab("Flows")
 
-        XCTAssertTrue(app.staticTexts["Pushed 2 deep"].waitForExistence(timeout: 5))
+        XCTAssertTrue(staticText("Pushed 2 deep").waitForExistence(timeout: elementTimeout / 2))
     }
 
     /// `navigationMove` broadcasts, and the first registered handler answers — from a pushed
@@ -76,7 +76,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
 
         tapRow("page.sheet")
         XCTAssertTrue(
-            app.navigationBars["Managed sheet"].waitForExistence(timeout: 3),
+            waitForScreen("Managed sheet", timeout: elementTimeout / 4),
             "The sheet did not present while the screen that asked for it was still on screen"
         )
 
@@ -94,7 +94,7 @@ final class NavigationFlowUITests: ExampleUITestCase {
 
         tapRow("page.backWithHUD")
         XCTAssertTrue(
-            app.navigationBars["Flows"].waitForExistence(timeout: 3),
+            waitForScreen("Flows", timeout: elementTimeout / 4),
             "The screen stayed on display after the pop was requested"
         )
         XCTAssertTrue(app.staticTexts["Deleted"].exists)
@@ -108,12 +108,10 @@ final class NavigationFlowUITests: ExampleUITestCase {
             openTab(title)
             assertScreen(title)
 
-            for control in [BackControl.system, .confirmation, .close] {
-                XCTAssertFalse(
-                    app.buttons[control.rawValue].exists,
-                    "\(title) shows a \(control) control at the root of its tab"
-                )
-            }
+            XCTAssertFalse(
+                hasCustomBackControl(),
+                "\(title) shows a layout-installed back control at the root of its tab"
+            )
         }
     }
 

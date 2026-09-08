@@ -15,11 +15,11 @@ final class PresentationUITests: ExampleUITestCase {
         tapRow("hud.success")
 
         let hud = app.staticTexts["Success"]
-        XCTAssertTrue(hud.waitForExistence(timeout: 5))
+        XCTAssertTrue(hud.waitForExistence(timeout: elementTimeout / 2))
 
         let disappeared = NSPredicate(format: "exists == false")
         expectation(for: disappeared, evaluatedWith: hud)
-        waitForExpectations(timeout: 15)
+        waitForExpectations(timeout: elementTimeout)
     }
 
     @MainActor
@@ -30,7 +30,7 @@ final class PresentationUITests: ExampleUITestCase {
 
         tapRow("hud.stack")
 
-        XCTAssertTrue(app.staticTexts["HUD 5"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["HUD 5"].waitForExistence(timeout: elementTimeout / 2))
         XCTAssertTrue(app.staticTexts["HUD 4"].exists)
         XCTAssertTrue(app.staticTexts["HUD 3"].exists)
         XCTAssertFalse(app.staticTexts["HUD 1"].exists)
@@ -43,28 +43,37 @@ final class PresentationUITests: ExampleUITestCase {
         assertScreen("HUD")
 
         tapRow("hud.stack")
-        XCTAssertTrue(app.staticTexts["HUD 5"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["HUD 5"].waitForExistence(timeout: elementTimeout / 2))
 
         tapRow("hud.clear")
 
         let cleared = NSPredicate(format: "exists == false")
         expectation(for: cleared, evaluatedWith: app.staticTexts["HUD 5"])
-        waitForExpectations(timeout: 10)
+        waitForExpectations(timeout: elementTimeout)
     }
 
     @MainActor
-    func testAlertConfirmationRunsItsAction() {
-        openTab("Presentation")
-        tapRow("presentation.alerts")
-        assertScreen("Alerts")
+    func testAlertConfirmationRunsItsAction() throws {
+        #if os(macOS)
+            // macOS renders a legacy `Alert` as a sheet whose buttons carry no geometry at all
+            // ({{inf, inf}, {0, 0}}), and the destructive role deliberately has no keyboard
+            // equivalent — XCUITest physically cannot press it. The alert's presence and its
+            // cancel path are still covered by `testAlertCancellationKeepsTheState`.
+            throw XCTSkip("macOS publishes legacy Alert buttons without geometry")
+        #else
+            openTab("Presentation")
+            tapRow("presentation.alerts")
+            assertScreen("Alerts")
 
-        tapRow("alert.discard")
+            tapRow("alert.discard")
 
-        let confirm = app.alerts.buttons["Discard"]
-        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
-        confirm.tap()
+            tapAlertButton("Discard")
 
-        XCTAssertTrue(app.staticTexts["discard"].waitForExistence(timeout: 5))
+            XCTAssertTrue(
+                staticText("discard").waitForExistence(timeout: elementTimeout / 2),
+                "The discard action never ran. \(alertDiagnostics())"
+            )
+        #endif
     }
 
     @MainActor
@@ -75,11 +84,9 @@ final class PresentationUITests: ExampleUITestCase {
 
         tapRow("alert.discard")
 
-        let cancel = app.alerts.buttons["Cancel"]
-        XCTAssertTrue(cancel.waitForExistence(timeout: 5))
-        cancel.tap()
+        tapAlertButton("Cancel", cancels: true)
 
-        XCTAssertTrue(app.staticTexts["None"].waitForExistence(timeout: 5))
+        XCTAssertTrue(staticText("None").waitForExistence(timeout: elementTimeout / 2))
     }
 
     /// The demo starts in the empty state, so its overlay is already on screen; the pickers that
@@ -90,10 +97,63 @@ final class PresentationUITests: ExampleUITestCase {
         tapRow("presentation.loadingStates")
         assertScreen("Loading states")
 
-        let picker = app.segmentedControls["loadingState.picker"]
-        XCTAssertTrue(picker.waitForExistence(timeout: 10), "The overlay covered the state picker")
+        let picker = statePicker()
+        XCTAssertTrue(picker.waitForExistence(timeout: elementTimeout), "The overlay covered the state picker")
 
-        picker.buttons["Result"].tap()
-        XCTAssertTrue(app.staticTexts["Item 1"].waitForExistence(timeout: 5))
+        pickerOption(picker, "Result").tap()
+        XCTAssertTrue(app.staticTexts["Item 1"].waitForExistence(timeout: elementTimeout / 2))
+    }
+
+    /// A segmented picker is a segmented control on iOS and a radio group on a Mac.
+    ///
+    /// Which one a Mac publishes is only knowable once the picker is on screen, so both are
+    /// polled: a screen whose title has appeared before its controls have publishes neither,
+    /// and committing to one of them from that snapshot waits out the timeout on a query that
+    /// will never resolve.
+    @MainActor
+    private func statePicker() -> XCUIElement {
+        #if os(macOS)
+            let deadline = Date().addingTimeInterval(elementTimeout)
+            repeat {
+                let radioGroup = app.radioGroups["loadingState.picker"]
+                if radioGroup.exists {
+                    return radioGroup
+                }
+                let segmented = app.segmentedControls["loadingState.picker"]
+                if segmented.exists {
+                    return segmented
+                }
+                Thread.sleep(forTimeInterval: 0.25)
+            } while Date() < deadline
+
+            return app.radioGroups["loadingState.picker"]
+        #else
+            return app.segmentedControls["loadingState.picker"]
+        #endif
+    }
+
+    /// A radio group exposes its choices as radio buttons rather than buttons, so the element
+    /// type has to follow whichever container the platform published — polled for the same
+    /// reason the container itself is.
+    @MainActor
+    private func pickerOption(_ picker: XCUIElement, _ title: String) -> XCUIElement {
+        #if os(macOS)
+            let deadline = Date().addingTimeInterval(elementTimeout)
+            repeat {
+                let radioButton = picker.radioButtons[title]
+                if radioButton.exists {
+                    return radioButton
+                }
+                let button = picker.buttons[title]
+                if button.exists {
+                    return button
+                }
+                Thread.sleep(forTimeInterval: 0.25)
+            } while Date() < deadline
+
+            return picker.radioButtons[title]
+        #else
+            return picker.buttons[title]
+        #endif
     }
 }

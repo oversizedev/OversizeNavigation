@@ -18,6 +18,18 @@ enum RootType: Int, Codable, Sendable {
 /// Sent through the navigator to swap the root layout from anywhere in the tree.
 struct ToggleRootType: Hashable, Sendable {}
 
+extension RootType {
+    /// The shape each platform reaches for first: a sidebar on the Mac, a tab bar elsewhere.
+    /// Both roots stay reachable through `settings.toggleRoot` on either platform.
+    static var defaultForPlatform: RootType {
+        #if os(macOS)
+            .split
+        #else
+            .tabbed
+        #endif
+    }
+}
+
 extension RootType: Identifiable {
     var id: Int {
         rawValue

@@ -12,7 +12,7 @@ import SwiftUI
 struct RootView: View {
     private let navigator: Navigator = .root(restorationKey: ExampleLaunch.isUITesting ? nil : "Example")
 
-    @State private var rootType: RootType = .tabbed
+    @State private var rootType: RootType = .defaultForPlatform
 
     var body: some View {
         rootType

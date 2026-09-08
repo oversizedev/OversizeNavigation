@@ -190,6 +190,61 @@ Custom alert types conform to `Alertable` (Identifiable + Equatable + Hashable).
 
 iOS < 26 uses custom `ArrowLeft` image from `Media.xcassets`. iOS 26+ uses `Image(systemName: "chevron.left")` / `"xmark"`. Always gate with `#available(iOS 26, *)` or `#if os(iOS)` where needed — existing code is the reference.
 
+Two availability floors, and they are not a mistake: the package deploys to iOS 17 / macOS 14 /
+tvOS 17 / watchOS 10 because that is what `Deprecated/` supports, while every current
+`Navigation*Layout` is annotated one major higher (iOS 18 / macOS 15 / tvOS 18 / watchOS 11 /
+visionOS 2) — the version where the OversizeUI layout it wraps became available. Do not "fix" the
+gap by raising the package floor; that would drop the deprecated layer that still has callers.
+visionOS is declared at 2.0 rather than 1.0 because OversizeUI itself starts there, and SwiftPM
+rejects a floor below a direct dependency's.
+
+### macOS
+
+macOS is a supported platform, built by CI and exercised by the Example app and its UI tests, not
+an afterthought. Four things behave differently there and are worth knowing before writing a fix:
+
+- **`.managedCover` presents nothing.** NavigatorUI wraps `.fullScreenCover` in
+  `#if os(iOS) || os(tvOS) || os(watchOS)`, so a destination asking for a cover on macOS sets state
+  nothing renders and the screen silently never appears. `Models/NavigationMethodPlatform.swift`
+  states the substitution once as `.platformManagedCover` / `.platformCover`; destinations use
+  those rather than re-deriving it. Its `#if` mirrors NavigatorUI's own condition instead of
+  naming macOS, so visionOS — which has no cover either — is covered by the same line.
+- **The back control is a labelled button in a pane header, not a window toolbar item.**
+  `NavigationLayoutBackToolbarModifier` renders it through `safeAreaInset(edge: .top)` on macOS:
+  the stacks live beside a plain split pane (see the next bullet), and a window toolbar cannot
+  place an item over a pane — SwiftUI has no tracking separator. The header shows on every
+  pushed screen (replacing the system back button it hides) and wherever the policy installs a
+  control. Which word it is comes from `BackButtonPolicy.backButtonRole` — `.close` at the root
+  of a presentation, `.pop` otherwise — the same value that picks the glyph on iOS and the
+  accessibility identifier (`navigationBack.close` / `navigationBack.pop`) on both. A
+  `#if os(macOS)` branch that decides the label on its own is how macOS ended up labelling every
+  pop "Cancel".
+- **A stack cannot sit in a `NavigationSplitView` detail column.** The column races the stack
+  for its bound path on macOS: a programmatic push renders the screen while the path is wiped
+  back to empty, so every later pop and push silently dies — whatever drives the sidebar
+  selection, and however the operation is deferred. The same stack inside a sheet keeps its
+  path. The Example hosts its macOS sidebar beside an `HSplitView` instead; iPadOS keeps the
+  native split, which has no such race.
+- **`navigationBarAppearanceConfiguration()` is a no-op**, since it configures `UINavigationBar`.
+  Mac bar styling has to come from the toolbar itself.
+- **`.sensoryFeedback` is inert**, so the HUD and alert feedback paths do nothing on macOS. Keep
+  the calls — they cost nothing and stay correct on the platforms that have haptics.
+- **An abrupt kill can poison window restoration.** A macOS app killed mid-flight — a crashed
+  UI test runner is enough — can record a scene with zero windows in a store keyed by bundle id
+  and served by a system daemon; every later launch then shows a menu bar over no window, which a
+  UI test reads as an empty accessibility tree. `-ApplePersistenceIgnoreState` does not cure it
+  and neither does deleting the container. `ExampleApp` opts out of restoration and
+  `ExampleLaunch.resetPersistedState()` wipes the app-side record under UI testing; if a local
+  machine is already poisoned, build with a fresh `PRODUCT_BUNDLE_IDENTIFIER` to get out. The
+  crash that plants it is why `ExampleUITestCase.setUp` must stay synchronous: an XCTest failure
+  with `continueAfterFailure = false` cannot unwind through an async `setUp` and kills the runner.
+
+The Example app starts on the split root on macOS and the tab root elsewhere
+(`RootType.defaultForPlatform`), and `ExampleUITestCase` branches per platform — a Mac has no tab
+bar, publishes `navigationTitle` into the window rather than a navigation bar, and renders a
+confirmation dialog as a sheet with a real Cancel button instead of a `PopoverDismissRegion`. Test
+bodies stay platform-free; only the helpers branch.
+
 ## File Organization
 
 - New layout type → new folder `NavigationXxxLayout/` with `NavigationXxxLayoutView.swift` + `NavigationXxxLayoutViewModifier.swift`

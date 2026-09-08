@@ -12,7 +12,7 @@ import XCTest
 final class AccessibilityTreeUITests: ExampleUITestCase {
     @MainActor
     func testTheAppPublishesAnAccessibilityTree() {
-        XCTAssertTrue(tabControl("Layouts").waitForExistence(timeout: 10))
+        XCTAssertTrue(tabControl("Layouts").waitForExistence(timeout: elementTimeout))
         XCTAssertGreaterThan(app.staticTexts.count, 0, "The app published no text")
         XCTAssertGreaterThan(app.buttons.count, 0, "The app published no controls")
     }
@@ -24,7 +24,7 @@ final class AccessibilityTreeUITests: ExampleUITestCase {
         assertScreen("HUD")
 
         tapRow("hud.success")
-        XCTAssertTrue(app.staticTexts["Success"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Success"].waitForExistence(timeout: elementTimeout / 2))
 
         // The row that raised the HUD is on screen on every device; `hud.clear` is below the fold on an iPhone.
         XCTAssertTrue(app.buttons["hud.success"].exists, "The HUD overlay hid the screen underneath it")

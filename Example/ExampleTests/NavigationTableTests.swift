@@ -5,6 +5,7 @@
 
 @testable import Example
 import NavigatorUI
+import OversizeNavigation
 import Testing
 
 @MainActor
@@ -47,7 +48,19 @@ struct DestinationMethodTests {
         #expect(FlowsDestinations.checkpointResult.method == .push)
         #expect(FlowsDestinations.locked.method == .push)
         #expect(FlowsDestinations.sheet.method == .managedSheet)
-        #expect(FlowsDestinations.cover.method == .managedCover)
+    }
+
+    /// NavigatorUI has no full screen cover on macOS, so the demo asks for the substitution
+    /// rather than for a cover that would present nothing there.
+    @Test("The cover demo falls back to a sheet where the platform has no cover")
+    func coverMethodFollowsThePlatform() {
+        #expect(FlowsDestinations.cover.method == .platformManagedCover)
+
+        #if os(iOS) || os(tvOS) || os(watchOS)
+            #expect(FlowsDestinations.cover.method == .managedCover)
+        #else
+            #expect(FlowsDestinations.cover.method == .managedSheet)
+        #endif
     }
 
     @Test("Presentation and settings destinations are pushed")
@@ -134,5 +147,25 @@ struct ReceiveHandlerTests {
                 #expect(owner[String(describing: type(of: value))] == tab)
             }
         }
+    }
+}
+
+/// Which root the app mounts first is a platform decision, and the UI tests branch on the same
+/// answer — a Mac window has a sidebar where a phone has a tab bar.
+@MainActor
+struct RootTypeTests {
+    @Test("The Mac starts on the split root and everything else on the tab root")
+    func defaultRootFollowsThePlatform() {
+        #if os(macOS)
+            #expect(RootType.defaultForPlatform == .split)
+        #else
+            #expect(RootType.defaultForPlatform == .tabbed)
+        #endif
+    }
+
+    @Test("Toggling swaps the root and is its own inverse")
+    func togglingIsReversible() {
+        #expect(RootType.defaultForPlatform.toggled != RootType.defaultForPlatform)
+        #expect(RootType.defaultForPlatform.toggled.toggled == RootType.defaultForPlatform)
     }
 }

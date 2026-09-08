@@ -30,6 +30,7 @@ struct CheckpointResultScreen: View {
         }
         .listLayoutStyle(.insetGrouped)
         .navigationReturn(to: KnownCheckpoints.flowsResult, value: $returnedValue)
+        .accessibilityIdentifier("screen.Return a value")
     }
 }
 
