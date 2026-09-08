@@ -24,12 +24,17 @@ enum ExampleLaunch {
     /// not cure it, and neither does `Scene.restorationBehavior(.disabled)` once the state is
     /// already on disk. Deleting both from `App.init`, before AppKit reads them, does.
     static func resetPersistedState() {
-        if let bundleIdentifier = Bundle.main.bundleIdentifier {
-            UserDefaults.standard.removePersistentDomain(forName: bundleIdentifier)
-        }
+        guard let bundleIdentifier = Bundle.main.bundleIdentifier else { return }
+
+        UserDefaults.standard.removePersistentDomain(forName: bundleIdentifier)
         for libraryURL in FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask) {
+            // This app's own archive and nothing else: the directory holding it carries the
+            // saved state of every application the user owns, and the macOS target is not
+            // sandboxed, so removing the directory itself would wipe all of them.
             try? FileManager.default.removeItem(
-                at: libraryURL.appendingPathComponent("Saved Application State")
+                at: libraryURL
+                    .appendingPathComponent("Saved Application State")
+                    .appendingPathComponent("\(bundleIdentifier).savedState")
             )
         }
         // Deleting only clears what an earlier instance wrote; these stop the record from being
