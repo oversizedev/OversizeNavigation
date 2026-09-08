@@ -56,9 +56,10 @@ visionOS is the exception — OversizeUI itself starts at visionOS 2, so both co
 - NavigatorUI renders `.fullScreenCover` only on iOS, tvOS and watchOS. A destination asking for
   `.managedCover` on macOS presents nothing — use `.platformManagedCover`, which falls back to a
   managed sheet where the platform has no cover.
-- A `Navigation*Layout` back control is a labelled toolbar button on macOS rather than a glyph,
-  reading *Back* on a push and *Close* at the root of a presentation. The deprecated
-  `Navigation*LayoutView` types build their own toolbar and still show a glyph there.
+- A `Navigation*Layout` back control is a labelled button in a header at the top of the pane on
+  macOS, not a glyph in the window toolbar: it reads *Back* on a push and *Close* at the root of
+  a presentation. The deprecated `Navigation*LayoutView` types build their own toolbar and still
+  show a glyph there.
 
 ## Navigation Layout Types
 
