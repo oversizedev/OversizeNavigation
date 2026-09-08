@@ -35,6 +35,7 @@ struct NavigationLayoutScreen: View {
         )
         .sectionTitlePosition(.inside)
         .bordered()
+        .accessibilityIdentifier("screen.NavigationLayout")
     }
 }
 

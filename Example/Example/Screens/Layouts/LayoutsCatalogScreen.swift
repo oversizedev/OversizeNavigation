@@ -26,6 +26,7 @@ struct LayoutsCatalogScreen: View {
         .listLayoutStyle(.insetGrouped)
         .backButtonHidden()
         .navigationOpen($openDestination)
+        .accessibilityIdentifier("screen.Layouts")
     }
 }
 

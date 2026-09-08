@@ -20,6 +20,7 @@ struct SelectableListLayoutScreen: View {
             }
         }
         .listLayoutStyle(.insetGrouped)
+        .accessibilityIdentifier("screen.Selection")
         #if !os(macOS)
             // A Mac list selects on click and has no editing mode to enter, so `EditButton` is
             // unavailable there rather than merely unnecessary.

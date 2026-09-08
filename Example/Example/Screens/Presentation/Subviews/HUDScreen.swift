@@ -60,6 +60,7 @@ struct HUDScreen: View {
         }
         .listLayoutStyle(.insetGrouped)
         .presentationHUD($hud)
+        .accessibilityIdentifier("screen.HUD")
     }
 
     private func presentMany() {

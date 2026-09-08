@@ -75,6 +75,7 @@ struct CoverLayoutScreen: View {
         .contentCornerRadius(24)
         .contentOffset(-24)
         .sectionTitlePosition(.inside)
+        .accessibilityIdentifier("screen.NavigationCoverLayout")
     }
 }
 

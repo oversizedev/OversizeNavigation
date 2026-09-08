@@ -44,6 +44,7 @@ struct LockedScreen: View {
             }
         }
         .presentationHUD($hud)
+        .accessibilityIdentifier("screen.Locked")
     }
 }
 

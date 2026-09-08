@@ -40,6 +40,7 @@ struct ListCoverLayoutScreen: View {
         )
         .listLayoutStyle(.insetGrouped)
         .coverSpacing(.zero)
+        .accessibilityIdentifier("screen.NavigationListCoverLayout")
     }
 }
 

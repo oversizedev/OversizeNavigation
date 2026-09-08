@@ -61,6 +61,7 @@ struct ListLayoutScreen: View {
             }
         }
         .listLayoutStyle(demoStyle.style)
+        .accessibilityIdentifier("screen.NavigationListLayout")
     }
 }
 

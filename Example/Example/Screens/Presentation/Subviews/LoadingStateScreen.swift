@@ -97,6 +97,7 @@ struct LoadingStateScreen: View {
             }
         }
         .listLayoutStyle(.insetGrouped)
+        .accessibilityIdentifier("screen.Loading states")
     }
 
     @ViewBuilder

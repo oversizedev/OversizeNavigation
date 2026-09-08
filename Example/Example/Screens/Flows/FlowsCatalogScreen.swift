@@ -96,6 +96,7 @@ struct FlowsCatalogScreen: View {
         .navigationMove($moveDestination)
         .navigationMove(values: $moveValues)
         .navigationRoute($route)
+        .accessibilityIdentifier("screen.Flows")
     }
 }
 

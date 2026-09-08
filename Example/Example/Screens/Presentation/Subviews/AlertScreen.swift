@@ -85,6 +85,7 @@ struct AlertScreen: View {
         .listLayoutStyle(.insetGrouped)
         .presentationAlert($alert)
         .presentationHUD($hud)
+        .accessibilityIdentifier("screen.Alerts")
     }
 
     private func confirm(_ name: String) {
