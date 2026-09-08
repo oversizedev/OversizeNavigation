@@ -19,7 +19,32 @@ import Foundation
 /// deferring some and not others would let two intents stated in one update swap places.
 @MainActor
 func deferNavigation(_ operation: @escaping @MainActor () -> Void) {
-    Task { @MainActor in
-        operation()
+    DeferredNavigationQueue.enqueue(operation)
+}
+
+/// The queue the deferred operations run on.
+///
+/// Main-actor isolation alone would not keep them in order: two intents stated in the same
+/// update each spawn their own unstructured `Task`, and the actor is free to schedule those in
+/// either order — a pop followed by a route could run as a route followed by a pop. One task
+/// drains a FIFO buffer instead, so an operation enqueued while the buffer is draining still
+/// runs after the ones already in it.
+@MainActor
+private enum DeferredNavigationQueue {
+    private static var operations: [@MainActor () -> Void] = []
+    private static var isDraining: Bool = false
+
+    static func enqueue(_ operation: @escaping @MainActor () -> Void) {
+        operations.append(operation)
+
+        guard isDraining == false else { return }
+        isDraining = true
+
+        Task { @MainActor in
+            defer { isDraining = false }
+            while operations.isEmpty == false {
+                operations.removeFirst()()
+            }
+        }
     }
 }
