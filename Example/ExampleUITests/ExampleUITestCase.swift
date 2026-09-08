@@ -349,17 +349,24 @@ class ExampleUITestCase: XCTestCase {
 
     private func isShowingScreen(_ title: String) -> Bool {
         #if os(macOS)
-            // `navigationTitle` becomes the window's title, which is where a screen hosted by the
-            // window announces itself. The sidebar publishes rows labelled like the screens they
-            // open and the detail column keeps showing the catalog row that started a push, so a
-            // plain text search would report the previous screen as the current one — the window
-            // title is the unambiguous source.
+            let marker = "screen.\(title)"
+
+            // A presented sheet leaves the window it is attached to in place, title and all, and
+            // publishes no title of its own — so while one is up the window still names the
+            // screen behind it, and asserting on that would report a dismissal that never
+            // happened. Only what the sheet itself carries counts until it closes.
+            if app.sheets.count > 0 {
+                return app.sheets.descendants(matching: .any)[marker].exists
+            }
+
+            // Otherwise `navigationTitle` becomes the window's title, which is where a screen
+            // hosted by the window announces itself. The sidebar publishes rows labelled like the
+            // screens they open and the detail column keeps showing the catalog row that started
+            // a push, so a plain text search would report the previous screen as the current one.
             if windowTitles.contains(title) {
                 return true
             }
-            // A sheet has no title bar, so its `navigationTitle` and that of anything pushed on
-            // top of it are published nowhere at all; those screens name themselves instead.
-            return app.descendants(matching: .any)["screen.\(title)"].exists
+            return app.descendants(matching: .any)[marker].exists
         #else
             return app.navigationBars[title].exists
         #endif
