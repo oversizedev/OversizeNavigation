@@ -105,23 +105,53 @@ final class PresentationUITests: ExampleUITestCase {
     }
 
     /// A segmented picker is a segmented control on iOS and a radio group on a Mac.
+    ///
+    /// Which one a Mac publishes is only knowable once the picker is on screen, so both are
+    /// polled: a screen whose title has appeared before its controls have publishes neither,
+    /// and committing to one of them from that snapshot waits out the timeout on a query that
+    /// will never resolve.
     @MainActor
     private func statePicker() -> XCUIElement {
         #if os(macOS)
-            let radioGroup = app.radioGroups["loadingState.picker"]
-            return radioGroup.exists ? radioGroup : app.segmentedControls["loadingState.picker"]
+            let deadline = Date().addingTimeInterval(elementTimeout)
+            repeat {
+                let radioGroup = app.radioGroups["loadingState.picker"]
+                if radioGroup.exists {
+                    return radioGroup
+                }
+                let segmented = app.segmentedControls["loadingState.picker"]
+                if segmented.exists {
+                    return segmented
+                }
+                Thread.sleep(forTimeInterval: 0.25)
+            } while Date() < deadline
+
+            return app.radioGroups["loadingState.picker"]
         #else
             return app.segmentedControls["loadingState.picker"]
         #endif
     }
 
     /// A radio group exposes its choices as radio buttons rather than buttons, so the element
-    /// type has to follow whichever container the platform published.
+    /// type has to follow whichever container the platform published — polled for the same
+    /// reason the container itself is.
     @MainActor
     private func pickerOption(_ picker: XCUIElement, _ title: String) -> XCUIElement {
         #if os(macOS)
-            let radioButton = picker.radioButtons[title]
-            return radioButton.exists ? radioButton : picker.buttons[title]
+            let deadline = Date().addingTimeInterval(elementTimeout)
+            repeat {
+                let radioButton = picker.radioButtons[title]
+                if radioButton.exists {
+                    return radioButton
+                }
+                let button = picker.buttons[title]
+                if button.exists {
+                    return button
+                }
+                Thread.sleep(forTimeInterval: 0.25)
+            } while Date() < deadline
+
+            return picker.radioButtons[title]
         #else
             return picker.buttons[title]
         #endif

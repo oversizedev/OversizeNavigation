@@ -81,17 +81,44 @@ class ExampleUITestCase: XCTestCase {
 
     /// A sidebar row by its identifier, whatever element type the platform publishes it as.
     /// A `NavigationLink` row was a button; a plain selectable `Label` row is a cell on macOS
-    /// and a static text elsewhere, so the query cannot commit to a type. `firstMatch` because
-    /// iPadOS publishes the identifier on the cell and again on its content — a strict query
-    /// refuses to tap what is one row on screen.
+    /// and a static text elsewhere, so the query cannot commit to a type.
+    ///
+    /// The identifier a row carries is inherited by everything the `Label` builds, and on iPadOS
+    /// the first of those matches is the leading icon — an image whose hit point resolves to
+    /// `{-1, -1}`, so every tap on it fails while the row itself is perfectly tappable. The
+    /// element that can be tapped is therefore preferred over the plain first match.
     func sidebarRow(_ identifier: String) -> XCUIElement {
-        app.descendants(matching: .any)[identifier].firstMatch
+        let matches = app.descendants(matching: .any).matching(identifier: identifier)
+        for index in 0 ..< matches.count {
+            let candidate = matches.element(boundBy: index)
+            if candidate.exists, candidate.isHittable {
+                return candidate
+            }
+        }
+
+        return matches.firstMatch
     }
 
     /// The control that selects a section, whichever root is mounted. The last branch scans
     /// every button on screen, so it is only reached when neither a tab bar nor a sidebar is
     /// mounted — the iPad tab strip.
+    ///
+    /// The candidates are polled rather than picked from the first snapshot: a root that has not
+    /// finished mounting publishes none of them yet, and committing to the fallback there would
+    /// return a query that can never resolve — the sidebar row is a cell, not a button.
     func tabControl(_ title: String) -> XCUIElement {
+        let deadline = Date().addingTimeInterval(elementTimeout)
+        repeat {
+            if let control = mountedTabControl(title) {
+                return control
+            }
+            Thread.sleep(forTimeInterval: 0.25)
+        } while Date() < deadline
+
+        return mountedTabControl(title) ?? sidebarRow("sidebar.\(title.lowercased())")
+    }
+
+    private func mountedTabControl(_ title: String) -> XCUIElement? {
         let sidebar = sidebarRow("sidebar.\(title.lowercased())")
         if sidebar.exists {
             return sidebar
@@ -104,7 +131,8 @@ class ExampleUITestCase: XCTestCase {
             }
         #endif
 
-        return app.buttons.matching(NSPredicate(format: "label == %@", title)).firstMatch
+        let labelled = app.buttons.matching(NSPredicate(format: "label == %@", title)).firstMatch
+        return labelled.exists ? labelled : nil
     }
 
     /// Rows below the fold are not created until the list scrolls to them. A row that ends up
@@ -236,9 +264,9 @@ class ExampleUITestCase: XCTestCase {
     /// The split root replaces the tab bar with a sidebar, which collapses into a stack in a
     /// compact width — there the sidebar is only reachable after popping the detail column.
     func openSidebarSection(_ tab: String, file: StaticString = #filePath, line: UInt = #line) {
-        let section = sidebarRow("sidebar.\(tab)")
+        let identifier = "sidebar.\(tab)"
 
-        if section.waitForExistence(timeout: elementTimeout / 2) == false {
+        if sidebarRow(identifier).waitForExistence(timeout: elementTimeout / 2) == false {
             let back = backNavigationBars.buttons.firstMatch
             if back.exists {
                 back.tap()
@@ -246,12 +274,14 @@ class ExampleUITestCase: XCTestCase {
         }
 
         XCTAssertTrue(
-            section.waitForExistence(timeout: elementTimeout),
+            sidebarRow(identifier).waitForExistence(timeout: elementTimeout),
             "No sidebar section \(tab)",
             file: file,
             line: line
         )
-        section.tap()
+        // Resolved again only now: `sidebarRow` picks the tappable element out of the ones the
+        // row publishes, and it can only do that once the row is actually on screen.
+        sidebarRow(identifier).tap()
     }
 
     /// A Mac renders `navigationTitle` as the window's title rather than into a navigation bar.
@@ -319,21 +349,17 @@ class ExampleUITestCase: XCTestCase {
 
     private func isShowingScreen(_ title: String) -> Bool {
         #if os(macOS)
-            // A sheet has no title bar on macOS, so its `navigationTitle` is published nowhere at
-            // all; those screens name themselves instead.
-            if app.descendants(matching: .any)["screen.\(title)"].exists {
-                return true
-            }
-            // Otherwise `navigationTitle` becomes the window's title, which is where the current
-            // screen announces itself. The toolbar carries no text, and the sidebar publishes rows
-            // labelled like the screens they open, so the window title is the unambiguous source.
+            // `navigationTitle` becomes the window's title, which is where a screen hosted by the
+            // window announces itself. The sidebar publishes rows labelled like the screens they
+            // open and the detail column keeps showing the catalog row that started a push, so a
+            // plain text search would report the previous screen as the current one — the window
+            // title is the unambiguous source.
             if windowTitles.contains(title) {
                 return true
             }
-            if app.toolbars.staticTexts[title].exists {
-                return true
-            }
-            return detailStaticText(title) != nil
+            // A sheet has no title bar, so its `navigationTitle` and that of anything pushed on
+            // top of it are published nowhere at all; those screens name themselves instead.
+            return app.descendants(matching: .any)["screen.\(title)"].exists
         #else
             return app.navigationBars[title].exists
         #endif
@@ -345,51 +371,6 @@ class ExampleUITestCase: XCTestCase {
             app.windows.element(boundBy: index).title
         }
     }
-
-    /// The element that carries the current screen's title right now, or a query that does not
-    /// resolve if the transition has not published it yet — prefer ``waitForScreen(_:timeout:)``
-    /// when the title may still be on its way.
-    ///
-    /// On macOS the sidebar stays on screen beside the detail column and publishes a row with the
-    /// same title as the screen it opens, so a global `app.staticTexts[title]` would match the
-    /// sidebar and `assertScreen("Flows")` would pass while the detail column still shows the
-    /// previous screen. The title is therefore read from the detail column's toolbar first, and
-    /// otherwise from a text that sits clear of the sidebar's own width.
-    func screenTitleElement(_ title: String) -> XCUIElement {
-        #if os(macOS)
-            let inToolbar = app.toolbars.staticTexts[title]
-            if inToolbar.exists {
-                return inToolbar
-            }
-            return detailStaticText(title) ?? app.staticTexts[title]
-        #else
-            return app.navigationBars[title]
-        #endif
-    }
-
-    #if os(macOS)
-        /// A static text with this title that is not part of the sidebar, or `nil` when the
-        /// screen has not published one yet.
-        private func detailStaticText(_ title: String) -> XCUIElement? {
-            // Label or value: macOS publishes some SwiftUI texts with the string in the value —
-            // a sheet's pushed screen carries its title only there, since a Mac sheet has no
-            // title bar and no toolbar text.
-            let matches = app.staticTexts.matching(
-                NSPredicate(format: "label == %@ OR value == %@", title, title)
-            )
-            let sidebarWidth = sidebarTrailingEdge()
-
-            for index in 0 ..< matches.count {
-                let candidate = matches.element(boundBy: index)
-                guard candidate.exists else { continue }
-                if candidate.frame.minX >= sidebarWidth {
-                    return candidate
-                }
-            }
-
-            return nil
-        }
-    #endif
 
     /// The container the back control lives in. iOS publishes a navigation bar; a Mac window
     /// publishes a toolbar.
@@ -436,15 +417,38 @@ class ExampleUITestCase: XCTestCase {
                 return app.buttons["BackButton"]
             #endif
         case .confirmation:
-            return app.buttons["navigationBack.pop"]
+            return layoutBackControl(identifier: "navigationBack.pop", label: "Back")
         case .close:
-            return app.buttons["navigationBack.close"]
+            return layoutBackControl(identifier: "navigationBack.close", label: "Close")
         }
+    }
+
+    /// The control a layout installs, addressed by the role it was installed for.
+    ///
+    /// macOS does not publish the accessibility identifier of the pane header's button — the
+    /// button is in the tree and answers to its label, the identifier reads back empty — so the
+    /// control is addressed there by the word it shows. `BackButtonPolicy.backButtonRole` picks
+    /// both the identifier and that word, so a pop and a close stay distinguishable either way.
+    private func layoutBackControl(identifier: String, label: String) -> XCUIElement {
+        let identified = app.buttons[identifier]
+        #if os(macOS)
+            if identified.exists {
+                return identified
+            }
+            // A window's own close button carries the same word; the standard window controls
+            // identify themselves with an `_XCUI:` prefix and are excluded by it.
+            return app.buttons.matching(
+                NSPredicate(format: "label == %@ AND NOT (identifier BEGINSWITH %@)", label, "_XCUI:")
+            ).firstMatch
+        #else
+            return identified
+        #endif
     }
 
     /// A control a layout installs itself, as opposed to one the system provides.
     func hasCustomBackControl() -> Bool {
-        app.buttons["navigationBack.pop"].exists || app.buttons["navigationBack.close"].exists
+        layoutBackControl(identifier: "navigationBack.pop", label: "Back").exists
+            || layoutBackControl(identifier: "navigationBack.close", label: "Close").exists
     }
 
     /// The dialog's own sheet is queried first on macOS: the action it names can also exist in
