@@ -560,9 +560,11 @@ class ExampleUITestCase: XCTestCase {
     /// renders the dialog as a sheet whose cancel role is an ordinary button.
     func dismissDialog(file: StaticString = #filePath, line: UInt = #line) {
         #if os(macOS)
-            let cancel = app.sheets.buttons["Cancel"].exists
-                ? app.sheets.buttons["Cancel"]
-                : app.buttons["Cancel"]
+            // The dialog's own sheet is preferred over a bare `app.buttons["Cancel"]`, which can
+            // match the screen underneath as well and then refuses the tap. Which container is
+            // published is polled rather than read from one snapshot: before the sheet is up
+            // neither carries the button.
+            let cancel = dialogCancelButton()
             XCTAssertTrue(
                 cancel.waitForExistence(timeout: elementTimeout),
                 "No dialog on screen",
@@ -581,4 +583,19 @@ class ExampleUITestCase: XCTestCase {
             region.tap()
         #endif
     }
+
+    #if os(macOS)
+        private func dialogCancelButton() -> XCUIElement {
+            let deadline = Date().addingTimeInterval(elementTimeout)
+            repeat {
+                let inSheet = app.sheets.buttons["Cancel"]
+                if inSheet.exists {
+                    return inSheet
+                }
+                Thread.sleep(forTimeInterval: 0.25)
+            } while Date() < deadline
+
+            return app.buttons["Cancel"].firstMatch
+        }
+    #endif
 }
