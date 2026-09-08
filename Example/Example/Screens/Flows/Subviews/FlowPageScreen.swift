@@ -17,21 +17,12 @@ struct FlowPageScreen: View {
     @State private var openDestination: FlowsDestinations?
     @State private var moveDestination: FlowsDestinations?
     @State private var hud: OversizeNavigation.HUD?
-    @State private var backReport: String = "none"
-    @State private var depthHistory: String = ""
-    @State private var appearedAt: Date = .init()
 
     var body: some View {
         NavigationLayout("Page \(number)") {
             Section("Where am I") {
                 Row("Depth", subtitle: "Pushed \(navigationInfo.depth) deep")
                     .accessibilityIdentifier("page.depth")
-
-                Row("Back result", subtitle: "back=\(backReport)")
-                    .accessibilityIdentifier("page.backReport")
-
-                Row("Depth history", subtitle: "history=\(depthHistory)")
-                    .accessibilityIdentifier("page.depthHistory")
             }
 
             Section("Go deeper") {
@@ -92,24 +83,10 @@ struct FlowPageScreen: View {
             }
         }
         .sectionTitlePosition(.inside)
-        // When the split root wipes the stack's path, the wipe is invisible on screen — the
-        // pushed view stays up while the navigator reads empty. Recording every depth change
-        // with its offset from appearance puts the exact moment into the failure diagnostics.
-        .onChange(of: navigationInfo.depth) { oldDepth, newDepth in
-            let offset = String(format: "%.1f", Date().timeIntervalSince(appearedAt))
-            depthHistory += " \(oldDepth)>\(newDepth)@\(offset)s"
-        }
-        .navigationBack($isBackTriggered) { result in
-            // Rendered so a UI test failure can read whether the pop ran and what it claimed:
-            // `true` means the navigator removed a path entry that never left the screen,
-            // `false` means it found nothing to pop — two very different macOS defects.
-            switch result {
-            case let .success(didLeave):
-                backReport = "left=\(didLeave) depth=\(navigationInfo.depth)"
-            case let .failure(error):
-                backReport = "error=\(error)"
-            }
-        }
+        // A page pushed inside a managed sheet has no title bar to publish `navigationTitle`
+        // into on macOS, so it names itself the way the sheet roots do.
+        .accessibilityIdentifier("screen.Page \(number)")
+        .navigationBack($isBackTriggered)
         .navigationReturn(to: KnownCheckpoints.flows, trigger: $isReturningToFlows)
         .navigationOpen($openDestination)
         .navigationMove($moveDestination)
