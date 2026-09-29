@@ -53,4 +53,10 @@ public extension NavigationCoverLayout {
         control.contentOffset = offset
         return control
     }
+
+    func listLayoutStyle(_ listStyle: ListLayoutStyle) -> Self {
+        var control = self
+        control.listStyle = listStyle
+        return control
+    }
 }

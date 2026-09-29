@@ -30,6 +30,7 @@ public struct NavigationCoverLayout<
     var coverStyle: CoverNavigationType = .static
     var contentCornerRadius: CGFloat = 0
     var contentOffset: CGFloat = 0
+    var listStyle: ListLayoutStyle = .plain
 
     public var body: some View {
         CoverLayout(
@@ -45,6 +46,7 @@ public struct NavigationCoverLayout<
         .coverStyle(coverStyle)
         .contentCornerRadius(contentCornerRadius)
         .contentOffset(contentOffset)
+        .listLayoutStyle(listStyle)
         .navigationLayoutBackToolbar(
             backConfirmation: backConfirmation,
             isBackButtonHidden: isBackButtonHidden
@@ -94,6 +96,7 @@ public struct NavigationCoverLayout<
         } coverBackground: {
             Color.red
         }
+        .listLayoutStyle(.smallInsetGrouped)
         .sectionTitlePosition(.inside)
         .bordered()
     }

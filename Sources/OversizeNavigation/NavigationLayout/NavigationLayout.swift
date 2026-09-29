@@ -20,6 +20,7 @@ public struct NavigationLayout<
     private let onScroll: ScrollAction?
     var backConfirmation: BackConfirmationContent?
     var isBackButtonHidden: Bool?
+    var listStyle: ListLayoutStyle = .plain
 
     public var body: some View {
         OversizeUI.Layout(
@@ -28,6 +29,7 @@ public struct NavigationLayout<
             content: { content },
             background: { background }
         )
+        .listLayoutStyle(listStyle)
         .navigationLayoutBackToolbar(
             backConfirmation: backConfirmation,
             isBackButtonHidden: isBackButtonHidden
@@ -38,7 +40,7 @@ public struct NavigationLayout<
         _ title: String = "",
         onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { Color.backgroundSecondary }
+        @ViewBuilder background: () -> Background = { EmptyView() }
     ) {
         self.title = title
         self.onScroll = onScroll
@@ -61,6 +63,7 @@ public struct NavigationLayout<
                 Row("Song 3") { print("") }
             }
         }
+        .listLayoutStyle(.smallInsetGrouped)
         .sectionTitlePosition(.inside)
         .bordered()
     }
