@@ -3,6 +3,7 @@
 // NavigationLayoutModifier.swift, created on 26.06.2026
 //
 
+import OversizeUI
 import SwiftUI
 
 @available(iOS 18.0, macOS 15.0, tvOS 18.0, watchOS 11.0, visionOS 2.0, *)
@@ -32,6 +33,12 @@ public extension NavigationLayout {
             confirmationButtonTitle: confirmationButtonTitle,
             cancelButtonTitle: cancelButtonTitle
         )
+        return control
+    }
+
+    func listLayoutStyle(_ listStyle: ListLayoutStyle) -> Self {
+        var control = self
+        control.listStyle = listStyle
         return control
     }
 }
