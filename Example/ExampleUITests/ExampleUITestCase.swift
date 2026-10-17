@@ -426,15 +426,15 @@ class ExampleUITestCase: XCTestCase {
         case .confirmation:
             return layoutBackControl(identifier: "navigationBack.pop", label: "Back")
         case .close:
-            return layoutBackControl(identifier: "navigationBack.close", label: "Close")
+            return layoutBackControl(identifier: "navigationBack.close", label: closeLabel)
         }
     }
 
     /// The control a layout installs, addressed by the role it was installed for.
     ///
-    /// macOS does not publish the accessibility identifier of the pane header's button — the
-    /// button is in the tree and answers to its label, the identifier reads back empty — so the
-    /// control is addressed there by the word it shows. `BackButtonPolicy.backButtonRole` picks
+    /// macOS may not publish the accessibility identifier of a toolbar button — the button is
+    /// in the tree and answers to its label, the identifier reads back empty — so the control is
+    /// addressed there by its label as a fallback. `BackButtonPolicy.backButtonRole` picks
     /// both the identifier and that word, so a pop and a close stay distinguishable either way.
     private func layoutBackControl(identifier: String, label: String) -> XCUIElement {
         let identified = app.buttons[identifier]
@@ -455,7 +455,15 @@ class ExampleUITestCase: XCTestCase {
     /// A control a layout installs itself, as opposed to one the system provides.
     func hasCustomBackControl() -> Bool {
         layoutBackControl(identifier: "navigationBack.pop", label: "Back").exists
-            || layoutBackControl(identifier: "navigationBack.close", label: "Close").exists
+            || layoutBackControl(identifier: "navigationBack.close", label: closeLabel).exists
+    }
+
+    private var closeLabel: String {
+        #if os(macOS)
+            "Cancel"
+        #else
+            "Close"
+        #endif
     }
 
     /// The dialog's own sheet is queried first on macOS: the action it names can also exist in

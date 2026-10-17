@@ -24,7 +24,6 @@ struct PresentationCatalogScreen: View {
             }
         }
         .listLayoutStyle(.insetGrouped)
-        .backButtonHidden()
         .navigationOpen($openDestination)
         .accessibilityIdentifier("screen.Presentation")
     }

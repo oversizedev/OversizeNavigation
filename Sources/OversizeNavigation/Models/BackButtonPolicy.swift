@@ -3,12 +3,14 @@
 // BackButtonPolicy.swift, created on 05.09.2026
 //
 
+import NavigatorUI
+
 /// Decides how the back control of a navigation layout behaves for a given navigator state.
 ///
 /// The layouts and the shared back toolbar modifier all need the same answers, and the rules
 /// depend only on plain values, so they live here instead of being repeated inside each view.
 struct BackButtonPolicy: Equatable, Sendable {
-    /// Whether the navigator owning the screen is itself presented (sheet, cover, split detail).
+    /// Whether the navigator owning the screen is itself presented as a sheet or a cover.
     let isPresented: Bool
 
     /// How many screens the navigator has pushed on top of its root.
@@ -53,6 +55,26 @@ struct BackButtonPolicy: Equatable, Sendable {
             return false
         }
         return isPresentationRoot || hasBackConfirmation
+    }
+}
+
+extension BackButtonPolicy {
+    static func isPresentation(isPresented: Bool, owner: Navigator.Owner) -> Bool {
+        isPresented && owner == .presenter
+    }
+
+    @MainActor
+    init(
+        navigator: Navigator,
+        isBackButtonHidden: Bool?,
+        hasBackConfirmation: Bool
+    ) {
+        self.init(
+            isPresented: Self.isPresentation(isPresented: navigator.isPresented, owner: navigator.owner),
+            count: navigator.count,
+            isBackButtonHidden: isBackButtonHidden,
+            hasBackConfirmation: hasBackConfirmation
+        )
     }
 }
 

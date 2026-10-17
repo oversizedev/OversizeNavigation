@@ -4,10 +4,13 @@
 //
 
 import NavigatorUI
+import OversizeNavigation
 import SwiftUI
 
-/// Every tab owns its own stack. `scene:` keys the stack for state restoration, and
-/// `navigationAutoReceive` lets values sent from anywhere land on the right stack.
+/// Every tab owns its own stack. `scene:` keys the stack for state restoration,
+/// `navigationAutoReceive` lets values sent from anywhere land on the right stack, and
+/// `navigationForwardsNavigator` keeps pushed screens on this stack's navigator inside a macOS
+/// split detail column.
 ///
 /// The received type is read from ``RootTabs/receivedDestinationType`` rather than written out
 /// here, so the tree cannot end up with two handlers for one type — the failure that makes a
@@ -52,6 +55,6 @@ struct SettingsNavigationStack: View {
 private extension View {
     /// Installs the handler for the one destination type the tab owns.
     func navigationAutoReceive(destinationsOf tab: RootTabs) -> AnyView {
-        tab.receivedDestinationType.installReceiveHandler(on: self)
+        tab.receivedDestinationType.installReceiveHandler(on: navigationForwardsNavigator())
     }
 }

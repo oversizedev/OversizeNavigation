@@ -88,7 +88,6 @@ struct FlowsCatalogScreen: View {
             }
         }
         .listLayoutStyle(.insetGrouped)
-        .backButtonHidden()
         .navigationCheckpoint(KnownCheckpoints.flowsResult) { result in
             checkpointResult = result
         }

@@ -32,7 +32,6 @@ struct SettingsScreen: View {
             }
         }
         .listLayoutStyle(.insetGrouped)
-        .backButtonHidden()
         .navigationOpen($openDestination)
         .navigationMove($toggleRootType)
         .accessibilityIdentifier("screen.Settings")
