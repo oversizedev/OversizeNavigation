@@ -65,7 +65,7 @@ public struct NavigationLayout<
         }
         .listLayoutStyle(.smallInsetGrouped)
         .sectionTitlePosition(.inside)
-        .bordered()
+        .sectionBordered()
     }
 }
 
