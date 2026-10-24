@@ -67,7 +67,7 @@ class ExampleUITestCase: XCTestCase {
             file: file,
             line: line
         )
-        control.tap()
+        control.activate()
     }
 
     /// Whether the app put anything on screen at all is the first question a "no control" failure
@@ -146,14 +146,22 @@ class ExampleUITestCase: XCTestCase {
         let element = app.buttons[identifier]
         _ = element.waitForExistence(timeout: elementTimeout / 2)
 
-        let scroller = scrollableContainer()
         var attempts = 0
-        while element.exists == false || element.isHittable == false || isCoveredByTabBar(element), attempts < 6 {
-            scroller.swipeUp()
+        while element.exists == false || element.isHittable == false || isCoveredByTabBar(element)
+            || isOutsideWindow(element), attempts < 6
+        {
+            scrollTowardsLaterRows()
             attempts += 1
         }
 
+        if element.isHittable == false {
+            let attachment = XCTAttachment(screenshot: app.screenshot())
+            attachment.name = "Row \(identifier) not hittable"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+        }
         XCTAssertTrue(element.isHittable, "Row \(identifier) never became hittable", file: file, line: line)
+        XCTAssertFalse(isOutsideWindow(element), "Row \(identifier) stayed outside the window", file: file, line: line)
         XCTAssertFalse(
             isCoveredByTabBar(element),
             "Row \(identifier) stayed underneath the tab bar",
@@ -195,6 +203,25 @@ class ExampleUITestCase: XCTestCase {
         return anySidebarRow.frame.maxX
     }
 
+    private func scrollTowardsLaterRows() {
+        #if os(macOS)
+            scrollableContainer().scroll(byDeltaX: 0, deltaY: -200)
+        #else
+            scrollableContainer().swipeUp()
+        #endif
+    }
+
+    private func isOutsideWindow(_ element: XCUIElement) -> Bool {
+        #if os(macOS)
+            let window = app.windows.firstMatch
+            guard element.exists, window.exists else { return false }
+
+            return window.frame.contains(CGPoint(x: element.frame.midX, y: element.frame.midY)) == false
+        #else
+            return false
+        #endif
+    }
+
     /// Only a bar sitting at the bottom of the window can swallow a tap meant for a row; the
     /// iPad tab strip lives at the top and covers nothing, and a Mac window has no tab bar.
     private func isCoveredByTabBar(_ element: XCUIElement) -> Bool {
@@ -210,7 +237,7 @@ class ExampleUITestCase: XCTestCase {
     }
 
     func tapRow(_ identifier: String, file: StaticString = #filePath, line: UInt = #line) {
-        row(identifier, file: file, line: line).tap()
+        row(identifier, file: file, line: line).activate()
     }
 
     /// A stack that misroutes a push renders it in a tab nobody is looking at, so the
@@ -269,7 +296,7 @@ class ExampleUITestCase: XCTestCase {
         if sidebarRow(identifier).waitForExistence(timeout: elementTimeout / 2) == false {
             let back = backNavigationBars.buttons.firstMatch
             if back.exists {
-                back.tap()
+                back.activate()
             }
         }
 
@@ -281,7 +308,7 @@ class ExampleUITestCase: XCTestCase {
         )
         // Resolved again only now: `sidebarRow` picks the tappable element out of the ones the
         // row publishes, and it can only do that once the row is actually on screen.
-        sidebarRow(identifier).tap()
+        sidebarRow(identifier).activate()
     }
 
     /// A Mac renders `navigationTitle` as the window's title rather than into a navigation bar.
@@ -397,7 +424,7 @@ class ExampleUITestCase: XCTestCase {
             file: file,
             line: line
         )
-        button.tap()
+        button.activate()
     }
 
     /// The layouts identify the control they install by its role, so the same query works on
@@ -483,7 +510,7 @@ class ExampleUITestCase: XCTestCase {
             file: file,
             line: line
         )
-        button.tap()
+        button.activate()
     }
 
     /// The button of a presented alert. iOS publishes alerts under `alerts`; a Mac renders them
@@ -535,19 +562,19 @@ class ExampleUITestCase: XCTestCase {
                 return
             }
             if button.isHittable {
-                button.tap()
+                button.activate()
                 return
             }
             let innerText = app.staticTexts.matching(
                 NSPredicate(format: "label == %@ OR value == %@", title, title)
             ).firstMatch
             if innerText.exists, innerText.isHittable {
-                innerText.tap()
+                innerText.activate()
                 return
             }
             app.typeKey(XCUIKeyboardKey.return, modifierFlags: [])
         #else
-            button.tap()
+            button.activate()
         #endif
     }
 
@@ -586,7 +613,7 @@ class ExampleUITestCase: XCTestCase {
                 file: file,
                 line: line
             )
-            cancel.tap()
+            cancel.activate()
         #else
             let region = app.otherElements["PopoverDismissRegion"]
             XCTAssertTrue(
@@ -595,7 +622,7 @@ class ExampleUITestCase: XCTestCase {
                 file: file,
                 line: line
             )
-            region.tap()
+            region.activate()
         #endif
     }
 
@@ -613,4 +640,14 @@ class ExampleUITestCase: XCTestCase {
             return app.buttons["Cancel"].firstMatch
         }
     #endif
+}
+
+extension XCUIElement {
+    func activate() {
+        #if os(macOS)
+            click()
+        #else
+            tap()
+        #endif
+    }
 }

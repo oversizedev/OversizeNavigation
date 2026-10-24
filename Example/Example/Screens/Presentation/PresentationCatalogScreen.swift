@@ -11,10 +11,10 @@ struct PresentationCatalogScreen: View {
     @State private var openDestination: PresentationDestinations?
 
     var body: some View {
-        NavigationListLayout("Presentation") {
+        NavigationLayout("Presentation") {
             Section("Feedback surfaces") {
                 ForEach(PresentationDestinations.catalog) { destination in
-                    ListRow(
+                    Row(
                         destination.title,
                         subtitle: destination.subtitle,
                         action: { openDestination = destination }
@@ -22,8 +22,13 @@ struct PresentationCatalogScreen: View {
                     .accessibilityIdentifier("presentation.\(destination.id)")
                 }
             }
+        } background: {
+            Color.backgroundSecondary
         }
         .listLayoutStyle(.insetGrouped)
+        .sectionBordered()
+        .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         .navigationOpen($openDestination)
         .accessibilityIdentifier("screen.Presentation")
     }

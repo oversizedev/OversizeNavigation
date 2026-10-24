@@ -29,6 +29,7 @@ struct FlowPageScreen: View {
                 NavigationLink(to: FlowsDestinations.page(number + 1)) {
                     Row("Push page \(number + 1)", subtitle: "NavigationLink(to:)")
                 }
+                .buttonStyle(.row)
                 .accessibilityIdentifier("page.push")
 
                 Row(
@@ -81,8 +82,13 @@ struct FlowPageScreen: View {
                 .disabled(navigationInfo.canReturn(to: KnownCheckpoints.flows) == false)
                 .accessibilityIdentifier("page.checkpoint")
             }
+        } background: {
+            Color.backgroundSecondary
         }
+        .listLayoutStyle(.insetGrouped)
+        .sectionBordered()
         .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         // A page pushed inside a managed sheet has no title bar to publish `navigationTitle`
         // into on macOS, so it names itself the way the sheet roots do.
         .accessibilityIdentifier("screen.Page \(number)")

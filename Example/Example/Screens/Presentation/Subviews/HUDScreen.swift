@@ -34,31 +34,36 @@ struct HUDScreen: View {
     ]
 
     var body: some View {
-        NavigationListLayout("HUD") {
+        NavigationLayout("HUD") {
             Section("Cases") {
                 ForEach(samples, id: \.id) { sample in
-                    ListRow(sample.title, action: { hud = sample.hud })
+                    Row(sample.title, action: { hud = sample.hud })
                         .accessibilityIdentifier("hud.\(sample.id)")
                 }
             }
 
             Section("Stack") {
-                ListRow(
+                Row(
                     "Present five in a row",
                     subtitle: "Only the three most recent stay on screen",
                     action: { presentMany() }
                 )
                 .accessibilityIdentifier("hud.stack")
 
-                ListRow(
+                Row(
                     "Clear the stack",
                     subtitle: "Cancels every pending auto dismiss",
                     action: { hudState.clearAllHUDs() }
                 )
                 .accessibilityIdentifier("hud.clear")
             }
+        } background: {
+            Color.backgroundSecondary
         }
         .listLayoutStyle(.insetGrouped)
+        .sectionBordered()
+        .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         .presentationHUD($hud)
         .accessibilityIdentifier("screen.HUD")
     }

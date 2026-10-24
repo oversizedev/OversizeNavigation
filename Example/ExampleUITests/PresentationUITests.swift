@@ -100,7 +100,7 @@ final class PresentationUITests: ExampleUITestCase {
         let picker = statePicker()
         XCTAssertTrue(picker.waitForExistence(timeout: elementTimeout), "The overlay covered the state picker")
 
-        pickerOption(picker, "Result").tap()
+        pickerOption(picker, "Result").activate()
         XCTAssertTrue(app.staticTexts["Item 1"].waitForExistence(timeout: elementTimeout / 2))
     }
 

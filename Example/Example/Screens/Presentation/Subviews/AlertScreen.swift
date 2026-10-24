@@ -27,26 +27,26 @@ struct AlertScreen: View {
     @State private var lastAction: String = "None"
 
     var body: some View {
-        NavigationListLayout("Alerts") {
+        NavigationLayout("Alerts") {
             Section("Last confirmed action") {
-                ListRow("Result", subtitle: lastAction)
+                Row("Result", subtitle: lastAction)
                     .accessibilityIdentifier("alert.result")
             }
 
             Section("Confirmations") {
-                ListRow("Dismiss", action: { alert = .dismiss { confirm("dismiss") } })
+                Row("Dismiss", action: { alert = .dismiss { confirm("dismiss") } })
                     .accessibilityIdentifier("alert.dismiss")
 
-                ListRow("Delete", action: { alert = .delete { confirm("delete") } })
+                Row("Delete", action: { alert = .delete { confirm("delete") } })
                     .accessibilityIdentifier("alert.delete")
 
-                ListRow("Discard", action: { alert = .discard { confirm("discard") } })
+                Row("Discard", action: { alert = .discard { confirm("discard") } })
                     .accessibilityIdentifier("alert.discard")
 
-                ListRow("Unsaved changes", action: { alert = .unsavedChanges { confirm("unsavedChanges") } })
+                Row("Unsaved changes", action: { alert = .unsavedChanges { confirm("unsavedChanges") } })
                     .accessibilityIdentifier("alert.unsavedChanges")
 
-                ListRow(
+                Row(
                     "Destructive",
                     action: {
                         alert = .destructive(
@@ -58,7 +58,7 @@ struct AlertScreen: View {
                 )
                 .accessibilityIdentifier("alert.destructive")
 
-                ListRow(
+                Row(
                     "Default",
                     action: {
                         alert = .default(
@@ -72,17 +72,22 @@ struct AlertScreen: View {
             }
 
             Section("Messages") {
-                ListRow("Text", action: { alert = .text("Everything is up to date") })
+                Row("Text", action: { alert = .text("Everything is up to date") })
                     .accessibilityIdentifier("alert.text")
 
-                ListRow("Error", action: { alert = .error(DemoError()) })
+                Row("Error", action: { alert = .error(DemoError()) })
                     .accessibilityIdentifier("alert.error")
 
-                ListRow("App error", action: { alert = .appError(error: DemoError()) })
+                Row("App error", action: { alert = .appError(error: DemoError()) })
                     .accessibilityIdentifier("alert.appError")
             }
+        } background: {
+            Color.backgroundSecondary
         }
         .listLayoutStyle(.insetGrouped)
+        .sectionBordered()
+        .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         .presentationAlert($alert)
         .presentationHUD($hud)
         .accessibilityIdentifier("screen.Alerts")

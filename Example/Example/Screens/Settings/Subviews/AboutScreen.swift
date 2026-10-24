@@ -15,9 +15,13 @@ struct AboutScreen: View {
                 Row("Navigator", subtitle: "Push, present, send, routes and checkpoints")
                 Row("Feedback", subtitle: "HUD stack and AppAlert")
             }
+        } background: {
+            Color.backgroundSecondary
         }
-        .sectionTitlePosition(.inside)
+        .listLayoutStyle(.insetGrouped)
         .sectionBordered()
+        .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         .accessibilityIdentifier("screen.About")
     }
 }

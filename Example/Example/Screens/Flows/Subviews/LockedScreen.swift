@@ -15,24 +15,29 @@ struct LockedScreen: View {
     @State private var hud: OversizeNavigation.HUD?
 
     var body: some View {
-        NavigationListLayout("Locked") {
+        NavigationLayout("Locked") {
             Section("Try to leave") {
-                ListRow(
+                Row(
                     "Dismiss anything",
                     subtitle: "Fails while this screen is on the stack",
                     action: { isDismissingAny = true }
                 )
                 .accessibilityIdentifier("locked.dismissAny")
 
-                ListRow(
+                Row(
                     "Pop this screen",
                     subtitle: "The lock only blocks the global dismiss",
                     action: { isBackTriggered = true }
                 )
                 .accessibilityIdentifier("locked.back")
             }
+        } background: {
+            Color.backgroundSecondary
         }
         .listLayoutStyle(.insetGrouped)
+        .sectionBordered()
+        .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         .navigationLocked()
         .navigationBack($isBackTriggered)
         .navigationBack($isDismissingAny, to: .allPresentations) { result in

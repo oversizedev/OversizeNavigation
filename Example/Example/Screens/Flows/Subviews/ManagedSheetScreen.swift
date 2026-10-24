@@ -14,30 +14,35 @@ struct ManagedSheetScreen: View {
     @State private var isDismissed: Bool = false
 
     var body: some View {
-        NavigationListLayout("Managed sheet") {
+        NavigationLayout("Managed sheet") {
             Section("Inside the sheet") {
-                ListRow(
+                Row(
                     "Push inside the sheet",
                     subtitle: "The close button becomes a chevron",
                     action: { openDestination = .page(1) }
                 )
                 .accessibilityIdentifier("sheet.push")
 
-                ListRow(
+                Row(
                     "Dismiss",
                     subtitle: "navigationBack(to: .presentation)",
                     action: { isDismissed = true }
                 )
                 .accessibilityIdentifier("sheet.dismiss")
             }
+        } background: {
+            Color.backgroundSecondary
         }
         .listLayoutStyle(.insetGrouped)
+        .sectionBordered()
+        .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         // macOS gives a sheet no title bar, so `navigationTitle` is published nowhere and the UI
         // tests cannot tell which sheet is on screen without the screen naming itself.
         .accessibilityIdentifier("screen.Managed sheet")
         .navigationOpen($openDestination)
         .navigationBack($isDismissed, to: .presentation)
-        // A Mac sheet sizes itself to its content's ideal height, and a `List` reports none —
+        // A Mac sheet sizes itself to its content's ideal height, and a scroll view reports none —
         // the sheet collapses to a strip too small for its own rows to be hittable.
         #if os(macOS)
             .frame(minWidth: 480, minHeight: 420)

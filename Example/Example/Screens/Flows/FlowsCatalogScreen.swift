@@ -15,16 +15,16 @@ struct FlowsCatalogScreen: View {
     @State private var checkpointResult: Int?
 
     var body: some View {
-        NavigationListLayout("Flows") {
+        NavigationLayout("Flows") {
             Section("Push") {
-                ListRow(
+                Row(
                     "navigationOpen",
                     subtitle: "Local and deterministic, stays on this stack",
                     action: { openDestination = .page(1) }
                 )
                 .accessibilityIdentifier("flows.open")
 
-                ListRow(
+                Row(
                     "navigationMove",
                     subtitle: "Broadcast, resolved by the receiving stack",
                     action: { moveDestination = .page(1) }
@@ -33,21 +33,21 @@ struct FlowsCatalogScreen: View {
             }
 
             Section("Presentation") {
-                ListRow(
+                Row(
                     "Managed sheet",
                     subtitle: "Destination declares .managedSheet",
                     action: { openDestination = .sheet }
                 )
                 .accessibilityIdentifier("flows.sheet")
 
-                ListRow(
+                Row(
                     "Managed cover",
                     subtitle: "Destination declares .platformManagedCover",
                     action: { openDestination = .cover }
                 )
                 .accessibilityIdentifier("flows.cover")
 
-                ListRow(
+                Row(
                     "Locked screen",
                     subtitle: "navigationLocked blocks the allPresentations exit",
                     action: { openDestination = .locked }
@@ -56,7 +56,7 @@ struct FlowsCatalogScreen: View {
             }
 
             Section("Checkpoints") {
-                ListRow(
+                Row(
                     "Return a value",
                     subtitle: checkpointResult.map { "Last result: \($0)" } ?? "No result yet",
                     action: { openDestination = .checkpointResult }
@@ -65,29 +65,34 @@ struct FlowsCatalogScreen: View {
             }
 
             Section("Deep links") {
-                ListRow(
+                Row(
                     "Send to the HUD screen",
                     subtitle: "navigationMove(values:) switches tab, then pushes",
                     action: { moveValues = ExampleRoutes.hud.moveValues }
                 )
                 .accessibilityIdentifier("flows.sendHUD")
 
-                ListRow(
+                Row(
                     "Route to About",
                     subtitle: "One router for URLs and buttons",
                     action: { route = .about }
                 )
                 .accessibilityIdentifier("flows.routeAbout")
 
-                ListRow(
+                Row(
                     "Route two pages deep",
                     subtitle: "A route may need several steps",
                     action: { route = .deepPage }
                 )
                 .accessibilityIdentifier("flows.routeDeep")
             }
+        } background: {
+            Color.backgroundSecondary
         }
         .listLayoutStyle(.insetGrouped)
+        .sectionBordered()
+        .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         .navigationCheckpoint(KnownCheckpoints.flowsResult) { result in
             checkpointResult = result
         }

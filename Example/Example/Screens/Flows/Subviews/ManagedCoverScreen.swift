@@ -35,6 +35,9 @@ struct ManagedCoverScreen: View {
         // Substituted by a sheet on macOS, which has no title bar there.
         .accessibilityIdentifier("screen.Managed cover")
         .navigationBack($isDismissed, to: .presentation)
+        #if os(macOS)
+            .frame(minWidth: 480, minHeight: 420)
+        #endif
     }
 }
 
