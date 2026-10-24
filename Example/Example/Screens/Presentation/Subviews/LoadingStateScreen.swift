@@ -70,7 +70,7 @@ struct LoadingStateScreen: View {
     /// The overlays cover everything they are applied to, so they wrap the items alone — over the
     /// whole screen they would also hide the pickers that pick the state being demonstrated.
     var body: some View {
-        NavigationListLayout("Loading states") {
+        NavigationLayout("Loading states") {
             Section("State") {
                 Picker("State", selection: $demoState) {
                     ForEach(DemoState.allCases) { state in
@@ -95,8 +95,13 @@ struct LoadingStateScreen: View {
                 overlaidItems
                     .frame(maxWidth: .infinity, minHeight: 240)
             }
+        } background: {
+            Color.backgroundSecondary
         }
         .listLayoutStyle(.insetGrouped)
+        .sectionBordered()
+        .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         .accessibilityIdentifier("screen.Loading states")
     }
 
@@ -121,7 +126,7 @@ struct LoadingStateScreen: View {
         if case let .result(items) = state, items.isEmpty == false {
             VStack(spacing: .zero) {
                 ForEach(items.values, id: \.self) { item in
-                    ListRow(item)
+                    Row(item)
                 }
             }
         } else {

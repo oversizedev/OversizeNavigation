@@ -56,10 +56,17 @@ visionOS is the exception — OversizeUI itself starts at visionOS 2, so both co
 - NavigatorUI renders `.fullScreenCover` only on iOS, tvOS and watchOS. A destination asking for
   `.managedCover` on macOS presents nothing — use `.platformManagedCover`, which falls back to a
   managed sheet where the platform has no cover.
-- A `Navigation*Layout` back control is a labelled button in a header at the top of the pane on
-  macOS, not a glyph in the window toolbar: it reads *Back* on a push and *Close* at the root of
-  a presentation. The deprecated `Navigation*LayoutView` types build their own toolbar and still
-  show a glyph there.
+- A screen pushed onto a stack in a `NavigationSplitView` detail column does not inherit the
+  stack's environment on macOS and would act on the root navigator. Apply
+  `.navigationForwardsNavigator()` to the root content of every stack, inside its
+  `ManagedNavigationStack`; it takes the stack's single `navigationModifier` slot. The stack's
+  own sheet cannot present over such a screen either, so `navigationOpen` presents sheets and
+  covers requested there from the pushed screen itself; a direct `navigator.navigate` does not.
+- A pushed screen keeps the system back button on macOS, in a split column and inside a sheet.
+  A `Navigation*Layout` adds a text *Cancel* in the cancellation spot at the root of a managed
+  sheet, and its own back control only when a back confirmation is set. A stack rooting a split
+  column or a tab is not a presentation and gets no Cancel, so section roots need no
+  `.backButtonHidden()`.
 
 ## Navigation Layout Types
 

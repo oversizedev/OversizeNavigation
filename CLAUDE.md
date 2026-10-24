@@ -59,10 +59,15 @@ once and tested directly (`Tests/OversizeNavigationTests/BackButtonPolicyTests.s
 being re-derived inside each view. Every layout renders the control through the single
 `ViewModifier/NavigationLayoutBackToolbarModifier.swift`; nothing else should build that toolbar.
 
-SwiftUI reports `isPresented == true` for a `NavigationSplitView` detail column, so a stack that
-roots a column looks presented to Navigator and the layouts would show a close button that
-collapses the column. Screens that root a column or a tab opt out with `.backButtonHidden()`,
-which applies only while the stack is at its root — pushed screens keep their back button.
+SwiftUI reports `isPresented == true` for a `NavigationSplitView` detail column, so Navigator
+marks a stack rooting a column as presented. The policy therefore counts a navigator as presented
+only when it is also owned by a `ManagedPresentationView` (`owner == .presenter`), which is what a
+managed sheet or cover builds — `BackButtonPolicy.isPresentation(isPresented:owner:)` states it
+once and `init(navigator:…)` applies it, in the current layouts and the deprecated ones alike.
+Column and tab roots need no `.backButtonHidden()`; keep that modifier for a screen that draws its
+own leave control, such as a wizard with a Cancel of its own. A plain `.sheet` hosting a bare
+`ManagedNavigationStack` is a `.stack`-owned navigator and gets no Close — wrap it in
+`ManagedPresentationView`, as the managed presentations do.
 
 ### Navigator Integration
 
@@ -209,22 +214,28 @@ an afterthought. Four things behave differently there and are worth knowing befo
   states the substitution once as `.platformManagedCover` / `.platformCover`; destinations use
   those rather than re-deriving it. Its `#if` mirrors NavigatorUI's own condition instead of
   naming macOS, so visionOS — which has no cover either — is covered by the same line.
-- **The back control is a labelled button in a pane header, not a window toolbar item.**
-  `NavigationLayoutBackToolbarModifier` renders it through `safeAreaInset(edge: .top)` on macOS:
-  the stacks live beside a plain split pane (see the next bullet), and a window toolbar cannot
-  place an item over a pane — SwiftUI has no tracking separator. The header shows on every
-  pushed screen (replacing the system back button it hides) and wherever the policy installs a
-  control. Which word it is comes from `BackButtonPolicy.backButtonRole` — `.close` at the root
-  of a presentation, `.pop` otherwise — the same value that picks the glyph on iOS and the
-  accessibility identifier (`navigationBack.close` / `navigationBack.pop`) on both. A
-  `#if os(macOS)` branch that decides the label on its own is how macOS ended up labelling every
-  pop "Cancel".
-- **A stack cannot sit in a `NavigationSplitView` detail column.** The column races the stack
-  for its bound path on macOS: a programmatic push renders the screen while the path is wiped
-  back to empty, so every later pop and push silently dies — whatever drives the sidebar
-  selection, and however the operation is deferred. The same stack inside a sheet keeps its
-  path. The Example hosts its macOS sidebar beside an `HSplitView` instead; iPadOS keeps the
-  native split, which has no such race.
+- **Every stack root applies `.navigationForwardsNavigator()`.** A screen pushed onto a stack in
+  a `NavigationSplitView` detail column does not inherit the stack's environment on macOS, so it
+  reads the root navigator: count 0, no back control, and `navigationOpen`, `navigationBack` and
+  a pop all land on the root while the path itself survives. The modifier sets NavigatorUI's
+  `navigationModifier` (with `inherits: false`, so a sheet's stack keeps its own navigator) to
+  re-inject the stack's navigator into each pushed destination. It occupies that single slot, so
+  a stack using it cannot also set a `navigationModifier` of its own. Elsewhere it is harmless,
+  which is why the Example's stacks apply it on every platform. The stack's sheet modifier
+  cannot present over a pushed screen there either: `Navigator.sheet` is set and nothing appears,
+  and the stale value then swallows the next identical request. On macOS the modifier also marks
+  pushed destinations (`presentsModalsLocally`), and `navigationOpen` presents a sheet or cover
+  asked for there with its own `.sheet` around `ManagedPresentationView`. Only `navigationOpen`
+  takes that path; such a sheet is not restored from scene storage.
+- **A pushed screen keeps the system back button, in a split column and inside a sheet.** A Mac
+  sheet hosting a `NavigationStack` shows the system chevron next to its title, so nothing is
+  drawn in its place — a header pinned with `safeAreaInset` was tried and reads as a foreign
+  control. The layout installs its own only where the policy needs one: at the root of a managed
+  sheet it is a text **Cancel** in `.cancellationAction`, the place a Mac sheet keeps its dismiss
+  button; a back confirmation on a pushed screen is a `chevron.backward` in `.navigation` in a
+  split column and a text **Back** in `.cancellationAction` inside a sheet, where a `.navigation`
+  item is not rendered. The role (`BackButtonPolicy.backButtonRole`) picks the label and the
+  accessibility identifier (`navigationBack.close` / `navigationBack.pop`) on every platform.
 - **`navigationBarAppearanceConfiguration()` is a no-op**, since it configures `UINavigationBar`.
   Mac bar styling has to come from the toolbar itself.
 - **`.sensoryFeedback` is inert**, so the HUD and alert feedback paths do nothing on macOS. Keep
@@ -240,7 +251,8 @@ an afterthought. Four things behave differently there and are worth knowing befo
   with `continueAfterFailure = false` cannot unwind through an async `setUp` and kills the runner.
 
 The Example app starts on the split root on macOS and the tab root elsewhere
-(`RootType.defaultForPlatform`), and `ExampleUITestCase` branches per platform — a Mac has no tab
+(`RootType.defaultForPlatform`). Both platforms build that root as a native `NavigationSplitView`
+with a `List(selection:)` sidebar and one stack per section, and `ExampleUITestCase` branches per platform — a Mac has no tab
 bar, publishes `navigationTitle` into the window rather than a navigation bar, and renders a
 confirmation dialog as a sheet with a real Cancel button instead of a `PopoverDismissRegion`. Test
 bodies stay platform-free; only the helpers branch.

@@ -98,6 +98,6 @@ public struct NavigationCoverLayout<
         }
         .listLayoutStyle(.smallInsetGrouped)
         .sectionTitlePosition(.inside)
-        .bordered()
+        .sectionBordered()
     }
 }

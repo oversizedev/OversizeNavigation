@@ -14,21 +14,26 @@ struct CheckpointResultScreen: View {
     @State private var returnedValue: Int?
 
     var body: some View {
-        NavigationListLayout("Return a value") {
+        NavigationLayout("Return a value") {
             Section("Value") {
                 Stepper("Value: \(value)", value: $value, in: 0 ... 100)
                     .accessibilityIdentifier("checkpoint.stepper")
             }
 
             Section("Return") {
-                ListRow(
+                Row(
                     "Return \(value) to the flows root",
                     action: { returnedValue = value }
                 )
                 .accessibilityIdentifier("checkpoint.return")
             }
+        } background: {
+            Color.backgroundSecondary
         }
         .listLayoutStyle(.insetGrouped)
+        .sectionBordered()
+        .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         .navigationReturn(to: KnownCheckpoints.flowsResult, value: $returnedValue)
         .accessibilityIdentifier("screen.Return a value")
     }

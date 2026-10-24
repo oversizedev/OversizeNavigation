@@ -3,6 +3,7 @@
 // BackButtonPolicyTests.swift, created on 05.09.2026
 //
 
+import NavigatorUI
 @testable import OversizeNavigation
 import Testing
 
@@ -146,6 +147,44 @@ struct BackButtonPolicyTests {
 
         #expect(explicit.isShowBackButton == unset.isShowBackButton)
         #expect(explicit.isBackButtonAtRootHidden == unset.isBackButtonAtRootHidden)
+    }
+
+    // MARK: - Presentation
+
+    @Test(
+        "Only a presenter-owned navigator counts as a presentation",
+        arguments: [Navigator.Owner.application, .root, .stack, .presenter]
+    )
+    func presentationRequiresPresenterOwner(owner: Navigator.Owner) {
+        #expect(BackButtonPolicy.isPresentation(isPresented: true, owner: owner) == (owner == .presenter))
+        #expect(BackButtonPolicy.isPresentation(isPresented: false, owner: owner) == false)
+    }
+
+    @Test("A stack rooting a split detail column shows no closing control")
+    func splitDetailColumnRootHasNoControl() {
+        let policy = BackButtonPolicy(
+            isPresented: BackButtonPolicy.isPresentation(isPresented: true, owner: .stack),
+            count: 0,
+            isBackButtonHidden: nil,
+            hasBackConfirmation: false
+        )
+
+        #expect(policy.isPresentationRoot == false)
+        #expect(policy.isShowBackButton == false)
+        #expect(policy.isNavigationBarBackButtonHidden == false)
+    }
+
+    @Test("The root of a managed sheet keeps its closing control")
+    func managedSheetRootKeepsClose() {
+        let policy = BackButtonPolicy(
+            isPresented: BackButtonPolicy.isPresentation(isPresented: true, owner: .presenter),
+            count: 0,
+            isBackButtonHidden: nil,
+            hasBackConfirmation: false
+        )
+
+        #expect(policy.isShowBackButton)
+        #expect(policy.backButtonRole == .close)
     }
 
     // MARK: - Full matrix

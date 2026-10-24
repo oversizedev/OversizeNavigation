@@ -12,9 +12,9 @@ struct SettingsScreen: View {
     @State private var toggleRootType: ToggleRootType?
 
     var body: some View {
-        NavigationListLayout("Settings") {
+        NavigationLayout("Settings") {
             Section("Root layout") {
-                ListRow(
+                Row(
                     "Switch tabs and split",
                     subtitle: "navigationMove broadcasts a value handled at the navigation root",
                     action: { toggleRootType = .init() }
@@ -23,16 +23,20 @@ struct SettingsScreen: View {
             }
 
             Section("About") {
-                ListRow(
+                Row(
                     "About",
                     subtitle: "The target of the about route",
                     action: { openDestination = .about }
                 )
                 .accessibilityIdentifier("settings.about")
             }
+        } background: {
+            Color.backgroundSecondary
         }
         .listLayoutStyle(.insetGrouped)
-        .backButtonHidden()
+        .sectionBordered()
+        .sectionTitlePosition(.inside)
+        .sectionTitleSeparator(.visible)
         .navigationOpen($openDestination)
         .navigationMove($toggleRootType)
         .accessibilityIdentifier("screen.Settings")

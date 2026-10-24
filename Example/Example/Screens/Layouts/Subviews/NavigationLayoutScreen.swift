@@ -34,7 +34,7 @@ struct NavigationLayoutScreen: View {
             background: { Color.backgroundSecondary }
         )
         .sectionTitlePosition(.inside)
-        .bordered()
+        .sectionBordered()
         .accessibilityIdentifier("screen.NavigationLayout")
     }
 }

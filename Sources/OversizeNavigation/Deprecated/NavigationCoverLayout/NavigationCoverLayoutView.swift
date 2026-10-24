@@ -104,8 +104,7 @@ public struct NavigationCoverLayoutView<
 
     private var backButtonPolicy: BackButtonPolicy {
         .init(
-            isPresented: navigator.isPresented,
-            count: navigator.count,
+            navigator: navigator,
             isBackButtonHidden: isBackButtonHidden,
             hasBackConfirmation: backConfirmation != nil
         )
