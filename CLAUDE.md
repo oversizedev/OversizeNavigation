@@ -221,7 +221,12 @@ an afterthought. Four things behave differently there and are worth knowing befo
   `navigationModifier` (with `inherits: false`, so a sheet's stack keeps its own navigator) to
   re-inject the stack's navigator into each pushed destination. It occupies that single slot, so
   a stack using it cannot also set a `navigationModifier` of its own. Elsewhere it is harmless,
-  which is why the Example's stacks apply it on every platform.
+  which is why the Example's stacks apply it on every platform. The stack's sheet modifier
+  cannot present over a pushed screen there either: `Navigator.sheet` is set and nothing appears,
+  and the stale value then swallows the next identical request. On macOS the modifier also marks
+  pushed destinations (`presentsModalsLocally`), and `navigationOpen` presents a sheet or cover
+  asked for there with its own `.sheet` around `ManagedPresentationView`. Only `navigationOpen`
+  takes that path; such a sheet is not restored from scene storage.
 - **A pushed screen keeps the system back button, in a split column and inside a sheet.** A Mac
   sheet hosting a `NavigationStack` shows the system chevron next to its title, so nothing is
   drawn in its place — a header pinned with `safeAreaInset` was tried and reads as a foreign

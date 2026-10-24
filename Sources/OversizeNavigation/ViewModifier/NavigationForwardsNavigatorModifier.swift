@@ -16,6 +16,9 @@ public extension View {
     /// pushed destination is built with the navigator that actually owns it. Elsewhere it is a no-op
     /// that costs one environment write per push, so stacks apply it on every platform.
     ///
+    /// The stack's own sheet cannot present over such a screen on macOS either, so `navigationOpen`
+    /// presents sheets and covers requested there from the pushed screen itself.
+    ///
     /// It occupies NavigatorUI's `navigationModifier` slot of that stack, which holds one closure:
     /// do not combine it with a `navigationModifier` of your own on the same stack. It does not
     /// pass on to child stacks — a sheet's stack forwards its own navigator, not this one.
@@ -31,6 +34,13 @@ private struct NavigationForwardsNavigatorModifier: ViewModifier {
         content.navigationModifier(inherits: false) { [navigator] destination in
             destination.asAnyView()
                 .environment(\.navigator, navigator)
+                #if os(macOS)
+                .environment(\.presentsModalsLocally, true)
+                #endif
         }
     }
+}
+
+extension EnvironmentValues {
+    @Entry var presentsModalsLocally: Bool = false
 }

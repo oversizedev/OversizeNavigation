@@ -59,7 +59,9 @@ visionOS is the exception — OversizeUI itself starts at visionOS 2, so both co
 - A screen pushed onto a stack in a `NavigationSplitView` detail column does not inherit the
   stack's environment on macOS and would act on the root navigator. Apply
   `.navigationForwardsNavigator()` to the root content of every stack, inside its
-  `ManagedNavigationStack`; it takes the stack's single `navigationModifier` slot.
+  `ManagedNavigationStack`; it takes the stack's single `navigationModifier` slot. The stack's
+  own sheet cannot present over such a screen either, so `navigationOpen` presents sheets and
+  covers requested there from the pushed screen itself; a direct `navigator.navigate` does not.
 - A pushed screen keeps the system back button on macOS, in a split column and inside a sheet.
   A `Navigation*Layout` adds a text *Cancel* in the cancellation spot at the root of a managed
   sheet, and its own back control only when a back confirmation is set. A stack rooting a split
