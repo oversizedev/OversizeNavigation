@@ -72,7 +72,7 @@ public struct NavigationListCoverLayout<
         @ViewBuilder content: () -> Content,
         @ViewBuilder cover: () -> Cover,
         @ViewBuilder coverBackground: () -> CoverBackground = { Color.backgroundSecondary },
-        @ViewBuilder background: () -> Background = { EmptyView() }
+        @ViewBuilder background: () -> Background = { LayoutBackground() }
     ) where SelectionValue == Never {
         self.title = title
         self.coverHeight = coverHeight
@@ -91,7 +91,7 @@ public struct NavigationListCoverLayout<
         @ViewBuilder content: () -> Content,
         @ViewBuilder cover: () -> Cover,
         @ViewBuilder coverBackground: () -> CoverBackground = { Color.backgroundSecondary },
-        @ViewBuilder background: () -> Background = { EmptyView() }
+        @ViewBuilder background: () -> Background = { LayoutBackground() }
     ) {
         self.title = title
         self.coverHeight = coverHeight
