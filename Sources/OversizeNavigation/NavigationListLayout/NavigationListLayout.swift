@@ -55,7 +55,7 @@ public struct NavigationListLayout<
     public init(
         _ title: String = "",
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { EmptyView() }
+        @ViewBuilder background: () -> Background = { LayoutBackground() }
     ) where SelectionValue == Never {
         self.title = title
         self.content = content()
@@ -68,7 +68,7 @@ public struct NavigationListLayout<
         _ title: String = "",
         selection: Binding<Set<SelectionValue>?>,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { EmptyView() }
+        @ViewBuilder background: () -> Background = { LayoutBackground() }
     ) {
         self.title = title
         self.content = content()

@@ -40,7 +40,7 @@ public struct NavigationLayout<
         _ title: String = "",
         onScroll: ScrollAction? = nil,
         @ViewBuilder content: () -> Content,
-        @ViewBuilder background: () -> Background = { EmptyView() }
+        @ViewBuilder background: () -> Background = { LayoutBackground() }
     ) {
         self.title = title
         self.onScroll = onScroll
